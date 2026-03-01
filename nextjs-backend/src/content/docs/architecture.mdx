@@ -1,0 +1,33 @@
+---
+title: System Architecture
+description: Behind the scenes of Tabby.
+---
+
+Tabby is built with a distributed architecture to ensure low-latency interactions and powerful AI capabilities.
+
+![Architecture Diagram](/landing/tabby-architecture.png)
+
+## The Three Pillars
+
+### 1. Electron Frontend
+The desktop application manages global hotkeys, captures the screen and clipboard, and provides the overlay user interface. It is written in TypeScript and uses Next.js for the UI components.
+
+### 2. Next.js API Backend
+Acts as the central orchestrator, handling:
+- Authentication via Supabase.
+- AI Provider routing (OpenAI, Groq, Cerebras).
+- Serving the documentation and landing pages.
+
+### 3. Python Memory Backend
+A specialized service using **FastAPI** and **Mem0** to manage the persistent memory layer. It interacts with:
+- **Supabase (Vector Store)**: For fast semantic search of memories.
+- **Neo4j (Knowledge Graph)**: For mapping relationships between different concepts and preferences.
+
+## Communication Flow
+
+1. **Input**: A global shortcut (e.g., `Alt+X`) is pressed.
+2. **Context Capture**: The Electron app captures the screen/text.
+3. **Processing**: Context is sent to the Next.js API.
+4. **Memory Retrieval**: The API queries the Memory Backend for relevant user facts.
+5. **AI Generation**: The prompt + context + memories are sent to the AI provider.
+6. **Delivery**: The response is streamed back to the Electron UI or typed out into the active app.

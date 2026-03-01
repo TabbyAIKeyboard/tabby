@@ -1,0 +1,16 @@
+packages:
+  - "."
+
+ignoredBuiltDependencies:
+  - extract-file-icon
+  - node-window-manager
+
+onlyBuiltDependencies:
+  - "@tailwindcss/oxide"
+  - dprint
+  - electron
+  - electron-winstaller
+  - esbuild
+  - sharp
+  - uiohook-napi
+  - unrs-resolver

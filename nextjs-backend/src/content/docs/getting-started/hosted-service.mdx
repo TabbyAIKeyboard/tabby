@@ -1,0 +1,33 @@
+---
+title: Hosted Service
+description: Get started quickly using our pre-deployed cloud infrastructure.
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps'
+
+The **Hosted Service** is the recommended path for most users. You use our hosted AI and memory backends, requiring only the client-side application to be installed.
+
+<Steps>
+  <Step>
+    ### Download the Executable
+    The easiest way to get started is to download the latest `.exe` from our [GitHub Releases](https://github.com/CubeStar1/ai-keyboard/releases).
+    
+    *Alternatively, you can clone the repo and run from source:*
+    ```bash
+    git clone https://github.com/CubeStar1/ai-keyboard.git
+    cd ai-keyboard/frontend
+    pnpm install
+    npm run dev
+    ```
+  </Step>
+  <Step>
+    ### Cloud Backend URLs
+    By default, the application is configured to use our live services:
+    - **API Backend**: `https://tabby-api-psi.vercel.app`
+    - **Memory Backend**: `https://tabby-backend.jollydesert-22a4756c.centralindia.azurecontainerapps.io`
+  </Step>
+  <Step>
+    ### Authentication
+    Simply sign in or create an account within the app to start using the system-wide AI features.
+  </Step>
+</Steps>

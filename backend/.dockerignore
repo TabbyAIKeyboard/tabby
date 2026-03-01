@@ -1,0 +1,8 @@
+.venv
+__pycache__
+*.pyc
+.env
+.git
+db/
+test_output.json
+.python-version

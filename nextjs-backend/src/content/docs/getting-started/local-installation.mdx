@@ -1,0 +1,185 @@
+---
+title: Local Installation
+description: Deploy the full stack on your own hardware for maximum privacy and control.
+---
+
+import { Steps, Step } from 'fumadocs-ui/components/steps'
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+
+For developers who want full control, privacy, or wish to contribute to the project, you can run the entire Tabby stack locally.
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed and accounts created:
+
+#### Software
+- **Node.js 18+**
+- **Python 3.12+**
+- **pnpm** (for Node package management)
+- **uv** (for Python package management)
+
+#### Accounts & API Keys
+- **[Supabase](https://supabase.com)** (PostgreSQL & Vector Store)
+- **[Neo4j AuraDB](https://neo4j.com/cloud/platform/aura-graph-database/)** (Knowledge Graph)
+- **AI Providers**: At least one of the following:
+  - **OpenAI** (Required for the memory backend)
+  - **Groq**, **Cerebras**, **Google Gemini**, or **OpenRouter**
+- **[Tavily](https://tavily.ai/)** (Optional: for web search capabilities)
+
+---
+
+### Step-by-Step Setup
+
+<Steps>
+  <Step>
+    ### Clone the Repository
+    First, clone the project and navigate into the root directory:
+    ```bash
+    git clone https://github.com/CubeStar1/ai-keyboard.git
+    cd ai-keyboard
+    ```
+  </Step>
+
+  <Step>
+    ### Install Dependencies
+    Install dependencies for the desktop app, the API backend, and the memory backend:
+    ```bash
+    # 1. Frontend & Windows MCP
+    cd frontend && pnpm install
+
+    # 2. Next.js API Backend
+    cd ../nextjs-backend && pnpm install
+
+    # 3. Python Memory Backend
+    cd ../backend && uv sync
+    ```
+  </Step>
+
+  <Step>
+    ### Configure Environment Variables
+    Copy the example environment files for each service:
+    ```bash
+    cp frontend/env.example frontend/.env.local
+    cp nextjs-backend/env.example nextjs-backend/.env
+    cp backend/env.example backend/.env
+    ```
+
+    You will need to fill these with your credentials.
+
+    <Tabs items={['Frontend', 'Next.js Backend', 'Memory Backend']}>
+      <Tab value="Frontend">
+        `frontend/.env.local`
+        ```bash
+        NEXT_PUBLIC_SUPABASE_URL=
+        NEXT_PUBLIC_SUPABASE_ANON_KEY=
+
+        NEXT_PUBLIC_APP_NAME="AI Keyboard"
+        NEXT_PUBLIC_APP_ICON="/ai-kb-logo.png"
+
+        NEXT_PUBLIC_API_URL="http://localhost:3001"
+        NEXT_PUBLIC_MEMORY_API_URL="http://localhost:8000"
+        ```
+      </Tab>
+      <Tab value="Next.js Backend">
+        `nextjs-backend/.env`
+        ```bash
+        # Supabase
+        NEXT_PUBLIC_SUPABASE_URL=
+        NEXT_PUBLIC_SUPABASE_ANON_KEY=
+        SUPABASE_ADMIN=
+
+        # Email
+        RESEND_API_KEY=
+        RESEND_DOMAIN=
+
+        NEXT_PUBLIC_APP_NAME=Tabby
+        NEXT_PUBLIC_APP_ICON='/logos/tabby-logo.png'
+
+        # AI Providers
+        OPENAI_API_KEY=
+        GOOGLE_GENERATIVE_AI_API_KEY=
+        GROQ_API_KEY=
+        CEREBRAS_API_KEY=
+        OPENROUTER_API_KEY=
+
+        # Tools
+        TAVILY_API_KEY=
+
+        MEMORY_API_URL="http://localhost:8000"
+        ```
+      </Tab>
+      <Tab value="Memory Backend">
+        `backend/.env`
+        ```bash
+        OPENAI_API_KEY=
+        SUPABASE_CONNECTION_STRING=
+
+        NEO4J_URL=
+        NEO4J_USERNAME=
+        NEO4J_PASSWORD=
+        NEO4J_DATABASE=
+        AURA_INSTANCEID=
+        AURA_INSTANCENAME=
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step>
+    ### Database Setup
+    
+    #### Supabase (PostgreSQL + Vector)
+    1. Create a new project at [supabase.com](https://supabase.com).
+    2. Open the **SQL Editor** in your Supabase dashboard.
+    3. Run the schema found in `frontend/src/lib/supabase/migrations/schema.sql`.
+    4. Copy your **Project URL**, **anon key**, and **Connection String** to your respective `.env` files.
+
+    #### Neo4j (Knowledge Graph)
+    1. Create a free instance at [Neo4j AuraDB](https://neo4j.com/cloud/platform/aura-graph-database/).
+    2. Save the credentials file (URI, username, password) provided.
+    3. Add these credentials to your `backend/.env` file.
+  </Step>
+</Steps>
+
+### Running the Application
+
+To run the full suite locally, you need to start four separate processes. It's recommended to use four terminal tabs/windows:
+
+<Tabs items={['Memory Backend', 'API Backend', 'Windows MCP', 'Desktop App']}>
+  <Tab value="Memory Backend">
+    ```bash
+    cd backend
+    uv run main.py
+    ```
+    *Port: 8000*
+  </Tab>
+  <Tab value="API Backend">
+    ```bash
+    cd nextjs-backend
+    pnpm dev
+    ```
+    *Port: 3001*
+  </Tab>
+  <Tab value="Windows MCP">
+    ```bash
+    cd frontend
+    pnpm windows-mcp
+    ```
+    *Port: 8001*
+  </Tab>
+  <Tab value="Desktop App">
+    ```bash
+    cd frontend
+    pnpm dev
+    ```
+    *Port: 3000*
+  </Tab>
+</Tabs>
+
+### Verification
+
+Once all services are running:
+1. Look for the **Tabby icon** in your Windows System Tray.
+2. Right-click the icon to access **Settings**, the **Brain Panel**, or to **Quit**.
+3. Press `Ctrl+\` to open the Action Menu anywhere on your system.
+4. Press `Ctrl+Alt+G` to trigger AI suggestions while typing.

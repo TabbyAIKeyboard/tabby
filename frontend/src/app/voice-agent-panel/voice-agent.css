@@ -1,0 +1,224 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  background: transparent !important;
+  overflow: hidden;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.voice-agent-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 8px;
+  background: transparent;
+}
+
+.voice-agent-panel {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  background: rgba(24, 24, 27, 0.85);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  max-width: 400px;
+  min-width: 320px;
+}
+
+/* Orb Container */
+.orb-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.orb {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.9);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+}
+
+.orb.connecting {
+  background: rgba(250, 204, 21, 0.9);
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
+}
+
+.orb.listening {
+  background: rgba(34, 197, 94, 0.9);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+}
+
+.orb.speaking {
+  background: rgba(99, 102, 241, 0.9);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+}
+
+.orb.thinking {
+  background: rgba(168, 85, 247, 0.9);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+}
+
+.orb-inner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.orb-ring {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.5);
+  border-right-color: rgba(255, 255, 255, 0.2);
+}
+
+.state-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+}
+
+/* Transcript Container */
+.transcript-container {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.transcript-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.role-indicator {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.transcript-text.user .role-indicator {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.transcript-text.assistant .role-indicator {
+  color: rgba(99, 102, 241, 0.9);
+}
+
+.text-content {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.95);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+.transcript-text.user .text-content {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.transcript-text.assistant .text-content {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.transcript-placeholder {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* End Session Button */
+.end-session-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  pointer-events: auto !important;
+  -webkit-app-region: no-drag;
+  user-select: none;
+}
+
+.end-session-btn:hover {
+  color: rgba(239, 68, 68, 0.9);
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.end-session-btn:active {
+  transform: scale(0.95);
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), 0 0 40px rgba(0, 212, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.6), 0 0 60px rgba(0, 212, 255, 0.3);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Connecting state animation */
+.orb.connecting .orb-inner {
+  animation: pulse-inner 1s ease-in-out infinite;
+}
+
+@keyframes pulse-inner {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}

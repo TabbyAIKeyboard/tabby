@@ -1,0 +1,13 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "---Introduction---",
+    "index",
+    "getting-started",
+    "---Core Features---",
+    "features",
+    "shortcuts",
+    "---System---",
+    "architecture"
+  ]
+}
