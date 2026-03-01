@@ -8,10 +8,10 @@ Tabby is a **system-wide AI assistant** that lives at the point of input. Instea
 
 - **Interview Copilot** - Real-time coding interview assistance with screen capture
 - **Context-Aware Autocomplete** - AI suggestions based on what you're typing
+- **Desktop Automation** - Full Windows MCP integration for system-level control
 - **Persistent Memory** - Remembers your preferences, coding style, and past interactions
 - **Invisible Typing** - AI can type directly into any app
-- **Desktop Automation** - Full Windows MCP integration for system-level control
-- **Voice Agent** - Voice-to-text and text-to-voice capabilities and live agent
+- - **Voice Agent** - Voice-to-text and text-to-voice capabilities and live agent
 
 ## Core Features
 
