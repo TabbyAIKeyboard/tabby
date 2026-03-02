@@ -3,14 +3,14 @@ import { generateText, UIMessage } from 'ai'
 import { myProvider } from '@/lib/ai'
 import { getTitleGenerationModel } from '@/lib/ai/provider'
 
-// POST /api/conversations/title - Generate a title from user message
+// POST /api/generate-title - Generate a title from user message
 export async function POST(request: Request) {
   try {
     const body = await request.json()
     const { message, model } = body as { message: UIMessage; model: string }
 
     if (!message) {
-      return NextResponse.json({ error: 'Missing message' }, { status: 400 })
+      return NextResponse.json({ data: 'New Chat' })
     }
 
     const textPart = message.parts?.find((p) => p.type === 'text')

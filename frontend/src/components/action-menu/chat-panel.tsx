@@ -31,7 +31,11 @@ import {
   getConversations,
   getConversationMessages,
   deleteConversation,
-} from "@/lib/conversations-api";
+  saveChat,
+  saveMessages,
+  getChatById,
+  generateTitle,
+} from "@/lib/local-db";
 import { Conversation as ConversationType } from "@/lib/ai/types";
 import { defaultModel, models } from "@/lib/ai/models";
 import { ModelSelector } from "@/components/chat/model-selector";
@@ -50,6 +54,7 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
   const [input, setInput] = useState("");
   const [selectedModel, setSelectedModel] = useState<string>(defaultModel);
   const [activeChatId, setActiveChatId] = useState<string>(() => generateUUID());
+  const activeChatIdRef = useRef(activeChatId);
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(true);
   const [voiceMode, setVoiceMode] = useState<VoiceMode>("input");
@@ -64,7 +69,25 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
     onError: (error) => {
       console.error("Chat error:", error);
     },
-    onFinish: () => {
+    onFinish: async ({ messages: allMessages }) => {
+      const currentChatId = activeChatIdRef.current;
+      try {
+        // Ensure conversation exists in local DB
+        const existing = await getChatById(currentChatId);
+        if (!existing && allMessages.length > 0) {
+          const firstUserMsg = allMessages.find((m) => m.role === "user");
+          const title = firstUserMsg
+            ? await generateTitle(firstUserMsg, selectedModel)
+            : "New Chat";
+          await saveChat({ id: currentChatId, title, type: "chat" });
+        }
+        // Save all messages
+        if (allMessages.length > 0) {
+          await saveMessages(allMessages, currentChatId);
+        }
+      } catch (error) {
+        console.error("Error persisting chat locally:", error);
+      }
       loadConversations();
     },
   });
@@ -139,6 +162,7 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
   const handleSwitchChat = useCallback(
     async (conversationId: string) => {
       setActiveChatId(conversationId);
+      activeChatIdRef.current = conversationId;
       lastMessageCountRef.current = 0;
       try {
         const msgs = await getConversationMessages(conversationId);
@@ -153,6 +177,7 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
   const handleNewChat = useCallback(() => {
     const newId = generateUUID();
     setActiveChatId(newId);
+    activeChatIdRef.current = newId;
     setMessages([]);
     lastMessageCountRef.current = 0;
   }, [setMessages]);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { UIMessage } from "ai";
 import { parsePartialJson } from "@ai-sdk/ui-utils";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,11 @@ import {
   getPrepConversations,
   getConversationMessages,
   deleteConversation,
-} from "@/lib/conversations-api";
+  saveChat,
+  saveMessages,
+  getChatById,
+  generateLocalTitle,
+} from "@/lib/local-db";
 import {
   PrepPatternTab,
   PrepHintsTab,
@@ -56,6 +60,7 @@ export function PrepModePanel({ onBack, onClose }: PrepModePanelProps) {
   const [activeTab, setActiveTab] = useState<TabId>("chat");
   const [isCapturing, setIsCapturing] = useState(false);
   const [activeConversationId, setActiveConversationId] = useState<string>(() => generateUUID());
+  const activeConversationIdRef = useRef(activeConversationId);
   const [conversations, setConversations] = useState<ConversationType[]>([]);
   const [hintLevel, setHintLevel] = useState(1);
 
@@ -65,7 +70,23 @@ export function PrepModePanel({ onBack, onClose }: PrepModePanelProps) {
     onError: (error) => {
       console.error("Prep Mode error:", error);
     },
-    onFinish: () => {
+    onFinish: async ({ messages: allMessages }) => {
+      const currentId = activeConversationIdRef.current;
+      try {
+        const existing = await getChatById(currentId);
+        if (!existing && allMessages.length > 0) {
+          const firstUserMsg = allMessages.find((m) => m.role === "user");
+          const title = firstUserMsg
+            ? generateLocalTitle(firstUserMsg)
+            : "Prep Session";
+          await saveChat({ id: currentId, title, type: "prep" });
+        }
+        if (allMessages.length > 0) {
+          await saveMessages(allMessages, currentId);
+        }
+      } catch (error) {
+        console.error("Error persisting prep session locally:", error);
+      }
       loadConversations();
     },
   });
@@ -85,6 +106,7 @@ export function PrepModePanel({ onBack, onClose }: PrepModePanelProps) {
 
   const handleSwitchConversation = useCallback(async (conversationId: string) => {
     setActiveConversationId(conversationId);
+    activeConversationIdRef.current = conversationId;
     try {
       const msgs = await getConversationMessages(conversationId);
       setMessages(msgs);
@@ -96,6 +118,7 @@ export function PrepModePanel({ onBack, onClose }: PrepModePanelProps) {
   const handleNewConversation = useCallback(() => {
     const newId = generateUUID();
     setActiveConversationId(newId);
+    activeConversationIdRef.current = newId;
     setMessages([]);
     setHintLevel(1);
   }, [setMessages]);

@@ -12,7 +12,6 @@ import { addMemoryTool, searchMemoryTool, getAllMemoriesTool } from '@/lib/ai/to
 import { generateUUID } from '@/lib/utils/generate-uuid'
 import { defaultModel } from '@/lib/ai/models'
 import { getAuthenticatedUserId } from '@/lib/supabase/auth'
-import { saveChat, saveMessages, getChatById, generateTitleFromUserMessage } from '@/actions/chat'
 
 const getSystemPrompt = (
   userId: string
@@ -240,19 +239,6 @@ export async function POST(req: Request) {
   const mcpTools = await getMCPTools()
   const modelMessages = await convertToModelMessages(messages)
 
-  const userMessage = messages[messages.length - 1]
-
-  if (conversationId && userMessage) {
-    const existingChat = await getChatById(conversationId)
-
-    if (!existingChat) {
-      const title = await generateTitleFromUserMessage(userMessage, model || defaultModel)
-      await saveChat({ id: conversationId, title, userId })
-    }
-
-    await saveMessages([userMessage], conversationId)
-  }
-
   const stream = createUIMessageStream({
     generateId: generateUUID,
     execute: async ({ writer: dataStream }) => {
@@ -280,11 +266,6 @@ export async function POST(req: Request) {
           sendReasoning: true,
         })
       )
-    },
-    onFinish: async ({ messages: generatedMessages }) => {
-      if (conversationId && generatedMessages && generatedMessages.length > 0) {
-        await saveMessages(generatedMessages as UIMessage[], conversationId)
-      }
     },
   })
 

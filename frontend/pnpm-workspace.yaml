@@ -1,12 +1,13 @@
 packages:
-  - "."
+  - .
 
 ignoredBuiltDependencies:
+  - better-sqlite3
   - extract-file-icon
   - node-window-manager
 
 onlyBuiltDependencies:
-  - "@tailwindcss/oxide"
+  - '@tailwindcss/oxide'
   - dprint
   - electron
   - electron-winstaller

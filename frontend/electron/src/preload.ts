@@ -152,4 +152,47 @@ contextBridge.exposeInMainWorld("electron", {
   // Onboarding
   getOnboardingComplete: () => ipcRenderer.invoke("get-onboarding-complete"),
   setOnboardingComplete: (complete: boolean) => ipcRenderer.send("set-onboarding-complete", complete),
+
+  // Local Database
+  db: {
+    getConversations: (type?: string) => ipcRenderer.invoke("db:getConversations", type),
+    getConversationById: (id: string) => ipcRenderer.invoke("db:getConversationById", id),
+    createConversation: (data: { id: string; title: string; type?: string; userId?: string }) =>
+      ipcRenderer.invoke("db:createConversation", data),
+    renameConversation: (id: string, title: string) =>
+      ipcRenderer.invoke("db:renameConversation", id, title),
+    deleteConversation: (id: string) => ipcRenderer.invoke("db:deleteConversation", id),
+    getMessages: (conversationId: string) => ipcRenderer.invoke("db:getMessages", conversationId),
+    saveMessages: (
+      messages: Array<{
+        id: string;
+        conversation_id: string;
+        role: string;
+        parts: unknown;
+        metadata?: unknown;
+      }>
+    ) => ipcRenderer.invoke("db:saveMessages", messages),
+  },
+
+  // Local File Storage
+  fileStorage: {
+    saveScreenshot: (imageDataUrl: string, userId: string) =>
+      ipcRenderer.invoke("fileStorage:saveScreenshot", imageDataUrl, userId),
+    saveChatAttachment: (
+      projectId: string,
+      fileBuffer: Buffer,
+      fileName: string,
+      mimeType: string
+    ) =>
+      ipcRenderer.invoke(
+        "fileStorage:saveChatAttachment",
+        projectId,
+        fileBuffer,
+        fileName,
+        mimeType
+      ),
+    deleteFile: (filePath: string) => ipcRenderer.invoke("fileStorage:deleteFile", filePath),
+    cleanupOldScreenshots: (userId: string, maxAgeHours?: number) =>
+      ipcRenderer.invoke("fileStorage:cleanupOldScreenshots", userId, maxAgeHours),
+  },
 });

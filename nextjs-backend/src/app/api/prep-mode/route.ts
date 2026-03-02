@@ -12,7 +12,6 @@ import { defaultModel } from '@/lib/ai/models'
 import { z } from 'zod'
 import { addMemoryTool, searchMemoryTool, getAllMemoriesTool } from '@/lib/ai/tools/memory'
 import { generateUUID } from '@/lib/utils/generate-uuid'
-import { saveChat, saveMessages, getChatById, generateTitleFromUserMessage } from '@/actions/chat'
 import { getAuthenticatedUserId } from '@/lib/supabase/auth'
 
 const prepSchema = z.object({
@@ -212,17 +211,6 @@ export async function POST(req: Request) {
     return new Response('Unauthorized', { status: 401 })
   }
 
-  const userMessage = messages[messages.length - 1]
-
-  if (conversationId && userMessage) {
-    const existingChat = await getChatById(conversationId)
-    if (!existingChat) {
-      const title = await generateTitleFromUserMessage(userMessage, defaultModel)
-      await saveChat({ id: conversationId, title, type: 'prep', userId })
-    }
-    await saveMessages([userMessage], conversationId)
-  }
-
   const mcpTools = await getMCPTools()
   const modelMessages = await convertToModelMessages(messages)
 
@@ -269,27 +257,6 @@ export async function POST(req: Request) {
           sendReasoning: true,
         })
       )
-    },
-    onFinish: async ({ messages: generatedMessages }) => {
-      if (conversationId && generatedMessages && generatedMessages.length > 0) {
-        const assistantMessages = generatedMessages.filter((m) => m.role === 'assistant')
-        if (assistantMessages.length > 0) {
-          const messagesWithMetadata = assistantMessages.map((msg) => {
-            const textPart = msg.parts?.find((p: { type: string }) => p.type === 'text')
-            let analysis = null
-            if (textPart && 'text' in textPart) {
-              try {
-                analysis = JSON.parse(textPart.text)
-              } catch {}
-            }
-            return {
-              ...msg,
-              metadata: analysis ? { analysis, type: 'prep' } : { type: 'prep' },
-            }
-          })
-          await saveMessages(messagesWithMetadata as UIMessage[], conversationId)
-        }
-      }
     },
   })
 
