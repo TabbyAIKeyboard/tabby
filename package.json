@@ -4,13 +4,17 @@
   "scripts": {
     "prepare": "husky",
     "build": "pnpm --dir frontend run build && pnpm --dir nextjs-backend run build",
-    "typecheck": "pnpm --dir frontend run typecheck && pnpm --dir nextjs-backend run typecheck"
+    "typecheck": "pnpm --dir frontend run typecheck && pnpm --dir nextjs-backend run typecheck",
+    "build:staged": "pnpm run typecheck && pnpm run build"
   },
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^15.4.3"
   },
   "lint-staged": {
+    "{frontend,nextjs-backend}/**/*.{js,jsx,ts,tsx}": [
+      "pnpm run build:staged"
+    ],
     "frontend/**/*.{js,jsx,ts,tsx}": [
       "pnpm --dir frontend run next:lint",
       "pnpm --dir frontend run format"
