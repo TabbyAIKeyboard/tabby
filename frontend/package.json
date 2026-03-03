@@ -1,12 +1,12 @@
 {
   "name": "tabby",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "main": "build/main.js",
   "description": "AI Keyboard",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CubeStar1/ai-keyboard.git"
+    "url": "https://github.com/TabbyAIKeyboard/tabby.git"
   },
   "scripts": {
     "build": "run-s next:build electron:build",
