@@ -4,6 +4,7 @@ dist
 build
 node_modules
 out
+pnpm-lock.yaml
 
 # Ignore content docs to prevent formatting issues
 *.mdx
