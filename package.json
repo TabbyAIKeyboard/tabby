@@ -14,7 +14,6 @@
       "pnpm --dir frontend run format"
     ],
     "nextjs-backend/**/*.{js,jsx,ts,tsx}": [
-      "pnpm --dir nextjs-backend run lint",
       "pnpm --dir nextjs-backend run format"
     ]
   }

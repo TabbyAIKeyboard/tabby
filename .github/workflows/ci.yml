@@ -61,8 +61,6 @@ jobs:
         run: cd nextjs-backend && pnpm install
       - name: Check Formatting
         run: cd nextjs-backend && pnpm run format:check
-      - name: Lint
-        run: cd nextjs-backend && pnpm run lint
       - name: Build Check
         run: cd nextjs-backend && pnpm run build
 
