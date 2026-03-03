@@ -3,8 +3,18 @@ name: CI
 on:
   pull_request:
     branches: ["main"]
+    paths:
+      - "frontend/**"
+      - "nextjs-backend/**"
+      - "backend/**"
+      - ".github/workflows/ci.yml"
   push:
     branches: ["main"]
+    paths:
+      - "frontend/**"
+      - "nextjs-backend/**"
+      - "backend/**"
+      - ".github/workflows/ci.yml"
 
 jobs:
   frontend-checks:
@@ -63,6 +73,21 @@ jobs:
         run: cd nextjs-backend && pnpm run format:check
       - name: Build Check
         run: cd nextjs-backend && pnpm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: "http://localhost:54321"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "ci"
+          SUPABASE_ADMIN: "ci"
+          RESEND_API_KEY: "ci"
+          RESEND_DOMAIN: "localhost"
+          NEXT_PUBLIC_APP_NAME: "Tabby"
+          NEXT_PUBLIC_APP_ICON: "/logos/tabby-logo.png"
+          OPENAI_API_KEY: "ci"
+          GOOGLE_GENERATIVE_AI_API_KEY: "ci"
+          GROQ_API_KEY: "ci"
+          CEREBRAS_API_KEY: "ci"
+          OPENROUTER_API_KEY: "ci"
+          TAVILY_API_KEY: "ci"
+          MEMORY_API_URL: "http://localhost:8000"
 
   python-backend-checks:
     runs-on: ubuntu-latest

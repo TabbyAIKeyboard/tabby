@@ -57,48 +57,48 @@ If you have an idea for a feature or an enhancement, please submit an issue expl
     ```
 
 #### 2. Database Setup (Local Supabase via Docker)
-    1.  **Start Docker Desktop** and wait for it to fully initialize.
-    2.  **Initialize Supabase** in the project root:
-        ```bash
-        npx supabase init    # Only needed the first time
-        ```
-    3.  **Start local Supabase:**
-        ```bash
-        npx supabase start
-        ```
-        The first run will pull ~13 Docker images (takes a few minutes). Subsequent starts take ~10 seconds.
-    4.  When completed, it prints all credentials. Note the **API URL**, **anon key**, and **service_role key**.
-    5.  The database schema is auto-applied from `supabase/migrations/`.
-    6.  **Create storage buckets** (one-time setup):
-        ```powershell
-        # PowerShell — create the two required storage buckets
-        $headers = @{
-        "apikey" = "<SERVICE_ROLE_KEY from step 4>"
-        "Authorization" = "Bearer <SERVICE_ROLE_KEY from step 4>"
-        "Content-Type" = "application/json"
-        }
-        Invoke-RestMethod -Uri "http://127.0.0.1:54321/storage/v1/bucket" -Method Post -Headers $headers -Body '{"id":"context-captures","name":"context-captures","public":true}'
-        Invoke-RestMethod -Uri "http://127.0.0.1:54321/storage/v1/bucket" -Method Post -Headers $headers -Body '{"id":"project-assets","name":"project-assets","public":true}'
-        ```
-        Or create them manually via **Supabase Studio** at `http://localhost:54323` → Storage.
+1.  **Start Docker Desktop** and wait for it to fully initialize.
+2.  **Initialize Supabase** in the project root:
+    ```bash
+    npx supabase init    # Only needed the first time
+    ```
+3.  **Start local Supabase:**
+    ```bash
+    npx supabase start
+    ```
+    The first run will pull ~13 Docker images (takes a few minutes). Subsequent starts take ~10 seconds.
+4.  When completed, it prints all credentials. Note the **API URL**, **anon key**, and **service_role key**.
+5.  The database schema is auto-applied from `supabase/migrations/`.
+6.  **Create storage buckets** (one-time setup):
+    ```powershell
+    # PowerShell — create the two required storage buckets
+    $headers = @{
+    "apikey" = "<SERVICE_ROLE_KEY from step 4>"
+    "Authorization" = "Bearer <SERVICE_ROLE_KEY from step 4>"
+    "Content-Type" = "application/json"
+    }
+    Invoke-RestMethod -Uri "http://127.0.0.1:54321/storage/v1/bucket" -Method Post -Headers $headers -Body '{"id":"context-captures","name":"context-captures","public":true}'
+    Invoke-RestMethod -Uri "http://127.0.0.1:54321/storage/v1/bucket" -Method Post -Headers $headers -Body '{"id":"project-assets","name":"project-assets","public":true}'
+    ```
+    Or create them manually via **Supabase Studio** at `http://localhost:54323` → Storage.
 
-    #### Supabase Quick Reference
+#### Supabase Quick Reference
 
-    | Action | Command |
-    | --- | --- |
-    | Start | `npx supabase start` |
-    | Stop | `npx supabase stop` |
-    | Status | `npx supabase status` |
-    | Admin UI | `http://localhost:54323` |
-    | Reset DB | `npx supabase db reset` |
+| Action | Command |
+| --- | --- |
+| Start | `npx supabase start` |
+| Stop | `npx supabase stop` |
+| Status | `npx supabase status` |
+| Admin UI | `http://localhost:54323` |
+| Reset DB | `npx supabase db reset` |
 
-    > **Note:** Docker Desktop must be running before `npx supabase start`.
+> **Note:** Docker Desktop must be running before `npx supabase start`.
 
-    #### Neo4j (Knowledge Graph — Optional)
+#### Neo4j (Knowledge Graph — Optional)
 
-    1.  Create a free instance at [Neo4j AuraDB](https://neo4j.com/cloud/platform/aura-graph-database/).
-    2.  Save the **Text File** containing your credentials (URI, username, password) when creating the instance.
-    3.  Note your **Instance ID** and **Instance Name** from the dashboard.
+1.  Create a free instance at [Neo4j AuraDB](https://neo4j.com/cloud/platform/aura-graph-database/).
+2.  Save the **Text File** containing your credentials (URI, username, password) when creating the instance.
+3.  Note your **Instance ID** and **Instance Name** from the dashboard.
 
 #### 3. Environment Variables
 
