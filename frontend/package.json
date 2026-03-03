@@ -141,8 +141,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "CubeStar1",
-        "repo": "ai-keyboard",
+        "owner": "TabbyAIKeyboard",
+        "repo": "tabby",
         "releaseType": "draft"
       }
     ],
