@@ -8,8 +8,6 @@ ignoredBuiltDependencies:
 
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
-  - '@tailwindcss/oxide'
-  - dprint
   - electron
   - electron-winstaller
   - esbuild

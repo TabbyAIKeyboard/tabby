@@ -17,7 +17,31 @@ on:
       - ".github/workflows/ci.yml"
 
 jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      nextjs-backend: ${{ steps.filter.outputs.nextjs-backend }}
+      python-backend: ${{ steps.filter.outputs.python-backend }}
+      workflow: ${{ steps.filter.outputs.workflow }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            nextjs-backend:
+              - 'nextjs-backend/**'
+            python-backend:
+              - 'backend/**'
+            workflow:
+              - '.github/workflows/ci.yml'
+
   frontend-checks:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend == 'true' || needs.detect-changes.outputs.workflow == 'true'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -56,6 +80,8 @@ jobs:
           NEXT_PUBLIC_MEMORY_API_URL: ${{ secrets.NEXT_PUBLIC_MEMORY_API_URL }}
 
   nextjs-backend-checks:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.nextjs-backend == 'true' || needs.detect-changes.outputs.workflow == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -90,6 +116,8 @@ jobs:
           MEMORY_API_URL: "http://localhost:8000"
 
   python-backend-checks:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.python-backend == 'true' || needs.detect-changes.outputs.workflow == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
