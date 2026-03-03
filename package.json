@@ -1,0 +1,21 @@
+{
+  "name": "tabby-root",
+  "private": true,
+  "scripts": {
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3"
+  },
+  "lint-staged": {
+    "frontend/**/*.{js,jsx,ts,tsx}": [
+      "pnpm --dir frontend run next:lint",
+      "pnpm --dir frontend run format"
+    ],
+    "nextjs-backend/**/*.{js,jsx,ts,tsx}": [
+      "pnpm --dir nextjs-backend run lint",
+      "pnpm --dir nextjs-backend run format"
+    ]
+  }
+}
