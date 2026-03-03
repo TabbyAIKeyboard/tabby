@@ -73,7 +73,7 @@ const highlights: Highlight[] = [
   },
   {
     text: 'System Tray',
-    description: 'Lives quietly in your system tray. Always accessible, never in the way.',
+    description: 'Lives quietly in your system tray. Always accessible, never gets in the way.',
     image: '/landing/tabby-interview-copilot.png',
   },
 ]

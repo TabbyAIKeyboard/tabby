@@ -1,7 +1,4 @@
-.env
+.env*
+!.env.example
 .venv
-*.pyc
-db
-__pycache__
-.env.local
 node_modules
