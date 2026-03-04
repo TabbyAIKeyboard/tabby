@@ -1,31 +1,52 @@
 ---
-name: Bug report
-about: Create a report to help us improve Tabby
-title: ''
+name: Bug Report
+about: Report a bug to help us improve Tabby
+title: "[Bug]: "
 labels: bug
 assignees: ''
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Describe the Bug
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+<!-- A clear and concise description of what the bug is. -->
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## Steps to Reproduce
 
-**Screenshots/Logs**
-If applicable, add screenshots or console logs to help explain your problem.
+1. 
+2. 
+3. 
+4. 
 
-**Environment (please complete the following information):**
- - OS: [e.g. Windows 11]
- - App Version [e.g. v0.1.3]
- - Provide any related API provider configurations (e.g., using OpenAI vs local model)
+## Expected Behavior
 
-**Additional context**
-Add any other context about the problem here.
+<!-- What you expected to happen. -->
+
+## Actual Behavior
+
+<!-- What actually happened instead. -->
+
+## Screenshots / Logs
+
+<!-- If applicable, paste screenshots or console output below. Use a code block for logs. -->
+
+<details>
+<summary>Console / Error Logs</summary>
+
+```
+paste logs here
+```
+
+</details>
+
+## Environment
+
+| Item | Value |
+|---|---|
+| OS | e.g. Windows 11 |
+| App Version | e.g. v0.1.3 |
+| Node.js Version | e.g. 20.11.0 |
+| AI Provider | e.g. OpenAI, Groq, Cerebras |
+
+## Additional Context
+
+<!-- Any other context about the problem - related issues, when it started, frequency, etc. -->

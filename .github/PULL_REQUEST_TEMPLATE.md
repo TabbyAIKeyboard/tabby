@@ -1,22 +1,61 @@
 ## Description
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context.
 
-Fixes # (issue)
+<!-- Summarize what this PR does and why. Link any related issues. -->
 
-## Type of change
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
+Closes #<!-- issue number -->
+
+## Type of Change
+
+<!-- Check the one that applies. -->
+
+- [ ] Bug fix (non-breaking change that fixes an issue)
+- [ ] New feature (non-breaking change that adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] This change requires a documentation update
+- [ ] Refactor (code change that neither fixes a bug nor adds a feature)
+- [ ] Documentation update
+- [ ] CI / Build / Tooling
+
+## Changes Made
+
+<!-- List the key changes introduced in this PR. Be specific. -->
+
+- 
+- 
+- 
 
 ## How Has This Been Tested?
-Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
-- [ ] Local application run (Frontend + Backend + DB)
-- [ ] Manual verification of the feature
 
-## Checklist:
+<!-- Describe how you verified your changes. Check all that apply. -->
+
+- [ ] Local application run (Frontend + Backend + DB)
+- [ ] Manual verification of the feature / fix
+- [ ] Existing tests pass
+- [ ] New tests added
+
+<details>
+<summary>Test details</summary>
+
+<!-- Describe your test steps so reviewers can reproduce. -->
+
+1. 
+2. 
+3. 
+
+</details>
+
+## Screenshots
+
+<!-- If this PR includes UI changes, add before/after screenshots. Remove this section if not applicable. -->
+
+| Before | After |
+|---|---|
+|  |  |
+
+## Checklist
+
 - [ ] My code follows the style guidelines of this project
 - [ ] I have performed a self-review of my own code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
 - [ ] My changes generate no new warnings
+- [ ] My commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)

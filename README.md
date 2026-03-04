@@ -1,156 +1,226 @@
-# Tabby - AI Keyboard
+# Tabby
 
-An intelligent keyboard layer that transforms your input device into a real-time AI collaborator for coding interviews and beyond.
+<div align="center">
 
-## What is Tabby?
+<img src="nextjs-backend/public/logos/tabby-header.png" alt="Tabby Logo" />
 
-Tabby is a **system-wide AI assistant** that lives at the point of input. Instead of switching between apps for AI help, it provides:
 
-- **Interview Copilot** - Real-time coding interview assistance with screen capture
-- **Context-Aware Autocomplete** - AI suggestions based on what you're typing
-- **Desktop Automation** - Full Windows MCP integration for system-level control
-- **Persistent Memory** - Remembers your preferences, coding style, and past interactions
-- **Invisible Typing** - AI can type directly into any app
-- **Voice Agent** - Voice-to-text and text-to-voice capabilities and live agent
+**A system-wide AI keyboard layer that transforms your input device into a real-time AI collaborator.**
 
-## Core Features
+[![CI](https://github.com/TabbyAIKeyboard/tabby/actions/workflows/ci.yml/badge.svg)](https://github.com/TabbyAIKeyboard/tabby/actions/workflows/ci.yml)
+[![GitHub stars](https://img.shields.io/github/stars/TabbyAIKeyboard/tabby?style=flat&logo=github)](https://github.com/TabbyAIKeyboard/tabby/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/TabbyAIKeyboard/tabby?style=flat&logo=github)](https://github.com/TabbyAIKeyboard/tabby/network/members)
+[![GitHub issues](https://img.shields.io/github/issues/TabbyAIKeyboard/tabby?style=flat&logo=github)](https://github.com/TabbyAIKeyboard/tabby/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/TabbyAIKeyboard/tabby?style=flat&logo=github)](https://github.com/TabbyAIKeyboard/tabby/commits/main)
+[![GitHub release](https://img.shields.io/github/v/release/TabbyAIKeyboard/tabby?style=flat&logo=github)](https://github.com/TabbyAIKeyboard/tabby/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-### 1. Interview Copilot (Coding Mode)
+[![Electron](https://img.shields.io/badge/Electron-38-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-Local_Docker-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 
-| Shortcut      | Action                                                            |
-| ------------- | ----------------------------------------------------------------- |
-| `Alt+X`       | Capture screen & analyze coding problem                           |
-| `Alt+Shift+X` | Update analysis with new constraints                              |
-| `Alt+N`       | Get code suggestions/improvements                                 |
-| `Ctrl+1-6`    | Switch tabs (Chat, Idea, Code, Walkthrough, Test Cases, Memories) |
+[Features](#features) · [Screenshots](#screenshots) · [Tech Stack](#tech-stack) · [Getting Started](#getting-started) · [Contributing](#contributing) · [License](#license)
 
-**Tabs:**
+</div>
 
-- **Chat** - Free-form conversation with context
-- **Idea** - Problem breakdown, key observations, approach
-- **Code** - Clean, commented implementation
-- **Walkthrough** - Step-by-step solution explanation
-- **Test Cases** - Edge cases with input/output/reason
-- **Memories** - Retrieved facts about your preferences
+---
 
-### 2. Action Menu (Quick AI)
+## Features
 
-| Shortcut    | Action                              |
-| ----------- | ----------------------------------- |
-| `Ctrl+\`    | Open action menu with selected text |
-| `Tab`       | Quick AI chat mode                  |
-| `Alt+[Key]` | Trigger specific action             |
+Tabby lives at the point of input - no more switching between apps for AI help.
 
-**Built-in Actions:**
+| Feature | Description |
+|---|---|
+| **Interview Copilot** | Real-time coding interview assistance with screen capture and multi-tab analysis |
+| **Context-Aware Autocomplete** | Inline AI suggestions based on what you're typing, anywhere on your system |
+| **Desktop Automation** | Full Windows MCP integration for system-level control |
+| **Persistent Memory** | Remembers your preferences, coding style, and past interactions via Mem0 |
+| **Invisible Typing** | AI types directly into any application, character-by-character |
+| **Voice Agent** | Voice-to-text, text-to-voice, and live conversational agent |
+| **Action Menu** | Quick AI actions on selected text — fix grammar, change tone, expand, summarize |
 
-- Fix Grammar, Shorten, Expand text
-- Professional/Casual/Friendly tone
-- Email writer
-- Custom prompts
+---
 
-### 3. AI Suggestions
+## Screenshots
 
-| Shortcut     | Action                                |
-| ------------ | ------------------------------------- |
-| `Ctrl+Space` | Get AI suggestion for current context |
+<div align="center">
 
-- Shows inline completions based on selected/typed text
-- Two modes: Hotkey-triggered or Auto (clipboard watcher)
+### Interview Copilot
+<img src="nextjs-backend/public/landing/tabby-interview-copilot.png" alt="Interview Copilot" width="700" />
 
-### 4. Brain Panel (Memory Dashboard)
+<br /><br />
 
-| Shortcut       | Action             |
-| -------------- | ------------------ |
-| `Ctrl+Shift+B` | Toggle brain panel |
+### Interview Ghost Text
+<img src="nextjs-backend/public/landing/tabby-interview-ghost.png" alt="Interview Ghost Text" width="700" />
 
-- View stored memories
-- Upload images for visual memory
-- Monitor automatic context capture
-- Neo4j knowledge graph visualization
+<br /><br />
 
-### 5. Text Output Modes
+### Action Menu
+<img src="nextjs-backend/public/landing/tabby-actions.png" alt="Action Menu" width="700" />
 
-- **Paste** — Standard clipboard paste (default)
-- **Typewriter** — AI types character-by-character (undetectable)
+<br /><br />
+
+### Voice Agent
+<img src="nextjs-backend/public/landing/tabby-voice-agent.png" alt="Voice Agent" width="700" />
+
+<br /><br />
+
+### Knowledge Graph
+<img src="nextjs-backend/public/landing/tabby-kg.png" alt="Knowledge Graph" width="700" />
+
+<br /><br />
+
+### Memories Dashboard
+<img src="nextjs-backend/public/landing/tabby-memories.png" alt="Memories Dashboard" width="700" />
+
+<br /><br />
+
+### Settings
+<img src="nextjs-backend/public/landing/tabby-settings.png" alt="Settings" width="700" />
+
+<br /><br />
+
+### Architecture
+<img src="nextjs-backend/public/landing/tabby-architecture.png" alt="Architecture Diagram" width="700" />
+
+</div>
+
+---
 
 ## Tech Stack
 
-| Layer              | Technology                                 |
-| ------------------ | ------------------------------------------ |
-| Desktop App        | Electron 38                                |
-| Frontend           | Next.js 15, React 19, Tailwind CSS         |
-| AI                 | Vercel AI SDK, OpenAI/Groq/Cerebras        |
-| Memory             | Mem0 (Supabase vector store + Neo4j graph) |
-| Desktop Automation | nut-js, node-window-manager, Windows MCP   |
-| Database           | Supabase (Local Docker)                    |
+| Layer | Technology |
+|---|---|
+| Desktop App | Electron 38 |
+| Frontend | Next.js 15, React 19, Tailwind CSS |
+| AI | Vercel AI SDK, OpenAI / Groq / Cerebras / Google Gemini |
+| Memory | Mem0 (Supabase vector store + Neo4j graph) |
+| Desktop Automation | nut-js, node-window-manager, Windows MCP |
+| Database | Supabase (Local Docker) |
 
-## Setup & Installation
+---
+
+## Keyboard Shortcuts
+
+<details>
+<summary><b>Global Shortcuts</b></summary>
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl+\` | Open / close action menu |
+| `Ctrl+Space` | Get AI suggestion |
+| `Ctrl+Shift+B` | Toggle brain panel |
+| `Ctrl+Alt+I` | Interview ghost text |
+| `Ctrl+Alt+J` | Voice Agent |
+| `Ctrl+Shift+X` | Stop autotyping |
+| `Ctrl+Shift+T` | Cycle transcribe modes |
+| `Ctrl+Alt+T` | Toggle voice transcription |
+
+</details>
+
+<details>
+<summary><b>Interview Copilot</b></summary>
+
+| Shortcut | Action |
+|---|---|
+| `Alt+X` | Capture screen & analyze coding problem |
+| `Alt+Shift+X` | Update analysis with new constraints |
+| `Alt+N` | Get code suggestions / improvements |
+| `Ctrl+1-6` | Switch tabs (Chat, Idea, Code, Walkthrough, Test Cases, Memories) |
+
+</details>
+
+<details>
+<summary><b>Navigation</b></summary>
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl+Arrow` | Move floating window |
+| `Esc` | Back / close |
+| `Enter` | Accept & paste |
+
+</details>
+
+---
+
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- Python 3.12+ (for memory backend)
-- [uv](https://github.com/astral-sh/uv) (Python package manager)
-- [pnpm](https://pnpm.io) (for package management)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for local Supabase)
-- [OpenAI](https://openai.com) API key
-- Google Generative AI API key (Optional)
-- XAI API key (Optional)
-- Groq API key (Optional)
-- Cerebras API key (Optional)
-- OpenRouter API key (Optional)
-- [Tavily](https://tavily.ai/) API key (Web Search)
-- [Neo4j](https://neo4j.com) instance (Optional, for knowledge graph)
+- **Node.js** 18+
+- **Python** 3.12+ (for memory backend)
+- [uv](https://github.com/astral-sh/uv) — Python package manager
+- [pnpm](https://pnpm.io) — JavaScript package manager
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — for local Supabase
+- An [OpenAI](https://openai.com) API key
 
-### 1. Clone & Install Dependencies
+<details>
+<summary><b>Optional API keys</b></summary>
+
+- Google Generative AI API key
+- XAI API key
+- Groq API key
+- Cerebras API key
+- OpenRouter API key
+- [Tavily](https://tavily.ai/) API key (web search)
+- [Neo4j](https://neo4j.com) instance (knowledge graph)
+
+</details>
+
+### 1. Clone & Install
 
 ```bash
-git clone https://github.com/CubeStar1/ai-keyboard.git
-cd ai-keyboard
+git clone https://github.com/TabbyAIKeyboard/tabby.git
+cd tabby
 
 # Frontend
-cd frontend
-pnpm install
+cd frontend && pnpm install
 
 # Next.js Backend
-cd ../nextjs-backend
-pnpm install
+cd ../nextjs-backend && pnpm install
 
 # Memory Backend
-cd ../backend
-uv sync
+cd ../backend && uv sync
 ```
 
-### 2. Database Setup (Local Supabase via Docker)
+### 2. Database Setup
 
-We use a **local Supabase instance** running in Docker instead of the cloud service.
+We use a **local Supabase instance** running in Docker.
 
-1.  **Start Docker Desktop** and wait for it to fully initialize.
-2.  **Initialize Supabase** in the project root:
-    ```bash
-    npx supabase init    # Only needed the first time
-    ```
-3.  **Start local Supabase:**
-    ```bash
-    npx supabase start
-    ```
-    The first run will pull ~13 Docker images (takes a few minutes). Subsequent starts take ~10 seconds.
-4.  When completed, it prints all credentials. Note the **API URL**, **anon key**, and **service_role key**.
-5.  The database schema is auto-applied from `supabase/migrations/`.
-6.  **Create storage buckets** (one-time setup):
-    ```powershell
-    # PowerShell — create the two required storage buckets
-    $headers = @{
-      "apikey" = "<SERVICE_ROLE_KEY from step 4>"
-      "Authorization" = "Bearer <SERVICE_ROLE_KEY from step 4>"
-      "Content-Type" = "application/json"
-    }
-    Invoke-RestMethod -Uri "http://127.0.0.1:54321/storage/v1/bucket" -Method Post -Headers $headers -Body '{"id":"context-captures","name":"context-captures","public":true}'
-    Invoke-RestMethod -Uri "http://127.0.0.1:54321/storage/v1/bucket" -Method Post -Headers $headers -Body '{"id":"project-assets","name":"project-assets","public":true}'
-    ```
-    Or create them manually via **Supabase Studio** at `http://localhost:54323` → Storage.
+```bash
+# Start Docker Desktop first, then:
+npx supabase init     # first time only
+npx supabase start    # starts all services (~10 s after first run)
+```
 
-#### Supabase Quick Reference
+After startup, note the **API URL**, **anon key**, and **service_role key** printed in the terminal.
+
+<details>
+<summary><b>Create storage buckets (one-time)</b></summary>
+
+```powershell
+# PowerShell
+$headers = @{
+  "apikey"        = "<SERVICE_ROLE_KEY>"
+  "Authorization" = "Bearer <SERVICE_ROLE_KEY>"
+  "Content-Type"  = "application/json"
+}
+Invoke-RestMethod -Uri "http://127.0.0.1:54321/storage/v1/bucket" `
+  -Method Post -Headers $headers `
+  -Body '{"id":"context-captures","name":"context-captures","public":true}'
+Invoke-RestMethod -Uri "http://127.0.0.1:54321/storage/v1/bucket" `
+  -Method Post -Headers $headers `
+  -Body '{"id":"project-assets","name":"project-assets","public":true}'
+```
+
+Or create them manually via **Supabase Studio** → `http://localhost:54323` → Storage.
+
+</details>
+
+<details>
+<summary><b>Supabase Quick Reference</b></summary>
 
 | Action | Command |
 | --- | --- |
@@ -162,31 +232,31 @@ We use a **local Supabase instance** running in Docker instead of the cloud serv
 
 > **Note:** Docker Desktop must be running before `npx supabase start`.
 
-#### Neo4j (Knowledge Graph — Optional)
+</details>
 
-1.  Create a free instance at [Neo4j AuraDB](https://neo4j.com/cloud/platform/aura-graph-database/).
-2.  Save the **Text File** containing your credentials (URI, username, password) when creating the instance.
-3.  Note your **Instance ID** and **Instance Name** from the dashboard.
+<details>
+<summary><b>Neo4j (Knowledge Graph — Optional)</b></summary>
+
+1. Create a free instance at [Neo4j AuraDB](https://neo4j.com/cloud/platform/aura-graph-database/).
+2. Save the credentials text file (URI, username, password).
+3. Note the **Instance ID** and **Instance Name** from the dashboard.
+
+</details>
 
 ### 3. Environment Variables
 
-Create the environment files from the examples, then fill in the Supabase credentials from `npx supabase status`:
+Copy the example env files, then fill in your credentials:
 
 ```bash
-# Frontend
 cp frontend/env.example frontend/.env.local
-
-# Next.js Backend
 cp nextjs-backend/env.example nextjs-backend/.env.local
-
-# Backend
 cp backend/env.example backend/.env
 ```
 
-**Frontend** (`frontend/.env.local`):
+<details>
+<summary><b>Frontend</b> — <code>frontend/.env.local</code></summary>
 
 ```env
-# Supabase (local Docker) — get values from `npx supabase status`
 NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:54321"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="<ANON_KEY from supabase status>"
 SUPABASE_ADMIN="<SERVICE_ROLE_KEY from supabase status>"
@@ -198,10 +268,12 @@ NEXT_PUBLIC_API_URL="http://localhost:3001"
 NEXT_PUBLIC_MEMORY_API_URL="http://localhost:8000"
 ```
 
-**Next.js Backend** (`nextjs-backend/.env.local`):
+</details>
+
+<details>
+<summary><b>Next.js Backend</b> — <code>nextjs-backend/.env.local</code></summary>
 
 ```env
-# Supabase (local Docker) — same keys as frontend
 NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:54321"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="<ANON_KEY from supabase status>"
 SUPABASE_ADMIN="<SERVICE_ROLE_KEY from supabase status>"
@@ -224,11 +296,13 @@ TAVILY_API_KEY=""
 MEMORY_API_URL="http://localhost:8000"
 ```
 
-**Backend** (`backend/.env`):
+</details>
+
+<details>
+<summary><b>Backend</b> — <code>backend/.env</code></summary>
 
 ```env
 OPENAI_API_KEY=
-# Local Supabase PostgreSQL — get DB_URL from `npx supabase status`
 SUPABASE_CONNECTION_STRING="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 
 # Neo4j (optional)
@@ -237,134 +311,138 @@ NEO4J_USERNAME=
 NEO4J_PASSWORD=
 ```
 
-### 4. Run the Application
+</details>
+
+### 4. Run
 
 ```bash
-# Terminal 0: Start local Supabase (Docker Desktop must be running)
+# Terminal 0 — Local Supabase (Docker Desktop must be running)
 npx supabase start
 
-# Terminal 1: Start memory backend
-cd backend
-uv run main.py
+# Terminal 1 — Memory backend
+cd backend && uv run main.py
 
-# Terminal 2: Start Next.js backend
-cd nextjs-backend
-pnpm dev
+# Terminal 2 — Next.js backend
+cd nextjs-backend && pnpm dev
 
-# Terminal 3: Start Windows MCP server (optional)
-cd frontend
-pnpm run windows-mcp
+# Terminal 3 — Windows MCP server (optional)
+cd frontend && pnpm run windows-mcp
 
-# Terminal 4: Start Electron app
-cd frontend
-pnpm dev
+# Terminal 4 — Electron app
+cd frontend && pnpm dev
 ```
 
-The app will start with:
+Once running:
 
-- Supabase at `http://127.0.0.1:54321` (Studio at `:54323`)
-- Frontend app at `http://localhost:3000`
-- Next.js Backend at `http://localhost:3001`
-- Memory API at `http://localhost:8000`
-- Windows MCP at `http://localhost:8001` (optional)
+| Service | URL |
+|---|---|
+| Supabase API | `http://127.0.0.1:54321` |
+| Supabase Studio | `http://localhost:54323` |
+| Frontend (Electron) | `http://localhost:3000` |
+| Next.js Backend | `http://localhost:3001` |
+| Memory API | `http://localhost:8000` |
+| Windows MCP | `http://localhost:8001` |
 
 ### 5. System Tray
 
-The app runs in the system tray. Right-click for:
+Tabby runs in the system tray. Right-click the icon for:
 
 - Show Actions Menu
 - Brain Panel
 - Settings
 - Quit
 
+---
+
 ## Building & Releasing
 
-### Local Build
-
-To create a local production executable for Windows:
+<details>
+<summary><b>Local Build</b></summary>
 
 ```bash
 cd frontend
-npm run dist
+pnpm run dist
 ```
 
-The resulting `.exe` will be in `frontend/dist`.
+The `.exe` will be in `frontend/dist`.
 
-### GitHub App Releases
+</details>
 
-Automated Windows app releases are set up using GitHub Actions.
+<details>
+<summary><b>GitHub Releases (CI)</b></summary>
 
-1. **GitHub Secrets**: Add these secrets to your repository settings:
-   - `GH_TOKEN`: Your GitHub Personal Access Token (classic) with `repo` scope.
-   - All `NEXT_PUBLIC_*` and `SUPABASE_*` variables from your `.env.local`.
-2. **Trigger Release**: Run this from the `frontend` directory:
+Automated Windows releases via GitHub Actions.
+
+1. **GitHub Secrets** — Add to repository settings:
+   - `GH_TOKEN` — Personal Access Token (classic) with `repo` scope
+   - All `NEXT_PUBLIC_*` and `SUPABASE_*` variables from `.env.local`
+2. **Trigger a release:**
    ```bash
-   npm run release
+   cd frontend && pnpm run release
    ```
-   This will automatically:
+   This creates a git tag from `package.json` version, pushes it, and triggers a GitHub Action to build and publish.
 
-- Grab the version from `package.json`.
-- Create a Git tag (e.g., `v0.1.0`).
-- Push the tag to GitHub.
-- Trigger a GitHub Action to build the Windows `.exe` and create a GitHub Release.
+</details>
 
-### Python Backend Deployment (Azure)
-
-The Python backend is deployed to **Azure Container Apps** with a fully automated CI/CD pipeline.
+<details>
+<summary><b>Python Backend — Azure</b></summary>
 
 - **Workflow:** `.github/workflows/backend-deploy.yml`
-- **Trigger:** Any push to the `backend/` directory on the `main` branch.
-- **Project URL:** [tabby-backend.azurecontainerapps.io](https://tabby-backend.jollydesert-22a4756c.centralindia.azurecontainerapps.io)
-- **Process:**
-  1. Builds a Docker image.
-  2. Pushes the image to Docker Hub (`thecubestar/tabby-backend`).
-  3. Updates the Azure Container App with the new image tag.
+- **Trigger:** Push to `backend/` on `main`
+- **URL:** [tabby-backend.azurecontainerapps.io](https://tabby-backend.jollydesert-22a4756c.centralindia.azurecontainerapps.io)
+- Builds Docker image → pushes to Docker Hub (`thecubestar/tabby-backend`) → updates Azure Container App
 
-### Next.js Backend Deployment (Vercel)
+</details>
 
-The shared API backend (`nextjs-backend/`) is deployed to **Vercel**
+<details>
+<summary><b>Next.js Backend — Vercel</b></summary>
 
-- **Deployment:** Automatic from the `main` branch.
-- **Project URL:** [tabby-api-psi.vercel.app](https://tabby-api-psi.vercel.app)
+- **Deployment:** Automatic from `main`
+- **URL:** [tabby-api-psi.vercel.app](https://tabby-api-psi.vercel.app)
+
+</details>
+
+---
 
 ## Project Structure
 
 ```
-ai-keyboard/
-├── frontend/                 # Electron + Next.js app
-├── electron/src/         # Electron main process
-│   ├── main.ts           # Window management, shortcuts
-│   ├── text-handler.ts   # Clipboard, typewriter mode
-│   └── context-capture.ts # Periodic screenshot capture
-├── src/
-│       ├── app/              # Next.js pages
-│       ├── components/       # React components
-│       │   ├── action-menu/  # Main AI menu, copilot, chat
-│       │   ├── brain-panel/  # Memory dashboard
-│       │   └── ai-elements/  # Message rendering
-├── backend/                  # FastAPI memory server
-│   └── main.py               # Mem0 API endpoints
-├── nextjs-backend/           # Shared API backend
-│   └── src/app/api/          # Shared AI and auth routes
-└── PS.md                     # Problem statement
+tabby/
+├── frontend/                   # Electron + Next.js desktop app
+│   ├── electron/src/           # Electron main process
+│   │   ├── main.ts             # Window management, shortcuts
+│   │   ├── text-handler.ts     # Clipboard, typewriter mode
+│   │   └── context-capture.ts  # Periodic screenshot capture
+│   └── src/
+│       ├── app/                # Next.js pages
+│       └── components/         # React components
+│           ├── action-menu/    # Main AI menu, copilot, chat
+│           ├── brain-panel/    # Memory dashboard
+│           └── ai-elements/    # Message rendering
+├── nextjs-backend/             # Shared API backend (Next.js)
+│   └── src/app/api/            # AI and auth API routes
+├── backend/                    # FastAPI memory server
+│   └── main.py                 # Mem0 API endpoints
+└── supabase/                   # Database migrations & config
 ```
 
-## Keyboard Shortcuts Reference
+---
 
-| Shortcut       | Context    | Action                      |
-| -------------- | ---------- | --------------------------- |
-| `Ctrl+\`       | Global     | Open/close action menu      |
-| `Ctrl+Space`   | Global     | Get AI suggestion           |
-| `Ctrl+Shift+B` | Global     | Toggle brain panel          |
-| `Ctrl+Alt+I`   | Global     | Interview ghost text        |
-| `Ctrl+Alt+J`   | Global     | Voice Agent                 |
-| `Ctrl+Shift+X` | Global     | Stop Autotyping             |
-| `Ctrl+Shift+T` | Global     | Cycle Transcribe modes      |
-| `Ctrl+Alt+T`   | Global     | Toggle voice transcription  |
-| `Alt+X`        | Copilot    | Analyze coding problem      |
-| `Alt+Shift+X`  | Copilot    | Update with new constraints |
-| `Alt+N`        | Copilot    | Code suggestions            |
-| `Ctrl+1-6`     | Copilot    | Switch tabs                 |
-| `Ctrl+Arrow`   | Any window | Move floating window        |
-| `Esc`          | Any panel  | Back/close                  |
-| `Enter`        | Result     | Accept & paste              |
+## Contributing
+
+Contributions are what make the open-source community amazing. **Any contributions you make are greatly appreciated.**
+
+Please read our [Contributing Guide](CONTRIBUTING.md) to get started. In short:
+
+1. Fork the repo
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes using [Conventional Commits](https://www.conventionalcommits.org/)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## License
+
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
+
