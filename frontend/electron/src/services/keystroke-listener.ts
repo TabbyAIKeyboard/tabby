@@ -1,91 +1,25 @@
-import { uIOhook, UiohookKey, UiohookKeyboardEvent } from 'uiohook-napi'
+// Linux-compatible keystroke listener using Electron's globalShortcut as fallback
+// uiohook-napi requires X11 RECORD extension which may not work on Wayland
+// This implementation gracefully falls back if uiohook is unavailable
 
 export type KeystrokeCallback = (key: string, isBackspace: boolean) => void
+
+let uIOhookModule: typeof import('uiohook-napi') | null = null
+
+try {
+  uIOhookModule = require('uiohook-napi')
+} catch (error) {
+  console.warn(
+    '[KeystrokeListener] uiohook-napi not available, keystroke capture will be limited:',
+    (error as Error).message
+  )
+}
 
 export class KeystrokeListener {
   private callback: KeystrokeCallback | null = null
   private isListening = false
   private isPaused = false
   private lastKeyTime = 0
-
-  // Map uiohook key codes to characters
-  private static readonly KEY_MAP: Record<number, string> = {
-    [UiohookKey.Space]: ' ',
-    [UiohookKey.Comma]: ',',
-    [UiohookKey.Period]: '.',
-    [UiohookKey.Semicolon]: ';',
-    [UiohookKey.Quote]: "'",
-    [UiohookKey.Slash]: '/',
-    [UiohookKey.Backslash]: '\\',
-    [UiohookKey.Equal]: '=',
-    [UiohookKey.Minus]: '-',
-    [UiohookKey.Backquote]: '`',
-    [UiohookKey.BracketLeft]: '[',
-    [UiohookKey.BracketRight]: ']',
-    // Numbers
-    [UiohookKey['0']]: '0',
-    [UiohookKey['1']]: '1',
-    [UiohookKey['2']]: '2',
-    [UiohookKey['3']]: '3',
-    [UiohookKey['4']]: '4',
-    [UiohookKey['5']]: '5',
-    [UiohookKey['6']]: '6',
-    [UiohookKey['7']]: '7',
-    [UiohookKey['8']]: '8',
-    [UiohookKey['9']]: '9',
-    // Letters
-    [UiohookKey.A]: 'a',
-    [UiohookKey.B]: 'b',
-    [UiohookKey.C]: 'c',
-    [UiohookKey.D]: 'd',
-    [UiohookKey.E]: 'e',
-    [UiohookKey.F]: 'f',
-    [UiohookKey.G]: 'g',
-    [UiohookKey.H]: 'h',
-    [UiohookKey.I]: 'i',
-    [UiohookKey.J]: 'j',
-    [UiohookKey.K]: 'k',
-    [UiohookKey.L]: 'l',
-    [UiohookKey.M]: 'm',
-    [UiohookKey.N]: 'n',
-    [UiohookKey.O]: 'o',
-    [UiohookKey.P]: 'p',
-    [UiohookKey.Q]: 'q',
-    [UiohookKey.R]: 'r',
-    [UiohookKey.S]: 's',
-    [UiohookKey.T]: 't',
-    [UiohookKey.U]: 'u',
-    [UiohookKey.V]: 'v',
-    [UiohookKey.W]: 'w',
-    [UiohookKey.X]: 'x',
-    [UiohookKey.Y]: 'y',
-    [UiohookKey.Z]: 'z',
-  }
-
-  // Map for shifted keys (US keyboard layout)
-  private static readonly SHIFT_KEY_MAP: Record<number, string> = {
-    [UiohookKey['0']]: ')',
-    [UiohookKey['1']]: '!',
-    [UiohookKey['2']]: '@',
-    [UiohookKey['3']]: '#',
-    [UiohookKey['4']]: '$',
-    [UiohookKey['5']]: '%',
-    [UiohookKey['6']]: '^',
-    [UiohookKey['7']]: '&',
-    [UiohookKey['8']]: '*',
-    [UiohookKey['9']]: '(',
-    [UiohookKey.Minus]: '_',
-    [UiohookKey.Equal]: '+',
-    [UiohookKey.BracketLeft]: '{',
-    [UiohookKey.BracketRight]: '}',
-    [UiohookKey.Backslash]: '|',
-    [UiohookKey.Semicolon]: ':',
-    [UiohookKey.Quote]: '"',
-    [UiohookKey.Comma]: '<',
-    [UiohookKey.Period]: '>',
-    [UiohookKey.Slash]: '?',
-    [UiohookKey.Backquote]: '~',
-  }
 
   constructor() {
     this.handleKeyDown = this.handleKeyDown.bind(this)
@@ -94,17 +28,36 @@ export class KeystrokeListener {
   start(): void {
     if (this.isListening) return
 
-    uIOhook.on('keydown', this.handleKeyDown)
-    uIOhook.start()
+    if (uIOhookModule) {
+      try {
+        uIOhookModule.uIOhook.on('keydown', this.handleKeyDown)
+        uIOhookModule.uIOhook.start()
+        this.isListening = true
+        console.log('[KeystrokeListener] Started global keystroke capture via uiohook')
+        return
+      } catch (error) {
+        console.warn('[KeystrokeListener] uiohook failed to start:', error)
+      }
+    }
+
+    // If uiohook is unavailable, log that auto-trigger won't work
+    console.log(
+      '[KeystrokeListener] Global keystroke capture unavailable - manual triggers only'
+    )
     this.isListening = true
-    console.log('[KeystrokeListener] Started global keystroke capture')
   }
 
   stop(): void {
     if (!this.isListening) return
 
-    uIOhook.off('keydown', this.handleKeyDown)
-    uIOhook.stop()
+    if (uIOhookModule) {
+      try {
+        uIOhookModule.uIOhook.off('keydown', this.handleKeyDown)
+        uIOhookModule.uIOhook.stop()
+      } catch {
+        // Already stopped or not started
+      }
+    }
     this.isListening = false
     console.log('[KeystrokeListener] Stopped global keystroke capture')
   }
@@ -129,11 +82,14 @@ export class KeystrokeListener {
     this.isPaused = false
   }
 
-  private handleKeyDown(event: UiohookKeyboardEvent): void {
-    // Ignore keystrokes when paused (e.g., during suggestion acceptance)
+  private handleKeyDown(event: { keycode: number; shiftKey?: boolean }): void {
     if (this.isPaused) return
 
     this.lastKeyTime = Date.now()
+
+    if (!uIOhookModule) return
+
+    const { UiohookKey } = uIOhookModule
 
     // Check for backspace
     if (event.keycode === UiohookKey.Backspace) {
@@ -141,26 +97,100 @@ export class KeystrokeListener {
       return
     }
 
-    // Check for enter/return - treat as word boundary
+    // Check for enter/return
     if (event.keycode === UiohookKey.Enter) {
       this.callback?.('\n', false)
       return
     }
 
+    // Key mappings
+    const KEY_MAP: Record<number, string> = {
+      [UiohookKey.Space]: ' ',
+      [UiohookKey.Comma]: ',',
+      [UiohookKey.Period]: '.',
+      [UiohookKey.Semicolon]: ';',
+      [UiohookKey.Quote]: "'",
+      [UiohookKey.Slash]: '/',
+      [UiohookKey.Backslash]: '\\',
+      [UiohookKey.Equal]: '=',
+      [UiohookKey.Minus]: '-',
+      [UiohookKey.Backquote]: '`',
+      [UiohookKey.BracketLeft]: '[',
+      [UiohookKey.BracketRight]: ']',
+      [UiohookKey['0']]: '0',
+      [UiohookKey['1']]: '1',
+      [UiohookKey['2']]: '2',
+      [UiohookKey['3']]: '3',
+      [UiohookKey['4']]: '4',
+      [UiohookKey['5']]: '5',
+      [UiohookKey['6']]: '6',
+      [UiohookKey['7']]: '7',
+      [UiohookKey['8']]: '8',
+      [UiohookKey['9']]: '9',
+      [UiohookKey.A]: 'a',
+      [UiohookKey.B]: 'b',
+      [UiohookKey.C]: 'c',
+      [UiohookKey.D]: 'd',
+      [UiohookKey.E]: 'e',
+      [UiohookKey.F]: 'f',
+      [UiohookKey.G]: 'g',
+      [UiohookKey.H]: 'h',
+      [UiohookKey.I]: 'i',
+      [UiohookKey.J]: 'j',
+      [UiohookKey.K]: 'k',
+      [UiohookKey.L]: 'l',
+      [UiohookKey.M]: 'm',
+      [UiohookKey.N]: 'n',
+      [UiohookKey.O]: 'o',
+      [UiohookKey.P]: 'p',
+      [UiohookKey.Q]: 'q',
+      [UiohookKey.R]: 'r',
+      [UiohookKey.S]: 's',
+      [UiohookKey.T]: 't',
+      [UiohookKey.U]: 'u',
+      [UiohookKey.V]: 'v',
+      [UiohookKey.W]: 'w',
+      [UiohookKey.X]: 'x',
+      [UiohookKey.Y]: 'y',
+      [UiohookKey.Z]: 'z',
+    }
+
+    const SHIFT_KEY_MAP: Record<number, string> = {
+      [UiohookKey['0']]: ')',
+      [UiohookKey['1']]: '!',
+      [UiohookKey['2']]: '@',
+      [UiohookKey['3']]: '#',
+      [UiohookKey['4']]: '$',
+      [UiohookKey['5']]: '%',
+      [UiohookKey['6']]: '^',
+      [UiohookKey['7']]: '&',
+      [UiohookKey['8']]: '*',
+      [UiohookKey['9']]: '(',
+      [UiohookKey.Minus]: '_',
+      [UiohookKey.Equal]: '+',
+      [UiohookKey.BracketLeft]: '{',
+      [UiohookKey.BracketRight]: '}',
+      [UiohookKey.Backslash]: '|',
+      [UiohookKey.Semicolon]: ':',
+      [UiohookKey.Quote]: '"',
+      [UiohookKey.Comma]: '<',
+      [UiohookKey.Period]: '>',
+      [UiohookKey.Slash]: '?',
+      [UiohookKey.Backquote]: '~',
+    }
+
     // Check for shifted special characters first
     if (event.shiftKey) {
-      const shiftChar = KeystrokeListener.SHIFT_KEY_MAP[event.keycode]
+      const shiftChar = SHIFT_KEY_MAP[event.keycode]
       if (shiftChar) {
         this.callback?.(shiftChar, false)
         return
       }
     }
 
-    // Map keycode to character
-    let char = KeystrokeListener.KEY_MAP[event.keycode]
+    let char = KEY_MAP[event.keycode]
 
     if (char) {
-      // Handle shift for uppercase letters
       if (event.shiftKey && char.length === 1 && /[a-z]/.test(char)) {
         char = char.toUpperCase()
       }

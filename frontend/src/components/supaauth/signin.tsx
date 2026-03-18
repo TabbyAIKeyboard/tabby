@@ -32,13 +32,11 @@ const FormSchema = z.object({
   }),
 })
 export default function SignIn() {
-  const queryString = typeof window !== 'undefined' ? window?.location.search : ''
-  const urlParams = new URLSearchParams(queryString)
+  const searchParams = useSearchParams()
   const appName = process.env.NEXT_PUBLIC_APP_NAME!
   const appIcon = process.env.NEXT_PUBLIC_APP_ICON!
 
-  // Get the value of the 'next' parameter
-  const next = urlParams.get('next')
+  const next = searchParams.get('next')
   return (
     <div className="w-full sm:w-[26rem] shadow sm:p-5  border dark:border-zinc-800 rounded-md">
       <div className="p-5 space-y-5">

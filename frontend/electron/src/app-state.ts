@@ -66,8 +66,8 @@ export const AppState: AppStateType = {
   ghostTextAutoTriggerDelay: 3000,
   contentProtectionEnabled: true,
 
-  defaultModel: (store.get('defaultModel') as string) || 'gpt-4.1-mini',
-  defaultFastModel: (store.get('defaultFastModel') as string) || 'gpt-4.1-mini',
+  defaultModel: (store.get('defaultModel') as string) || 'mistral-small-latest',
+  defaultFastModel: (store.get('defaultFastModel') as string) || 'mistral-small-latest',
 
   clipboardWatcher: null,
   lastClipboardContent: '',

@@ -34,5 +34,7 @@ app.on('will-quit', () => {
 })
 
 app.on('window-all-closed', () => {
-  // Keep app running in system tray
+  if (process.platform === 'linux') {
+    app.quit()
+  }
 })

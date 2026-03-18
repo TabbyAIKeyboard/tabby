@@ -1,6 +1,6 @@
 import { tool } from 'ai'
 import { z } from 'zod/v3'
-import tvly from '@/lib/ai/tavily/client'
+import getTavilyClient from '@/lib/ai/tavily/client'
 
 export const tavilySearchTool = tool({
   description: 'Search the web using Tavily for up-to-date information, news, and research.',
@@ -9,6 +9,10 @@ export const tavilySearchTool = tool({
   }),
   execute: async ({ query }) => {
     try {
+      const tvly = getTavilyClient()
+      if (!tvly) {
+        return JSON.stringify({ error: 'Web search is not available — TAVILY_API_KEY is not configured.' })
+      }
       const searchResult = await tvly.search(query, {
         includeAnswer: true,
         maxResults: 5,

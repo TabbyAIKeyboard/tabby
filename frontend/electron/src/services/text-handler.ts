@@ -1,10 +1,7 @@
-import { keyboard, Key } from '@nut-tree-fork/nut-js'
 import { clipboard } from 'electron'
-import { windowManager } from 'node-window-manager'
+import { execFileSync } from 'child_process'
 
-keyboard.config.autoDelayMs = 5
-
-let lastActiveWindowId: number | null = null
+let lastActiveWindowId: string | null = null
 let isTypingCancelled = false
 
 export function cancelTyping(): void {
@@ -14,29 +11,27 @@ export function cancelTyping(): void {
 
 export async function captureLastActiveWindow(): Promise<void> {
   try {
-    const activeWindow = windowManager.getActiveWindow()
-    lastActiveWindowId = activeWindow?.id ?? null
+    // Use xdotool to get the active window ID on Linux
+    const windowId = execFileSync('xdotool', ['getactivewindow'], {
+      encoding: 'utf-8',
+    }).trim()
+    lastActiveWindowId = windowId || null
     console.log('Captured window ID:', lastActiveWindowId)
   } catch (error) {
     console.error('Failed to capture active window:', error)
+    lastActiveWindowId = null
   }
 }
 
 export async function captureSelectedText(): Promise<string> {
   const original = clipboard.readText()
 
-  // Release modifiers that might interfere (especially for Ctrl+Alt+G)
-  await keyboard.releaseKey(Key.LeftAlt)
-  await keyboard.releaseKey(Key.RightAlt)
-  await keyboard.releaseKey(Key.LeftShift)
-  await keyboard.releaseKey(Key.RightShift)
-  await keyboard.releaseKey(Key.LeftControl)
-  await keyboard.releaseKey(Key.RightControl)
-
-  await keyboard.pressKey(Key.LeftControl)
-  await keyboard.pressKey(Key.C)
-  await keyboard.releaseKey(Key.C)
-  await keyboard.releaseKey(Key.LeftControl)
+  try {
+    // Use xdotool to simulate Ctrl+C on Linux
+    execFileSync('xdotool', ['key', '--clearmodifiers', 'ctrl+c'], { encoding: 'utf-8' })
+  } catch (error) {
+    console.error('Failed to simulate Ctrl+C:', error)
+  }
 
   await new Promise((r) => setTimeout(r, 150))
 
@@ -48,12 +43,14 @@ export async function captureSelectedText(): Promise<string> {
 
 async function restoreFocusToLastWindow(): Promise<boolean> {
   if (lastActiveWindowId) {
-    const targetWindow = windowManager.getWindows().find((w) => w.id === lastActiveWindowId)
-
-    if (targetWindow) {
-      targetWindow.bringToTop()
+    try {
+      execFileSync('xdotool', ['windowactivate', lastActiveWindowId], {
+        encoding: 'utf-8',
+      })
       await new Promise((r) => setTimeout(r, 100))
       return true
+    } catch (error) {
+      console.error('Failed to restore focus:', error)
     }
   }
   return false
@@ -69,12 +66,8 @@ export async function pasteToLastWindow(text: string): Promise<void> {
     clipboard.writeText(text)
     await new Promise((r) => setTimeout(r, 50))
 
-    // Paste
-    await keyboard.pressKey(Key.LeftControl)
-    await keyboard.pressKey(Key.V)
-    await new Promise((r) => setTimeout(r, 30))
-    await keyboard.releaseKey(Key.V)
-    await keyboard.releaseKey(Key.LeftControl)
+    // Paste using xdotool
+    execFileSync('xdotool', ['key', '--clearmodifiers', 'ctrl+v'], { encoding: 'utf-8' })
 
     await new Promise((r) => setTimeout(r, 100))
 
@@ -126,16 +119,16 @@ const QWERTY_NEIGHBORS: { [key: string]: string } = {
 
 // Human typing configuration
 interface HumanTypingConfig {
-  errorRate: number // Probability of making a typo (0.0 - 1.0)
-  minDelay: number // Minimum delay between keystrokes (ms)
-  maxDelay: number // Maximum delay between keystrokes (ms)
-  punctuationPauseMin: number // Additional pause after punctuation (ms)
+  errorRate: number
+  minDelay: number
+  maxDelay: number
+  punctuationPauseMin: number
   punctuationPauseMax: number
-  spacePauseMin: number // Additional pause after space (ms)
+  spacePauseMin: number
   spacePauseMax: number
-  correctionPauseMin: number // Pause before correction (ms)
+  correctionPauseMin: number
   correctionPauseMax: number
-  postCorrectionPauseMin: number // Pause after backspace (ms)
+  postCorrectionPauseMin: number
   postCorrectionPauseMax: number
 }
 
@@ -163,12 +156,10 @@ function getRandomNeighborChar(char: string): string {
   if (!neighbors) return char
 
   const randomNeighbor = neighbors[Math.floor(Math.random() * neighbors.length)]
-  // Preserve case
   return char === char.toUpperCase() ? randomNeighbor.toUpperCase() : randomNeighbor
 }
 
 function shouldMakeTypo(char: string, errorRate: number): boolean {
-  // Only make typos on alphanumeric characters
   return /[a-zA-Z0-9]/.test(char) && Math.random() < errorRate
 }
 
@@ -176,7 +167,31 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-// Simple typewriter for basic editors like Notepad (no auto-indent reset)
+function xdotoolType(char: string): void {
+  try {
+    if (char === '\n') {
+      execFileSync('xdotool', ['key', 'Return'], { encoding: 'utf-8' })
+    } else if (char === '\t') {
+      execFileSync('xdotool', ['key', 'Tab'], { encoding: 'utf-8' })
+    } else if (char === ' ') {
+      execFileSync('xdotool', ['key', 'space'], { encoding: 'utf-8' })
+    } else {
+      execFileSync('xdotool', ['type', '--clearmodifiers', '--', char], { encoding: 'utf-8' })
+    }
+  } catch {
+    console.error('[xdotool] Failed to type character:', char)
+  }
+}
+
+function xdotoolKey(key: string): void {
+  try {
+    execFileSync('xdotool', ['key', key], { encoding: 'utf-8' })
+  } catch (error) {
+    console.error('[xdotool] Failed to press key:', key, error)
+  }
+}
+
+// Simple typewriter for basic editors (no auto-indent reset)
 export async function typeSimpleToLastWindow(
   text: string,
   config: Partial<HumanTypingConfig> = {}
@@ -187,49 +202,32 @@ export async function typeSimpleToLastWindow(
   const cfg: HumanTypingConfig = { ...DEFAULT_HUMAN_CONFIG, ...config }
 
   for (const char of text) {
-    // Handle newlines with physical Enter key press
     if (char === '\n') {
-      await keyboard.pressKey(Key.Enter)
-      await keyboard.releaseKey(Key.Enter)
+      xdotoolKey('Return')
       await sleep(randomInRange(50, 150))
       continue
     }
 
-    // Handle carriage return (part of Windows line endings \r\n)
     if (char === '\r') {
-      continue // Skip \r, the \n will handle the newline
+      continue
     }
 
-    // Decide if we make a typo
     if (shouldMakeTypo(char, cfg.errorRate)) {
       const typoChar = getRandomNeighborChar(char)
-
-      // Type the wrong character
-      await keyboard.type(typoChar)
-
-      // Human-like pause before realizing the mistake
+      xdotoolType(typoChar)
       await sleep(randomInRange(cfg.correctionPauseMin, cfg.correctionPauseMax))
-
-      // Backspace to correct
-      await keyboard.pressKey(Key.Backspace)
-      await keyboard.releaseKey(Key.Backspace)
-
-      // Small pause after correction
+      xdotoolKey('BackSpace')
       await sleep(randomInRange(cfg.postCorrectionPauseMin, cfg.postCorrectionPauseMax))
     }
 
-    // Type the correct character
-    await keyboard.type(char)
+    xdotoolType(char)
 
-    // Calculate variable delay (jitter)
     let delay = randomInRange(cfg.minDelay, cfg.maxDelay)
 
-    // Add thinking pause after punctuation
     if (/[.,!?;:]/.test(char)) {
       delay += randomInRange(cfg.punctuationPauseMin, cfg.punctuationPauseMax)
     }
 
-    // Add slight pause after space (word boundary)
     if (char === ' ') {
       delay += randomInRange(cfg.spacePauseMin, cfg.spacePauseMax)
     }
@@ -252,68 +250,42 @@ export async function typeLeetCodeToLastWindow(
 
   const cfg: HumanTypingConfig = { ...DEFAULT_HUMAN_CONFIG, ...config }
 
-  // Split into lines for proper indentation handling
   const lines = text.split('\n')
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].replace(/\r$/, '') // Remove trailing \r if present
+    const line = lines[i].replace(/\r$/, '')
 
-    // 1. Trigger Newline (only if not the first line)
     if (i > 0) {
-      await keyboard.pressKey(Key.Enter)
-      await keyboard.releaseKey(Key.Enter)
-      await sleep(randomInRange(50, 150)) // Wait for auto-indent
+      xdotoolKey('Return')
+      await sleep(randomInRange(50, 150))
 
-      // 2. HARD RESET: Move to start of line and delete any auto-indented content
-      // Press Home to go to the beginning of the line
-      await keyboard.pressKey(Key.Home)
-      await keyboard.releaseKey(Key.Home)
+      xdotoolKey('Home')
       await sleep(randomInRange(20, 50))
 
-      // Select any auto-indented whitespace with Shift+End
-      await keyboard.pressKey(Key.LeftShift, Key.End)
-      await keyboard.releaseKey(Key.LeftShift, Key.End)
+      xdotoolKey('shift+End')
       await sleep(randomInRange(20, 50))
 
-      // Delete the selected content with Backspace
-      await keyboard.pressKey(Key.Backspace)
-      await keyboard.releaseKey(Key.Backspace)
+      xdotoolKey('BackSpace')
       await sleep(randomInRange(20, 50))
     }
 
-    // 3. Type the FULL line (including original leading spaces)
-    // This ensures the indentation is exactly what the source code has
     for (const char of line) {
-      // Decide if we make a typo (only on alphanumeric chars for realism)
       if (shouldMakeTypo(char, cfg.errorRate)) {
         const typoChar = getRandomNeighborChar(char)
-
-        // Type the wrong character
-        await keyboard.type(typoChar)
-
-        // Human-like pause before realizing the mistake
+        xdotoolType(typoChar)
         await sleep(randomInRange(cfg.correctionPauseMin, cfg.correctionPauseMax))
-
-        // Backspace to correct
-        await keyboard.pressKey(Key.Backspace)
-        await keyboard.releaseKey(Key.Backspace)
-
-        // Small pause after correction
+        xdotoolKey('BackSpace')
         await sleep(randomInRange(cfg.postCorrectionPauseMin, cfg.postCorrectionPauseMax))
       }
 
-      // Type the correct character
-      await keyboard.type(char)
+      xdotoolType(char)
 
-      // Calculate variable delay (jitter)
       let delay = randomInRange(cfg.minDelay, cfg.maxDelay)
 
-      // Add thinking pause after punctuation
       if (/[.,!?;:]/.test(char)) {
         delay += randomInRange(cfg.punctuationPauseMin, cfg.punctuationPauseMax)
       }
 
-      // Add slight pause after space (word boundary)
       if (char === ' ') {
         delay += randomInRange(cfg.spacePauseMin, cfg.spacePauseMax)
       }

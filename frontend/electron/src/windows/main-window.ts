@@ -57,8 +57,10 @@ export const createMainWindow = (): BrowserWindow => {
     },
   })
 
-  // Make window invisible to screen recorders/sharing (uses WDA_EXCLUDEFROMCAPTURE on Windows)
-  AppState.mainWindow.setContentProtection(true)
+  // Content protection causes issues on Linux/Wayland - only enable on Windows
+  if (process.platform === 'win32') {
+    AppState.mainWindow.setContentProtection(true)
+  }
 
   const loadURL = async () => {
     if (is.dev) {

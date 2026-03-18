@@ -95,8 +95,27 @@ export default function SignUp({ redirectTo }: { redirectTo: string }) {
       password: data.password,
     })
     if (!json.error) {
-      router.replace((pathname || '/') + '?verify=true&email=' + form.getValues('email'))
-      setIsConfirmed(true)
+      // For local dev: user is auto-confirmed, sign them in directly
+      const supabase = createSupabaseBrowser()
+      const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      })
+
+      if (signInError) {
+        // Fallback to OTP verification flow
+        router.replace((pathname || '/') + '?verify=true&email=' + form.getValues('email'))
+        setIsConfirmed(true)
+      } else {
+        // Store user ID in Electron store
+        if (window.electron && authData.user) {
+          window.electron.setUserId(authData.user.id)
+          console.log('User ID stored in Electron:', authData.user.id)
+        }
+        toast.success('Account created successfully!')
+        router.push(redirectTo)
+        router.refresh()
+      }
     } else {
       if (json.error.code) {
         toast.error(json.error.code)

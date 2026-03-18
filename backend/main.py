@@ -1,19 +1,26 @@
+"""
+FastAPI Memory Backend using ChromaDB + Mistral AI
+Simple and reliable memory solution for Linux
+"""
 import os
 import json
+import uuid
+from typing import List, Optional, Dict, Any
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, Literal
-from mem0 import Memory
 from dotenv import load_dotenv
-from openai import OpenAI
+import chromadb
+from chromadb.config import Settings
+from mistralai import Mistral
+from datetime import datetime
 
 load_dotenv()
 
 app = FastAPI(
-    title="Memory API",
-    description="API for mem0 memory operations with Supabase vector store",
-    version="1.0.0"
+    title="Mistral Memory API",
+    description="Memory API using ChromaDB + Mistral AI for Linux",
+    version="2.0.0"
 )
 
 app.add_middleware(
@@ -23,348 +30,296 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-supabase_connection_string = os.environ.get("SUPABASE_CONNECTION_STRING")
-neo4j_url = os.environ.get("NEO4J_URL")
-neo4j_username = os.environ.get("NEO4J_USERNAME", "neo4j")
-neo4j_password = os.environ.get("NEO4J_PASSWORD")
 
+# Initialize Mistral client
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+if not MISTRAL_API_KEY:
+    print("⚠️  Warning: MISTRAL_API_KEY not set!")
+    mistral = None
+else:
+    mistral = Mistral(api_key=MISTRAL_API_KEY)
 
-# if not supabase_connection_string:
-#     raise ValueError("SUPABASE_CONNECTION_STRING environment variable is required")
+# Initialize ChromaDB with persistent storage
+CHROMA_DB_PATH = os.path.expanduser("~/.tabby/chromadb")
+os.makedirs(CHROMA_DB_PATH, exist_ok=True)
 
+chroma_client = chromadb.PersistentClient(
+    path=CHROMA_DB_PATH,
+    settings=Settings(
+        anonymized_telemetry=False,
+        allow_reset=True
+    )
+)
 
-config = {
-    "llm": {
-    "provider": "openai",
-    "config": {
-        "model": "gpt-4.1-nano-2025-04-14",
-        "enable_vision": True,
-        }
-    },
-    "vector_store": {
-        "provider": "supabase",
-        "config": {
-            "connection_string": supabase_connection_string,
-            "collection_name": os.environ.get("SUPABASE_COLLECTION_NAME", "memories"),
-            "index_method": os.environ.get("SUPABASE_INDEX_METHOD", "hnsw"),
-            "index_measure": os.environ.get("SUPABASE_INDEX_MEASURE", "cosine_distance")
-        }
-        # "provider": "chroma",
-        # "config": {
-        #     "collection_name": "memories",
-        #     "path": "db",
-        # }
-    }
-}
-
-if neo4j_url and neo4j_password:
-    config["graph_store"] = {
-        "provider": "neo4j",
-        "config": {
-            "url": neo4j_url,
-            "username": neo4j_username,
-            "password": neo4j_password,
-        }
-    }
+# Get or create collection
+collection = chroma_client.get_or_create_collection(
+    name="memories",
+    metadata={"description": "Tabby Linux memory storage"}
+)
 
 print("=" * 50)
-print("MEM0 CONFIGURATION:")
-print(f"  Vector Store: supabase")
-print(f"  Graph Store: {'neo4j' if 'graph_store' in config else 'disabled'}")
+print("MEMORY CONFIGURATION:")
+print(f"  Provider: ChromaDB + Mistral")
+print(f"  LLM: Mistral Small")
+print(f"  Embeddings: Mistral Embed")
+print(f"  Storage: ChromaDB (persistent @ {CHROMA_DB_PATH})")
 print("=" * 50)
 
-memory = Memory.from_config(config)
 
-# Memory type classification
-MEMORY_TYPES = Literal["LONG_TERM", "SHORT_TERM", "EPISODIC", "SEMANTIC", "PROCEDURAL"]
-
-class MemoryClassifier:
-    """LLM-based classifier for categorizing memories into types."""
-    
-    CLASSIFICATION_PROMPT = """Classify the following memory/message into exactly ONE of these memory types. Pay careful attention to temporal indicators:
-
-- SHORT_TERM: TEMPORARY states, CURRENT activities, things happening RIGHT NOW or TODAY that will change soon.
-  Examples: "I'm currently working on...", "Right now I'm doing...", "I need to finish this today", "I'm in a meeting"
-  Key indicators: "currently", "right now", "today", "at the moment", "working on", "need to"
-
-- LONG_TERM: PERMANENT personal facts, preferences, identity, habits that persist over time.
-  Examples: "I prefer dark mode", "My name is John", "I like pizza", "I'm a software engineer"
-  Key indicators: general preferences, identity statements, lasting characteristics
-
-- EPISODIC: PAST events with specific time context - things that already HAPPENED.
-  Examples: "Yesterday I had a meeting", "Last week I went to...", "I met John at the conference"
-  Key indicators: "yesterday", "last week", "last month", past tense events
-
-- SEMANTIC: General KNOWLEDGE or facts about the world (not personal preferences).
-  Examples: "Python uses indentation", "The capital of France is Paris", "React is a JS library"
-  Key indicators: objective facts, definitions, general truths
-
-- PROCEDURAL: HOW-TO knowledge, step-by-step processes, instructions.
-  Examples: "To deploy, run npm build", "The recipe requires boiling water first"
-  Key indicators: "to do X, first...", "steps to...", instructions
-
-IMPORTANT: If the message describes what someone is CURRENTLY DOING or WORKING ON, classify as SHORT_TERM, not LONG_TERM.
-
-Respond with ONLY the memory type name (e.g., SHORT_TERM), nothing else.
-
-Memory content:
-{content}"""
-    
-    def __init__(self):
-        self.client = OpenAI()
-    
-    def classify(self, content: str) -> str:
-        """Classify memory content into a memory type."""
-        try:
-            response = self.client.chat.completions.create(
-                model="gpt-4.1-nano-2025-04-14",
-                messages=[
-                    {"role": "system", "content": "You are a memory classification assistant. Respond with only the memory type."},
-                    {"role": "user", "content": self.CLASSIFICATION_PROMPT.format(content=content)}
-                ],
-                max_tokens=20,
-                temperature=0
-            )
-            memory_type = response.choices[0].message.content.strip().upper()
-            # Validate the response
-            valid_types = ["LONG_TERM", "SHORT_TERM", "EPISODIC", "SEMANTIC", "PROCEDURAL"]
-            print(f"[MemoryClassifier] Classified as: {memory_type}")
-            if memory_type in valid_types:
-                return memory_type
-            return "LONG_TERM"  # Default fallback
-        except Exception as e:
-            print(f"[MemoryClassifier] Error: {e}")
-            return "LONG_TERM"  # Default on error
-
-classifier = MemoryClassifier()
-print("  Memory Classifier: enabled")
-
-class Message(BaseModel):
+# Pydantic models
+class MessageModel(BaseModel):
     role: str
     content: str
 
 
 class AddMemoryRequest(BaseModel):
-    messages: list[Message]
+    messages: List[MessageModel]
     user_id: str
-    metadata: Optional[dict] = None
-    auto_classify: bool = True  # Enable auto-classification by default
+    metadata: Optional[Dict[str, Any]] = None
 
 
 class SearchMemoryRequest(BaseModel):
     query: str
     user_id: str
     limit: Optional[int] = 10
-    memory_type: Optional[str] = None  # Filter by memory type
-
-
-class UpdateMemoryRequest(BaseModel):
-    memory_id: str
-    data: str
-
-
-class DeleteMemoryRequest(BaseModel):
-    memory_id: str
 
 
 class GetAllMemoriesRequest(BaseModel):
     user_id: str
-    memory_type: Optional[str] = None  # Filter by memory type
 
 
-class AddImageMemoryRequest(BaseModel):
-    image_url: str
-    context: Optional[str] = None
-    user_id: str
-    metadata: Optional[dict] = None
-    auto_classify: bool = True  # Enable auto-classification by default
+# Helper functions
+async def extract_facts_with_mistral(messages: List[Dict]) -> str:
+    """Extract facts from conversation using Mistral"""
+    if not mistral:
+        # Fallback: just concatenate messages
+        return " ".join([f"{m['role']}: {m['content']}" for m in messages])
+
+    try:
+        chat_text = "\n".join([f"{m['role']}: {m['content']}" for m in messages])
+
+        response = mistral.chat.complete(
+            model="mistral-small-latest",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Extract key facts, preferences, and important information from this conversation as concise bullet points. Focus on user preferences, stated facts, and important context."
+                },
+                {
+                    "role": "user",
+                    "content": chat_text
+                }
+            ]
+        )
+
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"Error extracting facts: {e}")
+        # Fallback
+        return " ".join([m['content'] for m in messages if m['role'] == 'user'])
 
 
+async def get_embeddings(text: str) -> List[float]:
+    """Get embeddings from Mistral"""
+    if not mistral:
+        # Fallback: return dummy embedding
+        return [0.0] * 1024
+
+    try:
+        response = mistral.embeddings.create(
+            model="mistral-embed",
+            inputs=[text]
+        )
+        return response.data[0].embedding
+    except Exception as e:
+        print(f"Error getting embeddings: {e}")
+        return [0.0] * 1024
+
+
+# API Endpoints
 @app.get("/")
 async def root():
-    """Health check endpoint"""
-    return {"status": "ok", "message": "Memory API is running"}
+    """Health check"""
+    return {
+        "status": "ok",
+        "service": "Mistral Memory API",
+        "version": "2.0.0",
+        "llm": "Mistral Small",
+        "embeddings": "Mistral Embed",
+        "storage": "ChromaDB"
+    }
+
+
+@app.get("/healthz")
+async def health():
+    """Detailed health check"""
+    return {
+        "status": "healthy",
+        "mistral_connected": mistral is not None,
+        "chromadb_connected": collection is not None
+    }
 
 
 @app.post("/memory/add")
 async def add_memory(request: AddMemoryRequest):
-    """
-    Add new memories from a conversation.
-    Mem0 automatically extracts and stores relevant facts.
-    Auto-classifies memory type if auto_classify=True.
-    """
+    """Add memories from a conversation"""
     try:
+        # Convert messages to dict
         messages = [{"role": m.role, "content": m.content} for m in request.messages]
-        
-        # Prepare metadata
-        metadata = request.metadata.copy() if request.metadata else {}
-        
-        # Auto-classify if enabled and memory_type not already set
-        if request.auto_classify and "memory_type" not in metadata:
-            # Extract content for classification
-            content = " ".join([m.content for m in request.messages if isinstance(m.content, str)])
-            if content:
-                memory_type = classifier.classify(content)
-                metadata["memory_type"] = memory_type
-                print(f"[add_memory] Classified as: {memory_type}")
-        
-        result = memory.add(
-            messages,
-            user_id=request.user_id,
-            metadata=metadata if metadata else None
+
+        # Extract facts using Mistral
+        facts = await extract_facts_with_mistral(messages)
+
+        # Get embeddings
+        embedding = await get_embeddings(facts)
+
+        # Create unique ID
+        memory_id = str(uuid.uuid4())
+
+        # Store in ChromaDB
+        collection.add(
+            ids=[memory_id],
+            embeddings=[embedding],
+            documents=[facts],
+            metadatas=[{
+                "user_id": request.user_id,
+                "timestamp": datetime.now().isoformat(),
+                **(request.metadata or {})
+            }]
         )
-        return {"success": True, "result": result, "classified_type": metadata.get("memory_type")}
+
+        return {
+            "status": "success",
+            "message": f"Added memory",
+            "memory_id": memory_id,
+            "facts": facts
+        }
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error adding memory: {str(e)}")
 
 
 @app.post("/memory/search")
 async def search_memory(request: SearchMemoryRequest):
-    """
-    Search memories based on a query.
-    Returns relevant memories with similarity scores.
-    Optionally filter by memory_type.
-    """
+    """Search memories by query"""
     try:
-        # Build filters if memory_type specified
-        filters = None
-        if request.memory_type:
-            filters = {"memory_type": request.memory_type}
-        
-        results = memory.search(
-            request.query,
-            user_id=request.user_id,
-            limit=request.limit,
-            filters=filters
+        # Get query embedding
+        query_embedding = await get_embeddings(request.query)
+
+        # Search ChromaDB
+        results = collection.query(
+            query_embeddings=[query_embedding],
+            n_results=request.limit,
+            where={"user_id": request.user_id}
         )
-        print(f"[search_memory] Results: {results}")
-        return {"success": True, "results": results}
+
+        memories = []
+        if results['documents'] and results['documents'][0]:
+            for i, doc in enumerate(results['documents'][0]):
+                memories.append({
+                    "memory": doc,
+                    "score": 1 - results['distances'][0][i] if results['distances'] else None,
+                    "metadata": results['metadatas'][0][i] if results['metadatas'] else {}
+                })
+
+        return {
+            "results": memories,
+            "query": request.query,
+            "count": len(memories)
+        }
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error searching memory: {str(e)}")
 
 
 @app.post("/memory/get_all")
 async def get_all_memories(request: GetAllMemoriesRequest):
-    """
-    Get all memories for a user.
-    Optionally filter by memory_type.
-    """
+    """Get all memories for a user"""
     try:
-        filters = None
-        if request.memory_type:
-            filters = {"memory_type": request.memory_type}
-        
-        memories = memory.get_all(user_id=request.user_id, filters=filters)
-        return {"success": True, "memories": memories}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/memory/add_image")
-async def add_image_memory(request: AddImageMemoryRequest):
-    """
-    Add an image-based memory.
-    Auto-classifies memory type if auto_classify=True.
-    """
-    try:
-        messages = []
-        
-        if request.context:
-            messages.append({"role": "user", "content": request.context})
-        
-        messages.append({
-            "role": "user",
-            "content": {
-                "type": "image_url",
-                "image_url": {"url": request.image_url}
-            }
-        })
-        
-        # Prepare metadata
-        metadata = request.metadata.copy() if request.metadata else {"source": "screen_capture"}
-        
-        # Auto-classify based on context if provided
-        if request.auto_classify and "memory_type" not in metadata and request.context:
-            memory_type = classifier.classify(request.context)
-            metadata["memory_type"] = memory_type
-            print(f"[add_image] Classified as: {memory_type}")
-        
-        print(f"[add_image] Processing image URL: {request.image_url[:100]}...")
-        
-        result = memory.add(
-            messages,
-            user_id=request.user_id,
-            metadata=metadata
+        # Get all memories for user
+        results = collection.get(
+            where={"user_id": request.user_id}
         )
-        print(f"[add_image] Result: {result}")
-        return {"success": True, "result": result, "classified_type": metadata.get("memory_type")}
+
+        memories = []
+        if results['documents']:
+            for i, doc in enumerate(results['documents']):
+                memories.append({
+                    "id": results['ids'][i],
+                    "memory": doc,
+                    "metadata": results['metadatas'][i] if results['metadatas'] else {}
+                })
+
+        return {
+            "results": memories,
+            "count": len(memories)
+        }
+
     except Exception as e:
-        print(f"[add_image] ERROR: {e}")
-        import traceback
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error getting memories: {str(e)}")
 
 
 @app.get("/memory/{memory_id}")
 async def get_memory(memory_id: str):
-    """
-    Get a specific memory by ID.
-    """
+    """Get a specific memory by ID"""
     try:
-        result = memory.get(memory_id)
-        return {"success": True, "memory": result}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        result = collection.get(ids=[memory_id])
 
+        if not result['documents'] or len(result['documents']) == 0:
+            raise HTTPException(status_code=404, detail="Memory not found")
 
-@app.put("/memory/update")
-async def update_memory(request: UpdateMemoryRequest):
-    """
-    Update an existing memory.
-    """
-    try:
-        result = memory.update(request.memory_id, request.data)
-        return {"success": True, "result": result}
+        return {
+            "id": memory_id,
+            "memory": result['documents'][0],
+            "metadata": result['metadatas'][0] if result['metadatas'] else {}
+        }
+
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error getting memory: {str(e)}")
 
 
 @app.delete("/memory/{memory_id}")
 async def delete_memory(memory_id: str):
-    """
-    Delete a specific memory by ID.
-    """
+    """Delete a specific memory"""
     try:
-        result = memory.delete(memory_id)
-        return {"success": True, "result": result}
+        collection.delete(ids=[memory_id])
+        return {"status": "success", "message": f"Deleted memory {memory_id}"}
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error deleting memory: {str(e)}")
 
 
 @app.delete("/memory/user/{user_id}")
-async def delete_all_user_memories(user_id: str):
-    """
-    Delete all memories for a specific user.
-    """
+async def delete_user_memories(user_id: str):
+    """Delete all memories for a user"""
     try:
-        result = memory.delete_all(user_id=user_id)
-        return {"success": True, "result": result}
+        # Get all IDs for this user
+        results = collection.get(where={"user_id": user_id})
+
+        if results['ids']:
+            collection.delete(ids=results['ids'])
+            return {
+                "status": "success",
+                "message": f"Deleted {len(results['ids'])} memories for user {user_id}"
+            }
+        else:
+            return {
+                "status": "success",
+                "message": f"No memories found for user {user_id}"
+            }
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error deleting user memories: {str(e)}")
 
 
 @app.get("/memory/history/{memory_id}")
 async def get_memory_history(memory_id: str):
-    """
-    Get the history/changelog of a specific memory.
-    """
-    try:
-        history = memory.history(memory_id)
-        return {"success": True, "history": history}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    """Get memory (no history tracking in this implementation)"""
+    return await get_memory(memory_id)
 
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

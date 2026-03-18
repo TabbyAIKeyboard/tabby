@@ -35,8 +35,10 @@ export const createSettingsWindow = (initialRoute: string = '/settings'): Browse
     },
   })
 
-  // Make window invisible to screen recorders/sharing (uses WDA_EXCLUDEFROMCAPTURE on Windows)
-  AppState.settingsWindow.setContentProtection(true)
+  // Content protection causes issues on Linux/Wayland - only enable on Windows
+  if (process.platform === 'win32') {
+    AppState.settingsWindow.setContentProtection(true)
+  }
 
   if (is.dev) {
     AppState.settingsWindow.loadURL(`http://localhost:3000${initialRoute}`)

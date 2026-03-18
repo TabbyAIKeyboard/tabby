@@ -192,8 +192,9 @@ export const registerGlobalShortcuts = (): void => {
     setTimeout(() => indicator.hide(), 1500)
   })
 
-  globalShortcut.register('CommandOrControl+Alt+T', async () => {
-    console.log('[Transcribe] Triggered via Ctrl+Alt+T')
+  // Use Ctrl+Alt+R on Linux to avoid conflict with Ctrl+Alt+T (Ubuntu terminal shortcut)
+  globalShortcut.register('CommandOrControl+Alt+R', async () => {
+    console.log('[Transcribe] Triggered via Ctrl+Alt+R')
 
     const service = getTranscribeService()
     const indicator = getTranscribeIndicator()

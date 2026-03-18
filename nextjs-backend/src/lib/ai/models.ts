@@ -47,6 +47,26 @@ export const models: Model[] = [
     provider: 'Cerebras',
   },
   {
+    id: 'mistral-large-latest',
+    label: 'Mistral Large',
+    provider: 'Mistral',
+  },
+  {
+    id: 'mistral-small-latest',
+    label: 'Mistral Small',
+    provider: 'Mistral',
+  },
+  {
+    id: 'codestral-latest',
+    label: 'Codestral',
+    provider: 'Mistral',
+  },
+  {
+    id: 'pixtral-large-latest',
+    label: 'Pixtral Large (Vision)',
+    provider: 'Mistral',
+  },
+  {
     id: 'openai/gpt-oss-20b-lmstudio',
     label: 'GPT OSS 20B (LMStudio)',
     provider: 'LMStudio',
@@ -58,5 +78,6 @@ export const models: Model[] = [
   },
 ]
 
-export const defaultModel = 'gpt-4.1-mini'
-export const defaultFastModel = 'gpt-4.1-mini'
+// Default to Mistral for Linux, OpenAI for Windows
+export const defaultModel = process.env.MISTRAL_API_KEY ? 'mistral-small-latest' : 'gpt-4.1-mini'
+export const defaultFastModel = process.env.MISTRAL_API_KEY ? 'mistral-small-latest' : 'gpt-4.1-mini'

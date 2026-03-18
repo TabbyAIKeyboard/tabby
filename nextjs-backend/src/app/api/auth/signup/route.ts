@@ -1,30 +1,27 @@
-import SupaAuthVerifyEmail from '@/emails'
 import supabaseAdmin from '@/lib/supabase/admin'
-
-import { Resend } from 'resend'
-const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: Request) {
   const data = await request.json()
   const supabase = supabaseAdmin()
 
-  const res = await supabase.auth.admin.generateLink({
-    type: 'signup',
+  // For local development: use admin createUser which auto-confirms the email
+  // This avoids needing Resend email service for local dev
+  const { data: userData, error: createError } = await supabase.auth.admin.createUser({
     email: data.email,
     password: data.password,
+    email_confirm: true,
   })
 
-  if (res.data.properties?.email_otp) {
-    const resendRes = await resend.emails.send({
-      from: `Tabby <onboarding@${process.env.RESEND_DOMAIN}>`,
-      to: [data.email],
-      subject: 'Tabby - Verify Email',
-      react: SupaAuthVerifyEmail({
-        verificationCode: res.data.properties?.email_otp,
-      }),
-    })
-    return Response.json(resendRes)
-  } else {
-    return Response.json({ data: null, error: res.error })
+  if (createError) {
+    // If user already exists, that's fine - they can sign in
+    if (createError.message?.includes('already been registered')) {
+      return Response.json({
+        data: null,
+        error: { message: 'User already exists. Please sign in instead.' },
+      })
+    }
+    return Response.json({ data: null, error: createError })
   }
+
+  return Response.json({ data: userData, error: null })
 }

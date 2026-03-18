@@ -6,7 +6,13 @@ import { createSettingsWindow } from '../windows/settings-window'
 import { app } from 'electron'
 
 export const createTray = (): Tray => {
-  const iconPath = join(__dirname, '..', 'public', 'icons/icon.ico')
+  const iconPath = join(
+    __dirname,
+    '..',
+    'public',
+    'icons',
+    process.platform === 'win32' ? 'icon.ico' : 'icon.png'
+  )
   const trayIcon = nativeImage.createFromPath(iconPath)
 
   AppState.tray = new Tray(trayIcon)

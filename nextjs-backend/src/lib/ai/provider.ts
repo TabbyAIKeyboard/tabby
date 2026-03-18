@@ -3,6 +3,7 @@ import { createOpenAI } from '@ai-sdk/openai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createGroq } from '@ai-sdk/groq'
 import { createCerebras } from '@ai-sdk/cerebras'
+import { createMistral } from '@ai-sdk/mistral'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 
 export const titleGenerationModels: Record<string, string> = {
@@ -48,6 +49,7 @@ export function createMyProvider(
     groq?: string
     cerebras?: string
     openrouter?: string
+    mistral?: string
   } = {}
 ) {
   const openai = createOpenAI({
@@ -64,6 +66,10 @@ export function createMyProvider(
 
   const cerebrasProvider = createCerebras({
     apiKey: apiKeys.cerebras || process.env.CEREBRAS_API_KEY,
+  })
+
+  const mistral = createMistral({
+    apiKey: apiKeys.mistral || process.env.MISTRAL_API_KEY,
   })
 
   const lmstudio = createOpenAICompatible({
@@ -92,6 +98,11 @@ export function createMyProvider(
       'llama3.1-8b': cerebrasProvider('llama3.1-8b'),
       'gpt-oss-120b': cerebrasProvider('gpt-oss-120b'),
       'qwen-3-32b': cerebrasProvider('qwen-3-32b'),
+
+      'mistral-large-latest': mistral('mistral-large-latest'),
+      'mistral-small-latest': mistral('mistral-small-latest'),
+      'codestral-latest': mistral('codestral-latest'),
+      'pixtral-large-latest': mistral('pixtral-large-latest'),
 
       'openai/gpt-oss-20b-lmstudio': lmstudio('openai/gpt-oss-20b'),
       'qwen/qwen3-4b-thinking-2507-lmstudio': lmstudio('qwen/qwen3-4b-thinking-2507'),

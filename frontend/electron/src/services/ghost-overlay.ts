@@ -57,8 +57,11 @@ export class GhostTextOverlay {
         },
       })
 
-      // Make window invisible to screen recorders/sharing (uses WDA_EXCLUDEFROMCAPTURE on Windows)
-      window.setContentProtection(true)
+      // Make window invisible to screen recorders/sharing
+      // Disabled on Linux - can cause black/invisible windows on some Wayland compositors
+      if (process.platform === 'win32') {
+        window.setContentProtection(true)
+      }
 
       // Critical: Make entire window click-through
       window.setIgnoreMouseEvents(true, { forward: true })
