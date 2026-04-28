@@ -355,61 +355,6 @@ Once running:
 | Memory API | `http://localhost:8000` |
 | Windows MCP | `http://localhost:8001` |
 
-### 5. System Tray
-
-
-<details>
-<summary><b>Run services individually</b></summary>
-
-```bash
-# Terminal 1 — Memory backend
-cd backend && uv run main.py
-
-# Terminal 2 — Next.js backend
-cd nextjs-backend && pnpm dev
-
-# Terminal 3 — Windows MCP server (optional)
-cd frontend && pnpm run windows-mcp
-
-# Terminal 4 — Electron app
-cd frontend && pnpm dev
-```
-
-</details>
-
-<details>
-<summary><b>Production mode</b></summary>
-
-```bash
-# Build and start everything
-pnpm prod
-
-# Or step-by-step:
-pnpm build    # builds frontend + nextjs-backend
-pnpm start    # starts all services in production mode
-```
-
-</details>
-
-Once running:
-
-| Service | URL |
-|---|---|
-| Supabase API | `http://127.0.0.1:54321` |
-| Supabase Studio | `http://localhost:54323` |
-| Frontend (Electron) | `http://localhost:3000` |
-| Next.js Backend | `http://localhost:3001` |
-| Memory API | `http://localhost:8000` |
-| Windows MCP | `http://localhost:8001` |
-
-### 5. System Tray
-
-Tabby runs in the system tray. Right-click the icon for:
-
-- Show Actions Menu
-- Brain Panel
-- Settings
-- Quit
 
 ---
 
@@ -424,14 +369,6 @@ pnpm run dist
 ```
 
 The `.exe` will be in `frontend/dist`.
-
-</details>
-
-<details>
-<summary><b>GitHub Releases (CI)</b></summary>
-
-Automated Windows releases via GitHub Actions.
-
 
 </details>
 
@@ -458,14 +395,6 @@ Automated Windows releases via GitHub Actions.
 - **Trigger:** Push to `backend/` on `main`
 - **URL:** [tabby-backend.azurecontainerapps.io](https://tabby-backend.jollydesert-22a4756c.centralindia.azurecontainerapps.io)
 - Builds Docker image → pushes to Docker Hub (`thecubestar/tabby-backend`) → updates Azure Container App
-
-</details>
-
-<details>
-<summary><b>Next.js Backend — Vercel</b></summary>
-
-- **Deployment:** Automatic from `main`
-- **URL:** [tabby-api-psi.vercel.app](https://tabby-api-psi.vercel.app)
 
 </details>
 
@@ -508,7 +437,7 @@ tabby/
 
 ## Contributing
 
-Contributions are what make the open-source community amazing. **Any contributions you make are greatly appreciated.**
+Contributions are what make the open-source community amazing. **We'd love for you to contribute!**
 
 **Check out our [Documentation](https://tabby-org.vercel.app/docs)** for detailed guides on architecture, features, and APIs.
 
