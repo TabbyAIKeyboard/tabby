@@ -7,6 +7,7 @@ import { Action, ActionType } from '@/lib/ai/types'
 import { loadActions, getActionPrompt, getActionByShortcut } from '@/lib/ai/actions-store'
 import { createAuthenticatedChatTransport } from '@/lib/api-url'
 import { ActionList } from './action-list'
+import { actionRequiresSelection, shouldRefuseAction } from './selection-rules'
 import { ResultPanel } from './result-panel'
 import { ChatPanel } from './chat-panel'
 import { InterviewCopilotPanel } from './interview-copilot-panel'
@@ -38,8 +39,11 @@ export function ActionMenu({ selectedText, onClose, onReplace }: ActionMenuProps
   const [layoutMode, setLayoutMode] = useState<'command-palette' | 'homescreen'>('command-palette')
   const [invisibilityEnabled, setInvisibilityEnabled] = useState(true)
   const [allActions, setAllActions] = useState<Action[]>([])
+  const [emptySelectionWarning, setEmptySelectionWarning] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const { theme, setTheme } = useTheme()
+
+  const requiresSelection = actionRequiresSelection
 
   const { messages, status, sendMessage, setMessages } = useChat({
     transport: createAuthenticatedChatTransport('/api/completion'),
@@ -74,6 +78,19 @@ export function ActionMenu({ selectedText, onClose, onReplace }: ActionMenuProps
     })
   }, [])
 
+  // When a fresh selection arrives from the main process (every Ctrl+\),
+  // reset any in-progress action so we never carry results from a previous
+  // selection over to the new one.
+  useEffect(() => {
+    setCurrentAction(null)
+    setMessages([])
+    setShowCustomInput(false)
+    setCustomPrompt('')
+    setEmptySelectionWarning(false)
+    setFilter('')
+    setSelectedIndex(0)
+  }, [selectedText, setMessages])
+
   const filteredActions = allActions
     .filter((action) => action.id !== 'text-agent') // Text Agent only for grid view
     .filter((action) => action.label.toLowerCase().includes(filter.toLowerCase()))
@@ -97,6 +114,14 @@ export function ActionMenu({ selectedText, onClose, onReplace }: ActionMenuProps
 
       if (action.id === 'voice-agent') {
         setShowVoiceAgentMode(true)
+        return
+      }
+
+      // Refuse text-mutating actions when nothing was actually selected.
+      // Without this guard the AI would run on whatever stale clipboard
+      // content the previous capture surfaced.
+      if (shouldRefuseAction(action, selectedText)) {
+        setEmptySelectionWarning(true)
         return
       }
 
@@ -129,6 +154,12 @@ export function ActionMenu({ selectedText, onClose, onReplace }: ActionMenuProps
   const handleCustomSubmit = useCallback(async () => {
     const customAction = allActions.find((a) => a.id === 'custom')
     if (!customAction) return
+
+    if (selectedText.trim().length === 0) {
+      setEmptySelectionWarning(true)
+      setShowCustomInput(false)
+      return
+    }
 
     setCurrentAction(customAction)
     setShowCustomInput(false)
@@ -357,6 +388,14 @@ export function ActionMenu({ selectedText, onClose, onReplace }: ActionMenuProps
             <Kbd className="text-[10px] px-1.5 py-0.5 bg-white/[0.06] border-white/[0.08]">Tab</Kbd>
           </div>
         </div>
+        {emptySelectionWarning && (
+          <div className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+            No text was captured. Select text in another window first, then press{' '}
+            <Kbd className="text-[10px] px-1 py-0.5">Ctrl</Kbd>+
+            <Kbd className="text-[10px] px-1 py-0.5">\</Kbd> again. Chat and agent modes still
+            work without a selection.
+          </div>
+        )}
       </div>
 
       <div className="flex-1 overflow-auto">

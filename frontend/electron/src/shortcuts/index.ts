@@ -34,7 +34,15 @@ export const registerGlobalShortcuts = (): void => {
       try {
         await captureLastActiveWindow()
         const selectedText = await captureSelectedText()
-        console.log('Captured text:', selectedText.slice(0, 50))
+        console.log(
+          'Captured text:',
+          selectedText ? selectedText.slice(0, 50) : '(empty)',
+          `(len=${selectedText.length})`
+        )
+        // Always send the freshly captured selection — including empty string —
+        // so the renderer never falls back to a stale value from a previous
+        // invocation. The menu UI is responsible for telling the user when
+        // there's no selection and refusing actions that need text.
         AppState.mainWindow.webContents.send('show-menu', selectedText)
         AppState.mainWindow.show()
         AppState.mainWindow.focus()

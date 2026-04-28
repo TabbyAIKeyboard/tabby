@@ -33,11 +33,16 @@ export default function Home() {
   }, [])
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.electron) {
-      window.electron.onShowMenu((text) => {
-        setSelectedText(text)
-        setIsOpen(true)
-      })
+    if (typeof window === 'undefined' || !window.electron) return
+    // onShowMenu returns an unsubscribe fn. Without using it we'd stack
+    // duplicate listeners on every remount (StrictMode, HMR), and each
+    // dispatch would race to setSelectedText.
+    const unsubscribe = window.electron.onShowMenu((text) => {
+      setSelectedText(text)
+      setIsOpen(true)
+    })
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe()
     }
   }, [])
 

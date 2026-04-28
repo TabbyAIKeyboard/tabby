@@ -28,6 +28,8 @@
     "windows-mcp": "uvx windows-mcp --transport streamable-http --port 8001",
     "leetcode-mcp": "npx -y @jinzcdev/leetcode-mcp-server --site global",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "release": "node -e \"const v=require('./package.json').version; require('child_process').execSync(`git tag v${v} && git push origin --tags`, {stdio: 'inherit'})\""
   },
   "dependencies": {
@@ -123,6 +125,7 @@
     "@types/node": "^24.6.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "@vitest/ui": "^4.1.5",
     "cross-env": "^10.1.0",
     "electron": "^38.2.1",
     "electron-builder": "^26.0.12",
@@ -136,7 +139,8 @@
     "tailwindcss": "^4.1.14",
     "tsup": "^8.5.0",
     "tw-animate-css": "^1.4.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.5"
   },
   "build": {
     "asar": true,
