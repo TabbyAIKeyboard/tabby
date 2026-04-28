@@ -153,21 +153,6 @@ Tabby lives at the point of input - no more switching between apps for AI help.
 | `Enter` | Accept & paste |
 
 </details>
-
-
-</details>
-
-<details>
-<summary><b>Navigation</b></summary>
-
-| Shortcut | Action |
-|---|---|
-| `Ctrl+Arrow` | Move floating window |
-| `Esc` | Back / close |
-| `Enter` | Accept & paste |
-
-</details>
-
 ---
 
 ## Getting Started
@@ -236,10 +221,6 @@ After startup, note the **API URL**, **anon key**, and **service_role key** prin
 > **Note:** Docker Desktop must be running before `npx supabase start`.
 
 </details>
-
-<details>
-<summary><b>Neo4j (Knowledge Graph — Optional)</b></summary>
-
 
 <details>
 <summary><b>Neo4j (Knowledge Graph — Optional)</b></summary>
