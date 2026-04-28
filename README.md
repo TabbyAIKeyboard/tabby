@@ -87,6 +87,17 @@ Tabby lives at the point of input - no more switching between apps for AI help.
 
 </div>
 
+
+### Settings
+<img src="nextjs-backend/public/landing/tabby-settings.png" alt="Settings" width="700" />
+
+<br /><br />
+
+### Architecture
+<img src="nextjs-backend/public/landing/tabby-architecture.png" alt="Architecture Diagram" width="700" />
+
+</div>
+
 ---
 
 ## Tech Stack
@@ -129,6 +140,20 @@ Tabby lives at the point of input - no more switching between apps for AI help.
 | `Alt+Shift+X` | Update analysis with new constraints |
 | `Alt+N` | Get code suggestions / improvements |
 | `Ctrl+1-6` | Switch tabs (Chat, Idea, Code, Walkthrough, Test Cases, Memories) |
+
+</details>
+
+<details>
+<summary><b>Navigation</b></summary>
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl+Arrow` | Move floating window |
+| `Esc` | Back / close |
+| `Enter` | Accept & paste |
+
+</details>
+
 
 </details>
 
@@ -211,6 +236,10 @@ After startup, note the **API URL**, **anon key**, and **service_role key** prin
 > **Note:** Docker Desktop must be running before `npx supabase start`.
 
 </details>
+
+<details>
+<summary><b>Neo4j (Knowledge Graph — Optional)</b></summary>
+
 
 <details>
 <summary><b>Neo4j (Knowledge Graph — Optional)</b></summary>
@@ -347,6 +376,77 @@ Once running:
 | Memory API | `http://localhost:8000` |
 | Windows MCP | `http://localhost:8001` |
 
+### 5. Linux Port
+
+The Linux build uses `xdotool` for window activation and synthetic key
+input, and reads the X11 PRIMARY selection directly for capture (so
+highlighting text in any X11 app is enough — no need to also Ctrl+C).
+It is tested on GNOME / X11; Wayland sessions will need to fall back
+to XWayland.
+
+#### Prerequisites
+
+```bash
+sudo apt install xdotool
+```
+
+#### Then run as on the other platforms
+
+```bash
+cd frontend
+pnpm install
+pnpm dev
+```
+
+After that, run the application.
+
+### 6. System Tray
+
+
+<details>
+<summary><b>Run services individually</b></summary>
+
+```bash
+# Terminal 1 — Memory backend
+cd backend && uv run main.py
+
+# Terminal 2 — Next.js backend
+cd nextjs-backend && pnpm dev
+
+# Terminal 3 — Windows MCP server (optional)
+cd frontend && pnpm run windows-mcp
+
+# Terminal 4 — Electron app
+cd frontend && pnpm dev
+```
+
+</details>
+
+<details>
+<summary><b>Production mode</b></summary>
+
+```bash
+# Build and start everything
+pnpm prod
+
+# Or step-by-step:
+pnpm build    # builds frontend + nextjs-backend
+pnpm start    # starts all services in production mode
+```
+
+</details>
+
+Once running:
+
+| Service | URL |
+|---|---|
+| Supabase API | `http://127.0.0.1:54321` |
+| Supabase Studio | `http://localhost:54323` |
+| Frontend (Electron) | `http://localhost:3000` |
+| Next.js Backend | `http://localhost:3001` |
+| Memory API | `http://localhost:8000` |
+| Windows MCP | `http://localhost:8001` |
+
 ### 5. System Tray
 
 Tabby runs in the system tray. Right-click the icon for:
@@ -377,6 +477,14 @@ The `.exe` will be in `frontend/dist`.
 
 Automated Windows releases via GitHub Actions.
 
+
+</details>
+
+<details>
+<summary><b>GitHub Releases (CI)</b></summary>
+
+Automated Windows releases via GitHub Actions.
+
 1. **GitHub Secrets** — Add to repository settings:
    - `GH_TOKEN` — Personal Access Token (classic) with `repo` scope
    - All `NEXT_PUBLIC_*` and `SUPABASE_*` variables from `.env.local`
@@ -395,6 +503,17 @@ Automated Windows releases via GitHub Actions.
 - **Trigger:** Push to `backend/` on `main`
 - **URL:** [tabby-backend.azurecontainerapps.io](https://tabby-backend.jollydesert-22a4756c.centralindia.azurecontainerapps.io)
 - Builds Docker image → pushes to Docker Hub (`thecubestar/tabby-backend`) → updates Azure Container App
+
+</details>
+
+<details>
+<summary><b>Next.js Backend — Vercel</b></summary>
+
+- **Deployment:** Automatic from `main`
+- **URL:** [tabby-api-psi.vercel.app](https://tabby-api-psi.vercel.app)
+
+</details>
+
 
 </details>
 
