@@ -74,28 +74,6 @@ Tabby lives at the point of input - no more switching between apps for AI help.
 
 ### Memories Dashboard
 <img src="nextjs-backend/public/landing/tabby-memories.png" alt="Memories Dashboard" width="700" />
-
-<br /><br />
-
-### Settings
-<img src="nextjs-backend/public/landing/tabby-settings.png" alt="Settings" width="700" />
-
-<br /><br />
-
-### Architecture
-<img src="nextjs-backend/public/landing/tabby-architecture.png" alt="Architecture Diagram" width="700" />
-
-</div>
-
-
-### Settings
-<img src="nextjs-backend/public/landing/tabby-settings.png" alt="Settings" width="700" />
-
-<br /><br />
-
-### Architecture
-<img src="nextjs-backend/public/landing/tabby-architecture.png" alt="Architecture Diagram" width="700" />
-
 </div>
 
 ---
@@ -153,7 +131,6 @@ Tabby lives at the point of input - no more switching between apps for AI help.
 | `Enter` | Accept & paste |
 
 </details>
----
 
 ## Getting Started
 
@@ -346,6 +323,27 @@ pnpm start    # starts all services in production mode
 
 </details>
 
+<details>
+<summary><b>Linux (X11)</b></summary>
+
+The Linux build uses `xdotool` for window activation and synthetic key input, and reads the X11 PRIMARY selection directly for capture (so highlighting text in any X11 app is enough — no need to also Ctrl+C). It is tested on GNOME / X11; Wayland sessions will need to fall back to XWayland.
+
+**Prerequisites**
+
+```bash
+sudo apt install xdotool
+```
+
+Then run as on the other platforms:
+
+```bash
+cd frontend
+pnpm install
+pnpm dev
+```
+
+</details>
+
 Once running:
 
 | Service | URL |
@@ -357,31 +355,7 @@ Once running:
 | Memory API | `http://localhost:8000` |
 | Windows MCP | `http://localhost:8001` |
 
-### 5. Linux Port
-
-The Linux build uses `xdotool` for window activation and synthetic key
-input, and reads the X11 PRIMARY selection directly for capture (so
-highlighting text in any X11 app is enough — no need to also Ctrl+C).
-It is tested on GNOME / X11; Wayland sessions will need to fall back
-to XWayland.
-
-#### Prerequisites
-
-```bash
-sudo apt install xdotool
-```
-
-#### Then run as on the other platforms
-
-```bash
-cd frontend
-pnpm install
-pnpm dev
-```
-
-After that, run the application.
-
-### 6. System Tray
+### 5. System Tray
 
 
 <details>
