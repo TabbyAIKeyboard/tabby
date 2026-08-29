@@ -7,6 +7,8 @@ import {
   initializeGhostText,
   createKeyboardMonitor,
   cancelTyping,
+  recordSuggestionDecision,
+  beginPostAcceptEditCapture,
 } from '../services'
 import { createBrainPanelWindow, createSuggestionWindow } from '../windows'
 import { ensureAuthFlow } from '../services/auth-flow'
@@ -127,6 +129,7 @@ export const registerGlobalShortcuts = (): void => {
     AppState.keystrokeListener?.pause()
 
     const suggestion = AppState.ghostOverlay.getCurrentSuggestion()
+    const suggestionId = AppState.ghostOverlay.getCurrentSuggestionId()
     console.log('[GhostText] Shift+Tab - accepting suggestion:', suggestion.slice(0, 30))
 
     AppState.ghostOverlay.hide()
@@ -136,6 +139,13 @@ export const registerGlobalShortcuts = (): void => {
       await captureLastActiveWindow()
       await sendTextToLastWindow(suggestion, AppState.textOutputMode)
       console.log('[GhostText] Suggestion inserted')
+    }
+
+    if (suggestionId) {
+      recordSuggestionDecision(suggestionId, 'accepted')
+      // Watches the next few keystrokes to detect corrections made right
+      // after acceptance (accepted-as-is vs. accepted-edited).
+      beginPostAcceptEditCapture(suggestionId, suggestion)
     }
 
     setTimeout(() => {
@@ -149,8 +159,40 @@ export const registerGlobalShortcuts = (): void => {
     cancelTyping() // Always try to stop typing
 
     if (!AppState.ghostTextEnabled) return
+
+    if (AppState.ghostOverlay?.isShowing()) {
+      const dismissedId = AppState.ghostOverlay.getCurrentSuggestionId()
+      if (dismissedId) recordSuggestionDecision(dismissedId, 'dismissed_explicit')
+    }
     AppState.ghostOverlay?.hide()
   })
+
+  // Pilot instrumentation: toggle the memory-free baseline condition on/off
+  // without restarting the app. See docs/pilot-protocol.md.
+  // Plain Ctrl+Alt+M collides with an existing OS/assistive-tech binding on
+  // at least Windows (Electron's globalShortcut.register() fails silently
+  // in that case, with no error unless the return value is checked) - the
+  // extra Shift makes a collision much less likely.
+  const memoryToggleRegistered = globalShortcut.register('CommandOrControl+Alt+Shift+M', () => {
+    AppState.memoryBaselineMode = !AppState.memoryBaselineMode
+    // Both must be cleared - the LRU cache is keyed on typed text only, so a
+    // suggestion fetched under one memory condition could otherwise be
+    // silently served under the other after the toggle.
+    AppState.keyboardMonitor?.clearBuffer()
+    AppState.keyboardMonitor?.clearCache()
+    AppState.ghostOverlay?.hide()
+    console.log(
+      `[Pilot] Memory baseline mode ${
+        AppState.memoryBaselineMode ? 'ON (memory disabled)' : 'OFF (memory enabled)'
+      }`
+    )
+  })
+  if (!memoryToggleRegistered) {
+    console.error(
+      '[Pilot] Failed to register Ctrl+Alt+Shift+M - another app/OS feature already owns it. ' +
+        'Pick a different combo in shortcuts/index.ts before running the pilot.'
+    )
+  }
 }
 
 export const unregisterGlobalShortcuts = (): void => {

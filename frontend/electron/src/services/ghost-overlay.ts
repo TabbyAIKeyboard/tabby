@@ -13,6 +13,7 @@ export interface GhostTextState {
 export class GhostTextOverlay {
   private windows: BrowserWindow[] = []
   private currentSuggestion = ''
+  private currentSuggestionId = ''
   private isVisible = false
   private caretPosition: CaretPosition = { x: 0, y: 0, isValid: false }
   private caretTrackingCleanup: (() => void) | null = null
@@ -130,13 +131,14 @@ export class GhostTextOverlay {
     this.broadcast('ghost-loading', { visible: false, x: 0, y: 0 })
   }
 
-  async showSuggestion(suggestion: string): Promise<void> {
+  async showSuggestion(suggestion: string, id?: string): Promise<void> {
     // Hide loading indicator
     this.hideLoading()
 
     if (!this.isEnabled) return
 
     this.currentSuggestion = suggestion
+    this.currentSuggestionId = id || ''
 
     // Get current caret position
     this.caretPosition = await getCaretPosition()
@@ -201,6 +203,7 @@ export class GhostTextOverlay {
   hide(): void {
     this.isVisible = false
     this.currentSuggestion = ''
+    this.currentSuggestionId = ''
     this.stopPositionTracking()
 
     // Hide all overlay windows
@@ -216,6 +219,10 @@ export class GhostTextOverlay {
 
   getCurrentSuggestion(): string {
     return this.currentSuggestion
+  }
+
+  getCurrentSuggestionId(): string {
+    return this.currentSuggestionId
   }
 
   isShowing(): boolean {

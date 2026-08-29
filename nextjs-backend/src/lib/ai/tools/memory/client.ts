@@ -21,6 +21,9 @@ export interface MemoryResult {
   categories?: string[]
   created_at: string
   score?: number
+  // Set by backend/main.py's MemoryClassifier at add-time and stored as
+  // Mem0 metadata; not present on memories added before classification existed.
+  metadata?: { memory_type?: 'LONG_TERM' | 'SHORT_TERM' | 'EPISODIC' | 'SEMANTIC' | 'PROCEDURAL'; [key: string]: unknown }
 }
 
 export async function addMemory(

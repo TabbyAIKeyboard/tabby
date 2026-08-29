@@ -37,6 +37,11 @@ export interface AppStateType {
 
   currentUserId: string | null
   cachedMemories: string[]
+
+  // Pilot instrumentation: when true, ghost-text suggestions are fetched with
+  // memory retrieval disabled (memory-free baseline condition). Toggle via
+  // Ctrl/Cmd+Alt+M. See docs/pilot-protocol.md.
+  memoryBaselineMode: boolean
 }
 
 export const AppState: AppStateType = {
@@ -68,6 +73,8 @@ export const AppState: AppStateType = {
 
   currentUserId: store.get('userId') as string | null,
   cachedMemories: (store.get('cachedMemories') as string[]) || [],
+
+  memoryBaselineMode: false,
 }
 
 export const getStore = () => store

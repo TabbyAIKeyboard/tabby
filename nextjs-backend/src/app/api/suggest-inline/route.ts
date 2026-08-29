@@ -110,6 +110,13 @@ ${relevantMemories.length > 0 ? relevantMemories.map((m) => `- ${m}`).join('\n')
 ## OUTPUT
 Return ONLY the completion text that comes AFTER the input. No quotes, no explanations, no prefixes, no repetition of input.`
 
+function extractMemoryTypes(memories: unknown): string[] {
+  if (!Array.isArray(memories)) return []
+  return memories
+    .map((m: any) => m?.metadata?.memory_type)
+    .filter((t: unknown): t is string => typeof t === 'string')
+}
+
 export async function POST(req: Request) {
   try {
     // Handle aborted requests (AbortController terminates connection, resulting in empty body)
@@ -121,7 +128,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ suggestion: '' })
     }
 
-    const { context, userId, cachedMemories } = body
+    const { context, userId, cachedMemories, disableMemory } = body
     console.log('[suggest-inline] Context:', context)
 
     if (!context || context.length < 5) {
@@ -134,18 +141,36 @@ export async function POST(req: Request) {
 
     const lastChunk = context.slice(-200)
 
-    // Use cached memories if provided, otherwise fetch (fallback for non-electron clients)
-    let relevantMemories: string[] = cachedMemories || []
+    // Memory-free baseline mode (pilot A/B toggle): skip both the cached
+    // memories and the fallback search entirely so relevantMemories is
+    // guaranteed empty, not just unused.
+    let relevantMemories: string[] = disableMemory ? [] : cachedMemories || []
+    let memoryTypes: string[] = []
 
-    if (relevantMemories.length === 0) {
-      try {
-        const memoryResult = await searchMemory(lastChunk, userId, 5)
+    // Type attribution for the NORA pilot log ("which memory types underlie
+    // accepted completions"). On the fast/cached path this runs alongside
+    // generateText (awaited below, not before it) so it adds no serial
+    // latency to the common case; on the fallback (no-cache) path it reuses
+    // the same search that already ran to build relevantMemories.
+    let memoryTypesPromise: Promise<void> = Promise.resolve()
+
+    if (!disableMemory) {
+      const searchPromise = searchMemory(lastChunk, userId, 5).catch((err) => {
+        console.warn('[suggest-inline] Failed to fetch memories/types:', err)
+        return null
+      })
+
+      if (relevantMemories.length > 0) {
+        memoryTypesPromise = searchPromise.then((memoryResult) => {
+          memoryTypes = extractMemoryTypes(memoryResult?.results?.results)
+        })
+      } else {
+        const memoryResult = await searchPromise
         const memories = memoryResult?.results?.results || []
         if (Array.isArray(memories)) {
           relevantMemories = memories.map((m: any) => m.memory)
         }
-      } catch (err) {
-        console.warn('[suggest-inline] Failed to fetch memories:', err)
+        memoryTypes = extractMemoryTypes(memories)
       }
     }
 
@@ -154,13 +179,18 @@ export async function POST(req: Request) {
       relevantMemories.length,
       'memories (cached:',
       !!cachedMemories,
+      ', disableMemory:',
+      !!disableMemory,
       ')'
     )
     const result = await generateText({
       model: myProvider.languageModel(defaultFastModel),
       system: getFastSystemPrompt(relevantMemories, new Date().toLocaleString()),
       prompt: `Complete this naturally. Return ONLY the completion:\n\n"${lastChunk}"`,
-      temperature: 0.5,
+      // Deterministic on purpose: this endpoint is instrumented for the NORA
+      // pilot, and any memory-ON vs. memory-OFF difference has to be
+      // attributable to memory grounding, not sampling noise.
+      temperature: 0,
       // Tools disabled for low-latency inline suggestions
       // tools: {
       //   tavilySearchTool,
@@ -170,6 +200,10 @@ export async function POST(req: Request) {
       // stopWhen: stepCountIs(5),
     })
 
+    // Settled by now in the common case (search is faster than the LLM
+    // call); only blocks if the memory search happened to run long.
+    await memoryTypesPromise
+
     let suggestion = result.text.trim()
 
     // Remove <think>...</think> tags from models like Qwen that include reasoning
@@ -177,7 +211,7 @@ export async function POST(req: Request) {
 
     console.log('[suggest-inline] Context:', context.slice(-50), '→', suggestion.slice(0, 50))
 
-    return NextResponse.json({ suggestion })
+    return NextResponse.json({ suggestion, memoryTypes })
   } catch (error) {
     console.error('[suggest-inline] Error:', error)
     return NextResponse.json({ suggestion: '' })

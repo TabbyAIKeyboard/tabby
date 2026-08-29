@@ -1,12 +1,19 @@
 import { LRUCache } from 'lru-cache'
 
+export interface SuggestionResult {
+  suggestion: string
+  // Memory types (e.g. EPISODIC/SEMANTIC/PROCEDURAL) attributed to whatever
+  // memory content grounded this suggestion, for pilot logging.
+  memoryTypes: string[]
+}
+
 export interface KeyboardMonitorConfig {
   debounceMs: number
   minContextLength: number
-  onSuggestionReady: (suggestion: string, context: string) => void
+  onSuggestionReady: (suggestion: string, context: string, memoryTypes: string[]) => void
   onClear: () => void
   onBufferUpdate?: (buffer: string) => void
-  getSuggestion: (context: string, signal: AbortSignal) => Promise<string>
+  getSuggestion: (context: string, signal: AbortSignal) => Promise<SuggestionResult>
 }
 
 export interface AutoTriggerConfig {
@@ -19,7 +26,7 @@ export class KeyboardMonitor {
   private debounceTimer: NodeJS.Timeout | null = null
   private displayTimer: NodeJS.Timeout | null = null
   private abortController = new AbortController()
-  private cache = new LRUCache<string, string>({ max: 25 })
+  private cache = new LRUCache<string, SuggestionResult>({ max: 25 })
   private config: KeyboardMonitorConfig
   private currentSuggestion = ''
   private autoTriggerConfig: AutoTriggerConfig = {
@@ -30,6 +37,7 @@ export class KeyboardMonitor {
   // Speculative prefetch state
   private pendingSuggestion = ''
   private pendingContext = ''
+  private pendingMemoryTypes: string[] = []
   private fetchVersion = 0
   private lastFetchTime = 0
   private prefetchTimer: NodeJS.Timeout | null = null
@@ -111,8 +119,9 @@ export class KeyboardMonitor {
     const cached = this.cache.get(context)
     if (cached) {
       console.log('[KeyboardMonitor] Cache hit for prefetch:', context.slice(-30))
-      this.pendingSuggestion = cached
+      this.pendingSuggestion = cached.suggestion
       this.pendingContext = context
+      this.pendingMemoryTypes = cached.memoryTypes
       return
     }
 
@@ -125,14 +134,15 @@ export class KeyboardMonitor {
     try {
       console.log('[KeyboardMonitor] Prefetching for:', context.slice(-40))
 
-      const suggestion = await this.config.getSuggestion(context, this.abortController.signal)
+      const result = await this.config.getSuggestion(context, this.abortController.signal)
 
       // Only cache if this is still the current fetch version
-      if (this.fetchVersion === version && suggestion && suggestion.length > 0) {
-        this.cache.set(context, suggestion)
-        this.pendingSuggestion = suggestion
+      if (this.fetchVersion === version && result.suggestion && result.suggestion.length > 0) {
+        this.cache.set(context, result)
+        this.pendingSuggestion = result.suggestion
         this.pendingContext = context
-        console.log('[KeyboardMonitor] Prefetch ready:', suggestion.slice(0, 30))
+        this.pendingMemoryTypes = result.memoryTypes
+        console.log('[KeyboardMonitor] Prefetch ready:', result.suggestion.slice(0, 30))
       }
     } catch (error) {
       if ((error as Error).name !== 'AbortError') {
@@ -149,13 +159,13 @@ export class KeyboardMonitor {
       if (this.pendingSuggestion && this.buffer === this.pendingContext) {
         console.log('[KeyboardMonitor] Display timer fired, showing cached suggestion')
         this.currentSuggestion = this.pendingSuggestion
-        this.config.onSuggestionReady(this.pendingSuggestion, this.pendingContext)
+        this.config.onSuggestionReady(this.pendingSuggestion, this.pendingContext, this.pendingMemoryTypes)
       } else if (this.pendingSuggestion && this.buffer !== this.pendingContext) {
         // Context changed, try to use cache or wait for prefetch
         const cached = this.cache.get(this.buffer)
         if (cached) {
-          this.currentSuggestion = cached
-          this.config.onSuggestionReady(cached, this.buffer)
+          this.currentSuggestion = cached.suggestion
+          this.config.onSuggestionReady(cached.suggestion, this.buffer, cached.memoryTypes)
         } else {
           console.log('[KeyboardMonitor] No matching suggestion ready, fetching now')
           this.fetchSuggestion()
@@ -208,8 +218,8 @@ export class KeyboardMonitor {
     const cached = this.cache.get(context)
     if (cached) {
       console.log('[KeyboardMonitor] Cache hit for:', context.slice(0, 30))
-      this.currentSuggestion = cached
-      this.config.onSuggestionReady(cached, context)
+      this.currentSuggestion = cached.suggestion
+      this.config.onSuggestionReady(cached.suggestion, context, cached.memoryTypes)
       return
     }
 
@@ -218,17 +228,17 @@ export class KeyboardMonitor {
     try {
       console.log('[KeyboardMonitor] Fetching suggestion for:', context.slice(0, 50))
 
-      const suggestion = await this.config.getSuggestion(context, this.abortController.signal)
+      const result = await this.config.getSuggestion(context, this.abortController.signal)
 
       if (this.buffer !== context) {
         console.log('[KeyboardMonitor] Context changed during fetch, discarding')
         return
       }
 
-      if (suggestion && suggestion.length > 0) {
-        this.cache.set(context, suggestion)
-        this.currentSuggestion = suggestion
-        this.config.onSuggestionReady(suggestion, context)
+      if (result.suggestion && result.suggestion.length > 0) {
+        this.cache.set(context, result)
+        this.currentSuggestion = result.suggestion
+        this.config.onSuggestionReady(result.suggestion, context, result.memoryTypes)
       }
     } catch (error) {
       if ((error as Error).name === 'AbortError') {
@@ -252,9 +262,17 @@ export class KeyboardMonitor {
     this.currentSuggestion = ''
     this.pendingSuggestion = ''
     this.pendingContext = ''
+    this.pendingMemoryTypes = []
     this.clearDisplayTimer()
     this.clearPrefetchTimer()
     this.config.onBufferUpdate?.('')
+  }
+
+  // The LRU cache is keyed only on typed text, so a memory-mode toggle
+  // (e.g. the pilot baseline A/B switch) must clear it too, or a suggestion
+  // fetched under one condition can be silently served under the other.
+  clearCache(): void {
+    this.cache.clear()
   }
 
   getCurrentSuggestion(): string {

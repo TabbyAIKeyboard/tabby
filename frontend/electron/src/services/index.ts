@@ -1,5 +1,6 @@
 import { is } from '@electron-toolkit/utils'
 import { clipboard } from 'electron'
+import { randomUUID } from 'crypto'
 import { AppState } from '../app-state'
 import { getApiUrl } from '../utils/api-url'
 import { ContextCaptureService } from './context-capture'
@@ -7,16 +8,30 @@ import { GhostTextOverlay } from './ghost-overlay'
 import { KeyboardMonitor } from './keyboard-monitor'
 import { KeystrokeListener } from './keystroke-listener'
 import { showSuggestionForContext } from '../windows/suggestion-window'
+import { recordSuggestionShown, recordSuggestionDecision, feedPostAcceptKeystroke } from './suggestion-logger'
 
 export const createKeyboardMonitor = (): KeyboardMonitor => {
   return new KeyboardMonitor({
     debounceMs: 500,
     minContextLength: 10,
-    onSuggestionReady: async (suggestion) => {
+    onSuggestionReady: async (suggestion, context, memoryTypes) => {
       console.log('[GhostText] Suggestion ready:', suggestion.slice(0, 30))
-      await AppState.ghostOverlay?.showSuggestion(suggestion)
+      const id = randomUUID()
+      recordSuggestionShown({
+        id,
+        userId: AppState.currentUserId,
+        memoryBaselineMode: AppState.memoryBaselineMode,
+        memoryTypes,
+        context,
+        suggestion,
+      })
+      await AppState.ghostOverlay?.showSuggestion(suggestion, id)
     },
     onClear: () => {
+      // Implicit dismiss: the user kept typing through a shown suggestion
+      // without pressing Shift+Tab or Shift+Escape.
+      const id = AppState.ghostOverlay?.getCurrentSuggestionId()
+      if (id) recordSuggestionDecision(id, 'dismissed_implicit')
       AppState.ghostOverlay?.hide()
     },
     getSuggestion: async (context, signal) => {
@@ -27,17 +42,21 @@ export const createKeyboardMonitor = (): KeyboardMonitor => {
           body: JSON.stringify({
             context,
             userId: AppState.currentUserId,
-            cachedMemories: AppState.cachedMemories,
+            // Pilot memory-free baseline: omit cached memories client-side
+            // too, not just the server-side disableMemory flag, so the two
+            // conditions can't accidentally share a code path.
+            cachedMemories: AppState.memoryBaselineMode ? [] : AppState.cachedMemories,
+            disableMemory: AppState.memoryBaselineMode,
           }),
           signal,
         })
         const data = await response.json()
-        return data.suggestion || ''
+        return { suggestion: data.suggestion || '', memoryTypes: data.memoryTypes || [] }
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
           console.error('[GhostText] API error:', error)
         }
-        return ''
+        return { suggestion: '', memoryTypes: [] }
       }
     },
   })
@@ -51,6 +70,7 @@ export const startKeystrokeListening = (): void => {
   }
 
   AppState.keystrokeListener.onKeystroke((char, isBackspace) => {
+    feedPostAcceptKeystroke(char, isBackspace)
     AppState.keyboardMonitor?.appendCharacter(char, isBackspace)
   })
 
@@ -133,6 +153,11 @@ export { GhostTextOverlay } from './ghost-overlay'
 export { KeyboardMonitor } from './keyboard-monitor'
 export { KeystrokeListener } from './keystroke-listener'
 export { getCaretPosition, startCaretTracking } from './caret-tracker'
+export {
+  recordSuggestionDecision,
+  beginPostAcceptEditCapture,
+  getSuggestionLogPath,
+} from './suggestion-logger'
 export type { CaretPosition } from './caret-tracker'
 export type { TextOutputMode } from './text-handler'
 export {
