@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { AppState, getStore } from '../app-state'
+import { AppState, getStore, normalizeCachedMemories } from '../app-state'
 import {
   startClipboardWatcher,
   stopClipboardWatcher,
@@ -105,10 +105,11 @@ export const registerSettingsHandlers = (): void => {
   })
 
   // Cached Memories for Inline Suggestions
-  ipcMain.on('set-cached-memories', (_, memories: string[]) => {
-    console.log('[Settings] Caching', memories.length, 'memories for inline suggestions')
-    getStore().set('cachedMemories', memories)
-    AppState.cachedMemories = memories
+  ipcMain.on('set-cached-memories', (_, memories: unknown) => {
+    const normalized = normalizeCachedMemories(memories)
+    console.log('[Settings] Caching', normalized.length, 'memories for inline suggestions')
+    getStore().set('cachedMemories', normalized)
+    AppState.cachedMemories = normalized
   })
 
   ipcMain.handle('get-cached-memories', () => {

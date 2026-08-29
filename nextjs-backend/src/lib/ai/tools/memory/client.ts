@@ -43,14 +43,21 @@ export async function searchMemory(
   query: string,
   userId: string,
   limit = 10,
-  memoryType?: 'LONG_TERM' | 'SHORT_TERM' | 'EPISODIC' | 'SEMANTIC' | 'PROCEDURAL'
+  memoryType?: 'LONG_TERM' | 'SHORT_TERM' | 'EPISODIC' | 'SEMANTIC' | 'PROCEDURAL',
+  // Pass a request signal so a client that hangs up cancels the lookup instead
+  // of leaving it to run to completion server-side.
+  signal?: AbortSignal
 ) {
-  const response = await memoryClient.post('/memory/search', {
-    query,
-    user_id: userId,
-    limit,
-    memory_type: memoryType,
-  })
+  const response = await memoryClient.post(
+    '/memory/search',
+    {
+      query,
+      user_id: userId,
+      limit,
+      memory_type: memoryType,
+    },
+    { signal }
+  )
   return response.data
 }
 

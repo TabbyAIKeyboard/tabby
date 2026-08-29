@@ -105,7 +105,8 @@ contextBridge.exposeInMainWorld('electron', {
   },
 
   // Cached Memories for Inline Suggestions
-  setCachedMemories: (memories: string[]) => ipcRenderer.send('set-cached-memories', memories),
+  setCachedMemories: (memories: { memory: string; memoryType: string }[]) =>
+    ipcRenderer.send('set-cached-memories', memories),
   getCachedMemories: () => ipcRenderer.invoke('get-cached-memories'),
 
   // Content Protection (Invisibility)

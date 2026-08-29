@@ -110,6 +110,18 @@ ${relevantMemories.length > 0 ? relevantMemories.map((m) => `- ${m}`).join('\n')
 ## OUTPUT
 Return ONLY the completion text that comes AFTER the input. No quotes, no explanations, no prefixes, no repetition of input.`
 
+const dedupe = (values: string[]): string[] => [...new Set(values)]
+
+// AbortError (fetch/AI SDK) and CanceledError (axios) both mean the client hung
+// up; that is the expected path here, not something worth logging as an error.
+// Walks `cause` because some providers wrap the original abort.
+function isAbort(err: unknown, depth = 0): boolean {
+  if (!err || depth > 4) return false
+  const name = (err as { name?: string })?.name
+  if (name === 'AbortError' || name === 'CanceledError' || name === 'TimeoutError') return true
+  return isAbort((err as { cause?: unknown })?.cause, depth + 1)
+}
+
 function extractMemoryTypes(memories: unknown): string[] {
   if (!Array.isArray(memories)) return []
   return memories
@@ -128,7 +140,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ suggestion: '' })
     }
 
-    const { context, userId, cachedMemories, disableMemory } = body
+    const { context, userId, cachedMemories, cachedMemoryTypes, disableMemory } = body
     console.log('[suggest-inline] Context:', context)
 
     if (!context || context.length < 5) {
@@ -148,30 +160,39 @@ export async function POST(req: Request) {
     let memoryTypes: string[] = []
 
     // Type attribution for the NORA pilot log ("which memory types underlie
-    // accepted completions"). On the fast/cached path this runs alongside
-    // generateText (awaited below, not before it) so it adds no serial
-    // latency to the common case; on the fallback (no-cache) path it reuses
-    // the same search that already ran to build relevantMemories.
-    let memoryTypesPromise: Promise<void> = Promise.resolve()
-
+    // accepted completions"). The types describe exactly the memories that go
+    // into the prompt below - nothing else - so they cost no extra lookup:
+    //   - cached path: the client already knew each memory's type when it
+    //     cached it, and ships them parallel to cachedMemories.
+    //   - fallback path: reuses the search that has to run anyway to build
+    //     relevantMemories.
     if (!disableMemory) {
-      const searchPromise = searchMemory(lastChunk, userId, 5).catch((err) => {
-        console.warn('[suggest-inline] Failed to fetch memories/types:', err)
-        return null
-      })
-
       if (relevantMemories.length > 0) {
-        memoryTypesPromise = searchPromise.then((memoryResult) => {
-          memoryTypes = extractMemoryTypes(memoryResult?.results?.results)
-        })
+        memoryTypes = dedupe(
+          Array.isArray(cachedMemoryTypes)
+            ? cachedMemoryTypes.filter((t: unknown): t is string => typeof t === 'string')
+            : []
+        )
       } else {
-        const memoryResult = await searchPromise
-        const memories = memoryResult?.results?.results || []
-        if (Array.isArray(memories)) {
-          relevantMemories = memories.map((m: any) => m.memory)
+        try {
+          const memoryResult = await searchMemory(lastChunk, userId, 5, undefined, req.signal)
+          const memories = memoryResult?.results?.results || []
+          if (Array.isArray(memories)) {
+            relevantMemories = memories.map((m: any) => m.memory)
+          }
+          memoryTypes = dedupe(extractMemoryTypes(memories))
+        } catch (err) {
+          if (isAbort(err)) return NextResponse.json({ suggestion: '' })
+          console.warn('[suggest-inline] Failed to fetch memories/types:', err)
         }
-        memoryTypes = extractMemoryTypes(memories)
       }
+    }
+
+    // The client aborts the previous prefetch on nearly every keystroke. Without
+    // this the socket closes but the model call still runs (and bills) to
+    // completion, for a result nothing will ever read.
+    if (req.signal.aborted) {
+      return NextResponse.json({ suggestion: '' })
     }
 
     console.log(
@@ -198,11 +219,8 @@ export async function POST(req: Request) {
       //   searchMemory: searchMemoryTool,
       // },
       // stopWhen: stepCountIs(5),
+      abortSignal: req.signal,
     })
-
-    // Settled by now in the common case (search is faster than the LLM
-    // call); only blocks if the memory search happened to run long.
-    await memoryTypesPromise
 
     let suggestion = result.text.trim()
 
@@ -213,7 +231,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ suggestion, memoryTypes })
   } catch (error) {
-    console.error('[suggest-inline] Error:', error)
+    if (!isAbort(error)) {
+      console.error('[suggest-inline] Error:', error)
+    }
     return NextResponse.json({ suggestion: '' })
   }
 }

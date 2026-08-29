@@ -45,7 +45,14 @@ export const createKeyboardMonitor = (): KeyboardMonitor => {
             // Pilot memory-free baseline: omit cached memories client-side
             // too, not just the server-side disableMemory flag, so the two
             // conditions can't accidentally share a code path.
-            cachedMemories: AppState.memoryBaselineMode ? [] : AppState.cachedMemories,
+            cachedMemories: AppState.memoryBaselineMode
+              ? []
+              : AppState.cachedMemories.map((m) => m.memory),
+            // Sent parallel to cachedMemories so the route can report memory-type
+            // attribution without re-querying mem0 on every keystroke.
+            cachedMemoryTypes: AppState.memoryBaselineMode
+              ? []
+              : AppState.cachedMemories.map((m) => m.memoryType),
             disableMemory: AppState.memoryBaselineMode,
           }),
           signal,

@@ -1,4 +1,5 @@
 import type { AuthResult, LocalUser } from '@/lib/auth/types'
+import type { CachedMemory } from '@/lib/memory-types'
 
 declare global {
   interface Window {
@@ -53,8 +54,8 @@ declare global {
         onAuthChanged: (callback: () => void) => () => void
       }
       // Cached Memories for Inline Suggestions
-      setCachedMemories: (memories: string[]) => void
-      getCachedMemories: () => Promise<string[]>
+      setCachedMemories: (memories: CachedMemory[]) => void
+      getCachedMemories: () => Promise<CachedMemory[]>
       // Content Protection (Invisibility)
       getContentProtectionEnabled: () => Promise<boolean>
       setContentProtectionEnabled: (enabled: boolean) => void

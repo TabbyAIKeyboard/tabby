@@ -2,11 +2,25 @@
 
 import { useEffect } from 'react'
 import { getAllMemories, type MemoryResult } from '@/lib/ai/tools/memory/client'
+import type { CachedMemory, MemoryType } from '@/lib/memory-types'
 
 /**
  * Initializes and caches user memories at app startup for low-latency inline suggestions.
- * Fetches LONG_TERM and SHORT_TERM memories and stores them in electron-store.
+ * Fetches every classifier type and stores each memory alongside its type in electron-store,
+ * so /api/suggest-inline can report memory-type attribution without a second lookup.
  */
+
+// Every label backend/main.py's MemoryClassifier can assign. All five are cached:
+// the pilot log attributes accepted completions to the types that grounded them,
+// so a type missing from the cache is a type that can never be credited.
+const MEMORY_TYPES: MemoryType[] = [
+  'LONG_TERM',
+  'SHORT_TERM',
+  'EPISODIC',
+  'SEMANTIC',
+  'PROCEDURAL',
+]
+
 export function MemoryInitializer() {
   useEffect(() => {
     const initializeMemories = async () => {
@@ -21,30 +35,24 @@ export function MemoryInitializer() {
 
         console.log('[MemoryInitializer] Fetching memories for user:', userId)
 
-        // Fetch LONG_TERM and SHORT_TERM memories in parallel
-        const [longTermResult, shortTermResult] = await Promise.all([
-          getAllMemories(userId, 'LONG_TERM').catch((err) => {
-            console.error('[MemoryInitializer] Failed to fetch LONG_TERM:', err)
-            return { results: [] }
-          }),
-          getAllMemories(userId, 'SHORT_TERM').catch((err) => {
-            console.error('[MemoryInitializer] Failed to fetch SHORT_TERM:', err)
-            return { results: [] }
-          }),
-        ])
+        const results = await Promise.all(
+          MEMORY_TYPES.map((type) =>
+            getAllMemories(userId, type).catch((err) => {
+              console.error(`[MemoryInitializer] Failed to fetch ${type}:`, err)
+              return { memories: { results: [] } }
+            })
+          )
+        )
 
-        console.log('[MemoryInitializer] LONG_TERM response:', longTermResult)
-        console.log('[MemoryInitializer] SHORT_TERM response:', shortTermResult)
-
-        // Response structure is { success, memories: { results: [...] } }
-        const longTermMemories = longTermResult?.memories?.results || []
-        const shortTermMemories = shortTermResult?.memories?.results || []
-
-        // Extract memory strings
-        const allMemories = [
-          ...longTermMemories.map((m: MemoryResult) => m.memory),
-          ...shortTermMemories.map((m: MemoryResult) => m.memory),
-        ]
+        // Response structure is { success, memories: { results: [...] } }.
+        // Each request filtered on one type, so the type is known from the
+        // request itself - no need to read it back off m.metadata.
+        const allMemories: CachedMemory[] = results.flatMap((result, i) =>
+          ((result?.memories?.results || []) as MemoryResult[]).map((m) => ({
+            memory: m.memory,
+            memoryType: MEMORY_TYPES[i],
+          }))
+        )
 
         console.log('[MemoryInitializer] Caching', allMemories.length, 'memories')
         window.electron.setCachedMemories(allMemories)
