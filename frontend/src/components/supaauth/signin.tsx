@@ -1,9 +1,8 @@
 'use client'
 
-import React, { useState, useTransition } from 'react'
-import Social from './social'
+import React, { useState } from 'react'
 import Image from 'next/image'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod/v3'
@@ -20,9 +19,11 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
-import { createSupabaseBrowser } from '@/lib/supabase/client'
+import { useRefreshUser } from '@/hooks/use-user'
+import { onboardingPath, postAuthPath } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+
 const FormSchema = z.object({
   email: z.string().email({
     message: 'Invalid Email Address',
@@ -31,14 +32,16 @@ const FormSchema = z.object({
     message: 'Password is too short',
   }),
 })
+
 export default function SignIn() {
   const queryString = typeof window !== 'undefined' ? window?.location.search : ''
   const urlParams = new URLSearchParams(queryString)
   const appName = process.env.NEXT_PUBLIC_APP_NAME!
   const appIcon = process.env.NEXT_PUBLIC_APP_ICON!
 
-  // Get the value of the 'next' parameter
-  const next = urlParams.get('next')
+  // '/' is the frameless overlay window, never a landing page for this window.
+  const nextParam = urlParams.get('next')
+  const next = nextParam && nextParam !== '/' ? nextParam : postAuthPath
   return (
     <div className="w-full sm:w-[26rem] shadow sm:p-5  border dark:border-zinc-800 rounded-md">
       <div className="p-5 space-y-5">
@@ -51,15 +54,9 @@ export default function SignIn() {
             className=" rounded-full mx-auto"
           />
           <h1 className="font-bold">Sign in to {appName}</h1>
-          <p className="text-sm">Welcome back! Please sign in to continue</p>
+          <p className="text-sm">Welcome back! Your account is stored on this device.</p>
         </div>
-        <Social redirectTo={next || '/'} />
-        <div className="flex items-center gap-5">
-          <div className="flex-1 h-[0.5px] w-full bg-zinc-400 dark:bg-zinc-800"></div>
-          <div className="text-sm">or</div>
-          <div className="flex-1 h-[0.5px] w-full bg-zinc-400 dark:bg-zinc-800"></div>
-        </div>
-        <SignInForm redirectTo={next || '/'} />
+        <SignInForm redirectTo={next} />
       </div>
     </div>
   )
@@ -67,8 +64,11 @@ export default function SignIn() {
 
 export function SignInForm({ redirectTo }: { redirectTo: string }) {
   const [passwordReveal, setPasswordReveal] = useState(false)
-  const [isPending, startTransition] = useTransition()
+  // Plain state rather than useTransition: tying the spinner to a router
+  // transition leaves it spinning forever if the guard redirects mid-flight.
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
+  const refreshUser = useRefreshUser()
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -76,29 +76,39 @@ export function SignInForm({ redirectTo }: { redirectTo: string }) {
       password: '',
     },
   })
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    const supabase = createSupabaseBrowser()
-    if (!isPending) {
-      startTransition(async () => {
-        const { data: authData, error } = await supabase.auth.signInWithPassword({
-          email: data.email,
-          password: data.password,
-        })
-        if (error) {
-          toast.error(error.message)
-        } else {
-          // Store user ID in Electron store
-          if (window.electron && authData.user) {
-            window.electron.setUserId(authData.user.id)
-            console.log('User ID stored in Electron:', authData.user.id)
-          }
 
-          router.push(redirectTo)
-          router.refresh()
-        }
-      })
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    if (isSubmitting) return
+
+    if (!window.electron?.auth) {
+      toast.error('Local auth is only available in the desktop app')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const result = await window.electron.auth.signIn(data.email, data.password)
+
+      if (!result.ok) {
+        toast.error(result.error)
+        setIsSubmitting(false)
+        return
+      }
+
+      // Keep the legacy store key in sync for the main process consumers.
+      window.electron.setUserId(result.user.id)
+      refreshUser(result.user)
+
+      // Leave the spinner up through navigation - the component unmounts.
+      router.replace(result.user.onboardingComplete ? redirectTo || postAuthPath : onboardingPath)
+    } catch (error) {
+      console.error('[SignIn] Failed:', error)
+      toast.error('Something went wrong signing in')
+      setIsSubmitting(false)
     }
   }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -144,7 +154,9 @@ export function SignInForm({ redirectTo }: { redirectTo: string }) {
           type="submit"
           className="w-full h-8 bg-indigo-500 hover:bg-indigo-600 transition-all text-white flex items-center gap-2"
         >
-          <AiOutlineLoading3Quarters className={cn(!isPending ? 'hidden' : 'block animate-spin')} />
+          <AiOutlineLoading3Quarters
+            className={cn(!isSubmitting ? 'hidden' : 'block animate-spin')}
+          />
           Continue
         </Button>
       </form>

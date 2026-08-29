@@ -15,15 +15,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { addMemory } from '@/lib/ai/tools/memory/client'
-import useUser from '@/hooks/use-user'
+import useUser, { useRefreshUser } from '@/hooks/use-user'
+import { postAuthPath } from '@/lib/constants'
 import { ArrowRight, ArrowLeft, Check, Loader2 } from 'lucide-react'
-
-// Helper to set cookie
-const setCookie = (name: string, value: string, days: number = 365) => {
-  const expires = new Date()
-  expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000)
-  document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`
-}
 
 interface OnboardingData {
   name: string
@@ -50,6 +44,7 @@ const steps = [
 export default function OnboardingPage() {
   const router = useRouter()
   const { data: user } = useUser()
+  const refreshUser = useRefreshUser()
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [data, setData] = useState<OnboardingData>({
@@ -100,6 +95,16 @@ export default function OnboardingPage() {
     }
   }
 
+  /**
+   * Marks onboarding done on the user record, then navigates. The write is
+   * awaited so AuthGuard can't read stale state and bounce us back here.
+   */
+  const completeOnboarding = async () => {
+    await window.electron?.setOnboardingComplete?.(true)
+    await refreshUser()
+    router.replace(postAuthPath)
+  }
+
   const handleSubmit = async () => {
     if (!user?.id) return
 
@@ -129,21 +134,9 @@ export default function OnboardingPage() {
         }
       )
 
-      // Mark onboarding as complete in localStorage and cookie
-      localStorage.setItem('onboarding_complete', 'true')
-      setCookie('onboarding_complete', 'true')
-
-      // Sync with Electron store so main process knows onboarding is complete
-      if (typeof window !== 'undefined' && (window as any).electron?.setOnboardingComplete) {
-        ;(window as any).electron.setOnboardingComplete(true)
-      }
-
-      // Redirect to settings page
-      router.push('/settings')
-      router.refresh() // Refresh to ensure middleware picks up new cookie
+      await completeOnboarding()
     } catch (error) {
       console.error('Failed to save onboarding data:', error)
-    } finally {
       setIsSubmitting(false)
     }
   }
@@ -508,17 +501,7 @@ export default function OnboardingPage() {
             <button
               className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
               onClick={() => {
-                localStorage.setItem('onboarding_complete', 'true')
-                setCookie('onboarding_complete', 'true')
-                // Sync with Electron store
-                if (
-                  typeof window !== 'undefined' &&
-                  (window as any).electron?.setOnboardingComplete
-                ) {
-                  ;(window as any).electron.setOnboardingComplete(true)
-                }
-                router.push('/settings')
-                router.refresh()
+                void completeOnboarding()
               }}
             >
               Skip for now

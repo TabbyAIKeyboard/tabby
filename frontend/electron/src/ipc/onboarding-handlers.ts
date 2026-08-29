@@ -1,15 +1,14 @@
 import { ipcMain } from 'electron'
-import { AppState, getStore } from '../app-state'
+import { isOnboardingComplete, setOnboardingComplete } from '../services/local-auth'
+import { broadcastAuthChanged } from './auth-handlers'
 
 export const registerOnboardingHandlers = (): void => {
-  const store = getStore()
+  // Onboarding is tracked per local user, not per machine.
+  ipcMain.handle('get-onboarding-complete', () => isOnboardingComplete())
 
-  ipcMain.handle('get-onboarding-complete', () => {
-    return AppState.onboardingComplete
-  })
-
-  ipcMain.on('set-onboarding-complete', (_, complete: boolean) => {
-    AppState.onboardingComplete = complete
-    store.set('onboardingComplete', complete)
+  // invoke (not send) so the renderer can await it before navigating.
+  ipcMain.handle('set-onboarding-complete', (_, complete: boolean) => {
+    setOnboardingComplete(complete)
+    broadcastAuthChanged()
   })
 }

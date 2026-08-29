@@ -6,30 +6,10 @@ import { CircleUser } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import useUser from '@/hooks/use-user'
 import { MdOutlineMarkEmailRead } from 'react-icons/md'
-import { FaGithub, FaDiscord } from 'react-icons/fa'
-import { FcGoogle } from 'react-icons/fc'
 import Avatar from './avatar'
-export type IconKey = 'email' | 'github' | 'discord' | 'google'
-export const authProvider = {
-  email: {
-    Icon: MdOutlineMarkEmailRead,
-  },
-  github: {
-    Icon: FaGithub,
-  },
-  discord: {
-    Icon: FaDiscord,
-  },
-  google: {
-    Icon: FcGoogle,
-  },
-}
 export default function ManageProfile() {
   const [activeTab, setActiveTab] = useState('profile')
   const { data } = useUser()
-  const AuthProviderIcon = data?.app_metadata.provider
-    ? authProvider[data?.app_metadata.provider as IconKey].Icon
-    : MdOutlineMarkEmailRead
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -72,13 +52,13 @@ export default function ManageProfile() {
             </div>
           </div>
           <div className="flex items-start py-5 gap-2 sm:gap-24 ">
-            <h1 className="text-sm font-medium w-36  ">Connected accounts</h1>
+            <h1 className="text-sm font-medium w-36  ">Sign-in method</h1>
             <div className="flex-1 space-y-5 ">
               <div className="flex items-center gap-2 px-3">
-                <AuthProviderIcon />
-                <p className="capitalize">{data?.app_metadata.provider}</p>
-                <p className="text-sm text-gray-400">{data?.user_metadata.user_name}</p>
+                <MdOutlineMarkEmailRead />
+                <p>Local account on this device</p>
               </div>
+              <p className="px-3 text-xs font-mono text-gray-400">{data?.id}</p>
             </div>
           </div>
         </div>

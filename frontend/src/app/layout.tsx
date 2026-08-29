@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { QueryProvider } from '@/components/query-provider'
 import { SettingsSynchronizer } from '@/components/settings-synchronizer'
 import { MemoryInitializer } from '@/components/memory-initializer'
+import { AuthGuard } from '@/components/auth-guard'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
@@ -31,6 +32,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
+            <AuthGuard />
             <SettingsSynchronizer />
             <MemoryInitializer />
             {children}

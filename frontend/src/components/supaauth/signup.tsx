@@ -4,11 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod/v3'
 import { FaRegEye, FaRegEyeSlash } from 'react-icons/fa6'
-import { RiArrowRightSFill, RiArrowDropLeftFill } from 'react-icons/ri'
+import { RiArrowRightSFill } from 'react-icons/ri'
 import { AiOutlineLoading3Quarters } from 'react-icons/ai'
-import { SiMinutemailer } from 'react-icons/si'
-import { REGEXP_ONLY_DIGITS } from 'input-otp'
-import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from '@/components/ui/input-otp'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -19,13 +16,14 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { getApiUrl } from '@/lib/api-url'
 import { toast } from 'sonner'
-import { usePathname, useRouter } from 'next/navigation'
-import { createSupabaseBrowser } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import { useRefreshUser } from '@/hooks/use-user'
+import { onboardingPath } from '@/lib/constants'
+
 const FormSchema = z
   .object({
     email: z.string().email({
@@ -38,32 +36,18 @@ const FormSchema = z
       message: 'Password is too short',
     }),
   })
-  .refine(
-    (data) => {
-      if (data['confirm-pass'] !== data.password) {
-        // console.log('running')
-        return false
-      } else {
-        return true
-      }
-    },
-    {
-      message: "Password does't match",
-      path: ['confirm-pass'],
-    }
-  )
+  .refine((data) => data['confirm-pass'] === data.password, {
+    message: "Password does't match",
+    path: ['confirm-pass'],
+  })
+
 export default function SignUp({ redirectTo }: { redirectTo: string }) {
-  const queryString = typeof window !== 'undefined' ? window.location.search : ''
-  const urlParams = new URLSearchParams(queryString)
-  const verify = urlParams.get('verify')
-  const existEmail = urlParams.get('email')
   const [passwordReveal, setPasswordReveal] = useState(false)
-  const [isConfirmed, setIsConfirmed] = useState(verify === 'true')
-  const [verifyStatus, setVerifyStatus] = useState<string>('')
-  const [isPending, startTransition] = useTransition()
-  const [isSendAgain, startSendAgain] = useTransition()
-  const pathname = usePathname()
+  // Plain state rather than useTransition: tying the spinner to a router
+  // transition leaves it spinning forever if the guard redirects mid-flight.
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
+  const refreshUser = useRefreshUser()
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -72,61 +56,44 @@ export default function SignUp({ redirectTo }: { redirectTo: string }) {
       'confirm-pass': '',
     },
   })
-  const postEmail = async ({ email, password }: { email: string; password: string }) => {
-    const requestOptions = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include' as RequestCredentials,
-      body: JSON.stringify({
-        email,
-        password,
-      }),
+
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    if (isSubmitting) return
+
+    if (!window.electron?.auth) {
+      toast.error('Local auth is only available in the desktop app')
+      return
     }
-    // Send the POST request
-    const res = await fetch(getApiUrl('/api/auth/signup'), requestOptions)
-    const json = await res.json()
-    return json
-  }
-  const sendVerifyEmail = async (data: z.infer<typeof FormSchema>) => {
-    const json = await postEmail({
-      email: data.email,
-      password: data.password,
-    })
-    if (!json.error) {
-      router.replace((pathname || '/') + '?verify=true&email=' + form.getValues('email'))
-      setIsConfirmed(true)
-    } else {
-      if (json.error.code) {
-        toast.error(json.error.code)
-      } else if (json.error.message) {
-        toast.error(json.error.message)
+
+    setIsSubmitting(true)
+
+    try {
+      // Creates the account on-device and generates the user UUID.
+      const result = await window.electron.auth.register(data.email, data.password)
+
+      if (!result.ok) {
+        toast.error(result.error)
+        setIsSubmitting(false)
+        return
       }
+
+      // Keep the legacy store key in sync for the main process consumers.
+      window.electron.setUserId(result.user.id)
+      refreshUser(result.user)
+
+      // New accounts always go through onboarding, which seeds the memory API.
+      router.replace(onboardingPath)
+    } catch (error) {
+      console.error('[SignUp] Failed:', error)
+      toast.error('Something went wrong creating your account')
+      setIsSubmitting(false)
     }
   }
-  const inputOptClass = cn({
-    ' border-green-500': verifyStatus === 'success',
-    ' border-red-500': verifyStatus === 'failed',
-  })
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    if (!isPending) {
-      startTransition(async () => {
-        await sendVerifyEmail(data)
-      })
-    }
-  }
+
   return (
-    <div
-      className={` whitespace-nowrap p-5 space-x-5 overflow-hidden  items-center align-top   ${isPending ? 'animate-pulse' : ''}`}
-    >
+    <div className={`p-5 space-y-5 ${isSubmitting ? 'animate-pulse' : ''}`}>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className={cn(`space-y-3 inline-block w-full transform transition-all`, {
-            '-translate-x-[110%]': isConfirmed,
-          })}
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 w-full">
           <FormField
             control={form.control}
             name="email"
@@ -195,9 +162,9 @@ export default function SignUp({ redirectTo }: { redirectTo: string }) {
             className="w-full h-8 bg-indigo-500 hover:bg-indigo-600 transition-all text-white flex items-center gap-2"
           >
             <AiOutlineLoading3Quarters
-              className={cn(!isPending ? 'hidden' : 'block animate-spin')}
+              className={cn(!isSubmitting ? 'hidden' : 'block animate-spin')}
             />
-            Continue
+            Create Account
             <RiArrowRightSFill className=" size-4" />
           </Button>
           <div className="text-center text-sm">
@@ -213,123 +180,6 @@ export default function SignUp({ redirectTo }: { redirectTo: string }) {
           </div>
         </form>
       </Form>
-      {/* verify email */}
-      <div
-        className={cn(
-          `w-full inline-block h-80 text-wrap align-top  transform transition-all space-y-3`,
-          isConfirmed ? '-translate-x-[105%]' : 'translate-x-0'
-        )}
-      >
-        <div className="flex h-full items-center justify-center flex-col space-y-5">
-          <SiMinutemailer className=" size-8" />
-
-          <h1 className="text-2xl font-semibold text-center">Verify email</h1>
-          <p className="text-center text-sm">
-            {' A verification code has been sent to '}
-            <span className="font-bold">
-              {verify === 'true' ? existEmail : form.getValues('email')}
-            </span>
-          </p>
-
-          <InputOTP
-            pattern={REGEXP_ONLY_DIGITS}
-            id="input-otp"
-            maxLength={6}
-            onChange={async (value) => {
-              if (value.length === 6) {
-                document.getElementById('input-otp')?.blur()
-                const response = await fetch(getApiUrl('/api/auth/verify-otp'), {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  credentials: 'include',
-                  body: JSON.stringify({
-                    email: form.getValues('email'),
-                    otp: value,
-                    type: 'email',
-                  }),
-                })
-                const res = await response.text()
-                const { error, data } = JSON.parse(res)
-                if (error) {
-                  setVerifyStatus('failed')
-                } else {
-                  // Store user ID in Electron store if available in response
-                  // Note: verifyOtp might need adjustments to return user data or we assume session is set
-                  // If session is set, we might need to get user from supabase or context.
-                  // For now, let's assume successful verification sets the session and we can get user.
-                  const supabase = createSupabaseBrowser()
-                  const {
-                    data: { user },
-                  } = await supabase.auth.getUser()
-
-                  if (user && window.electron) {
-                    window.electron.setUserId(user.id)
-                    console.log('User ID stored in Electron:', user.id)
-                  }
-
-                  setVerifyStatus('success')
-                  router.push(redirectTo)
-                }
-              }
-            }}
-          >
-            <InputOTPGroup>
-              <InputOTPSlot index={0} className={inputOptClass} />
-              <InputOTPSlot index={1} className={inputOptClass} />
-              <InputOTPSlot index={2} className={inputOptClass} />
-            </InputOTPGroup>
-            <InputOTPSeparator />
-            <InputOTPGroup>
-              <InputOTPSlot index={3} className={inputOptClass} />
-              <InputOTPSlot index={4} className={cn(inputOptClass)} />
-              <InputOTPSlot index={5} className={cn(inputOptClass)} />
-            </InputOTPGroup>
-          </InputOTP>
-          <div className="text-sm flex gap-2">
-            <p>{"Didn't work?"} </p>
-            <span
-              className="text-blue-400 cursor-pointer hover:underline transition-all flex items-center gap-2 "
-              onClick={async () => {
-                if (!isSendAgain) {
-                  startSendAgain(async () => {
-                    if (!form.getValues('password')) {
-                      const json = await postEmail({
-                        email: form.getValues('email'),
-                        password: form.getValues('password'),
-                      })
-                      if (json.error) {
-                        toast.error('Fail to resend email')
-                      } else {
-                        toast.success('Please check your email.')
-                      }
-                    } else {
-                      router.replace(pathname || '/register')
-                      form.setValue('email', existEmail || '')
-                      form.setValue('password', '')
-                      setIsConfirmed(false)
-                    }
-                  })
-                }
-              }}
-            >
-              <AiOutlineLoading3Quarters
-                className={`${!isSendAgain ? 'hidden' : 'block animate-spin'}`}
-              />
-              Send me another code.
-            </span>
-          </div>
-          <Button
-            type="submit"
-            className="w-full h-8 bg-indigo-500 hover:bg-indigo-600 transition-all text-white flex items-center gap-2"
-            onClick={async () => {
-              setIsConfirmed(false)
-            }}
-          >
-            <RiArrowDropLeftFill className=" size-5" />
-            Change Email
-          </Button>
-        </div>
-      </div>
     </div>
   )
 }

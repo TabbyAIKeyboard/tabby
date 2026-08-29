@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { getAllMemories, type MemoryResult } from '@/lib/ai/tools/memory/client'
 
 /**
@@ -8,12 +8,7 @@ import { getAllMemories, type MemoryResult } from '@/lib/ai/tools/memory/client'
  * Fetches LONG_TERM and SHORT_TERM memories and stores them in electron-store.
  */
 export function MemoryInitializer() {
-  const initialized = useRef(false)
-
   useEffect(() => {
-    if (initialized.current) return
-    initialized.current = true
-
     const initializeMemories = async () => {
       if (typeof window === 'undefined' || !window.electron) return
 
@@ -59,6 +54,12 @@ export function MemoryInitializer() {
     }
 
     initializeMemories()
+
+    // Re-cache when the account changes, so a signed-in user never inherits
+    // the previous account's memories.
+    return window.electron?.auth?.onAuthChanged?.(() => {
+      initializeMemories()
+    })
   }, [])
 
   return null

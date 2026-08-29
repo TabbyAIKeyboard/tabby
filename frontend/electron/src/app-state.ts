@@ -37,7 +37,6 @@ export interface AppStateType {
 
   currentUserId: string | null
   cachedMemories: string[]
-  onboardingComplete: boolean
 }
 
 export const AppState: AppStateType = {
@@ -69,7 +68,6 @@ export const AppState: AppStateType = {
 
   currentUserId: store.get('userId') as string | null,
   cachedMemories: (store.get('cachedMemories') as string[]) || [],
-  onboardingComplete: (store.get('onboardingComplete') as boolean) || false,
 }
 
 export const getStore = () => store

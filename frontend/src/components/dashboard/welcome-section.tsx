@@ -5,11 +5,7 @@ import useUser from '@/hooks/use-user'
 export function WelcomeSection() {
   const { data: user } = useUser()
 
-  const displayName =
-    user?.user_metadata?.full_name ||
-    user?.user_metadata?.name ||
-    user?.email?.split('@')[0] ||
-    'there'
+  const displayName = user?.displayName || user?.email?.split('@')[0] || 'there'
 
   const currentHour = new Date().getHours()
   let greeting = 'Good evening'

@@ -10,7 +10,6 @@ import { myProvider } from '@/lib/ai'
 import { defaultFastModel } from '@/lib/ai/models'
 import { addMemoryTool, searchMemoryTool, getAllMemoriesTool } from '@/lib/ai/tools/memory'
 import { generateUUID } from '@/lib/utils/generate-uuid'
-import { getAuthenticatedUserId } from '@/lib/supabase/auth'
 
 const getSystemPrompt = (
   userId: string
@@ -92,15 +91,12 @@ export async function POST(req: Request) {
     return new Response('Missing messages', { status: 400 })
   }
 
-  let userId: string | undefined = bodyUserId
+  // Auth is local to the desktop app: the client owns its user UUID and sends
+  // it with every request. It is only used to scope memory reads/writes.
+  const userId = bodyUserId
 
   if (!userId) {
-    const authenticatedId = await getAuthenticatedUserId(req)
-
-    if (!authenticatedId) {
-      return new Response('Unauthorized', { status: 401 })
-    }
-    userId = authenticatedId
+    return new Response('Missing userId', { status: 400 })
   }
 
   const modelMessages = await convertToModelMessages(messages)
@@ -111,7 +107,7 @@ export async function POST(req: Request) {
     execute: async ({ writer: dataStream }) => {
       const result = streamText({
         model: myProvider.languageModel(model || defaultFastModel),
-        system: getSystemPrompt(userId!),
+        system: getSystemPrompt(userId),
         messages: modelMessages,
         tools: {
           addMemory: addMemoryTool,

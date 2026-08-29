@@ -1,28 +1,12 @@
 /**
  * API URL utilities for connecting to the backend service.
  * Uses environment variables with fallbacks for local development.
+ *
+ * Auth is fully local: there is no bearer token. Requests are scoped by the
+ * locally-generated user UUID, read from the Electron main process.
  */
 
-import { createSupabaseBrowser } from '@/lib/supabase/client'
 import { DefaultChatTransport, UIMessage } from 'ai'
-
-// Cache for the current session token (refreshed on auth state changes)
-let cachedAccessToken: string | null = null
-
-// Initialize the auth listener to keep the token cache updated
-if (typeof window !== 'undefined') {
-  const supabase = createSupabaseBrowser()
-
-  // Get initial session
-  supabase.auth.getSession().then(({ data: { session } }) => {
-    cachedAccessToken = session?.access_token || null
-  })
-
-  // Listen for auth state changes
-  supabase.auth.onAuthStateChange((_event, session) => {
-    cachedAccessToken = session?.access_token || null
-  })
-}
 
 /**
  * Get the full URL for an API endpoint on the main backend.
@@ -45,78 +29,51 @@ export function getMemoryApiUrl(path: string): string {
 }
 
 /**
- * Get authentication headers synchronously using the cached access token.
- * This is useful for useChat transport which requires a sync headers function.
- * @returns Headers object with Authorization header if authenticated
+ * Read the local user id from the main process.
+ *
+ * Deliberately NOT cached in module scope: each Electron window is its own
+ * renderer, so a cached id goes stale the moment the user signs in or out in
+ * a different window - which silently sends the previous account's id to the
+ * API. The IPC round-trip is cheap; always ask.
  */
-export function getAuthHeadersSync(): Record<string, string> {
-  if (cachedAccessToken) {
-    return {
-      Authorization: `Bearer ${cachedAccessToken}`,
-    }
-  }
-  return {}
-}
+export async function getUserId(): Promise<string | null> {
+  if (typeof window === 'undefined' || !window.electron?.auth) return null
 
-/**
- * Get authentication headers with the Supabase access token (async version).
- * This is necessary for cross-origin requests where cookies can't be shared
- * (e.g., Electron app calling hosted backend).
- * @returns Headers object with Authorization header if authenticated
- */
-export async function getAuthHeaders(): Promise<HeadersInit> {
   try {
-    const supabase = createSupabaseBrowser()
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
-
-    if (session?.access_token) {
-      // Also update the cache
-      cachedAccessToken = session.access_token
-      return {
-        Authorization: `Bearer ${session.access_token}`,
-      }
-    }
+    const user = await window.electron.auth.getCurrentUser()
+    return user?.id ?? null
   } catch (error) {
-    console.error('[getAuthHeaders] Error getting session:', error)
+    console.error('[api-url] Failed to load local user:', error)
+    return null
   }
-
-  return {}
 }
 
 /**
- * Create fetch options with authentication headers.
- * Use this for all API calls to ensure auth works across origins.
+ * Create fetch options for API calls.
  * @param options - Additional fetch options to merge
- * @returns Fetch options with auth headers included
  */
 export async function createAuthenticatedFetchOptions(
   options: RequestInit = {}
 ): Promise<RequestInit> {
-  const authHeaders = await getAuthHeaders()
-
   return {
     ...options,
-    credentials: 'include' as RequestCredentials,
     headers: {
-      ...authHeaders,
+      'Content-Type': 'application/json',
       ...options.headers,
     },
   }
 }
 
 /**
- * Create an authenticated DefaultChatTransport for useChat.
- * This transport includes both credentials and Authorization headers
- * to work across origins (Electron app -> hosted backend).
+ * Create a chat transport for useChat that scopes every request to the
+ * local user by injecting `userId` into the request body.
  * @param apiPath - The API path (e.g., '/api/chat')
  * @returns Configured DefaultChatTransport
  */
 export function createAuthenticatedChatTransport(apiPath: string): DefaultChatTransport<UIMessage> {
   return new DefaultChatTransport<UIMessage>({
     api: getApiUrl(apiPath),
-    credentials: 'include',
-    headers: () => getAuthHeadersSync(),
+    // Resolved per request so it always reflects the current account.
+    body: async () => ({ userId: await getUserId() }),
   })
 }

@@ -1,3 +1,4 @@
+import { registerAuthHandlers } from './auth-handlers'
 import { registerTextHandlers } from './text-handlers'
 import { registerSettingsHandlers } from './settings-handlers'
 import { registerWindowHandlers } from './window-handlers'
@@ -7,6 +8,7 @@ import { registerDbHandlers } from './db-handlers'
 import { registerFileStorageHandlers } from '../services/local-file-storage'
 
 export const registerAllIpcHandlers = (): void => {
+  registerAuthHandlers()
   registerTextHandlers()
   registerSettingsHandlers()
   registerWindowHandlers()
@@ -16,6 +18,7 @@ export const registerAllIpcHandlers = (): void => {
   registerFileStorageHandlers()
 }
 
+export { registerAuthHandlers } from './auth-handlers'
 export { registerTextHandlers } from './text-handlers'
 export { registerSettingsHandlers } from './settings-handlers'
 export { registerWindowHandlers } from './window-handlers'

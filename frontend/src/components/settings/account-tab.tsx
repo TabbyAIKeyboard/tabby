@@ -3,7 +3,6 @@
 import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { createSupabaseBrowser } from '@/lib/supabase/client'
 import useUser from '@/hooks/use-user'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { LogOut, User, Mail, Calendar } from 'lucide-react'
@@ -17,17 +16,14 @@ export function AccountTab() {
 
   const handleSignOut = () => {
     startSignOut(async () => {
-      const supabase = createSupabaseBrowser()
-      await supabase.auth.signOut()
+      await window.electron?.auth?.signOut()
       await refetch()
       router.push('/signin')
     })
   }
 
-  const imageUrl = user?.user_metadata?.avatar_url
-  const displayName =
-    user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0]
-  const createdAt = user?.created_at ? new Date(user.created_at).toLocaleDateString() : null
+  const displayName = user?.displayName || user?.email?.split('@')[0]
+  const createdAt = user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : null
 
   if (isFetching) {
     return (
@@ -43,11 +39,7 @@ export function AccountTab() {
     <SettingsPage title="Account" description="User profile">
       <div className="flex flex-col items-center text-center space-y-6 py-4">
         <Avatar className="h-20 w-20 border-2 border-zinc-200 dark:border-zinc-700">
-          {imageUrl ? (
-            <AvatarImage src={imageUrl} alt={displayName || 'User'} />
-          ) : (
-            <AvatarImage src={`https://avatar.vercel.sh/${user?.email}`} alt="avatar" />
-          )}
+          <AvatarImage src={`https://avatar.vercel.sh/${user?.email}`} alt="avatar" />
           <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
             {displayName?.[0]?.toUpperCase() || 'U'}
           </AvatarFallback>

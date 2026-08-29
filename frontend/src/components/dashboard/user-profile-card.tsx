@@ -7,11 +7,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 export function UserProfileCard() {
   const { data: user, isFetching } = useUser()
 
-  const imageUrl = user?.user_metadata?.avatar_url
-  const displayName =
-    user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0]
-  const createdAt = user?.created_at
-    ? new Date(user.created_at).toLocaleDateString('en-US', {
+  const displayName = user?.displayName || user?.email?.split('@')[0]
+  const createdAt = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString('en-US', {
         month: 'long',
         day: 'numeric',
         year: 'numeric',
@@ -40,14 +38,10 @@ export function UserProfileCard() {
       {/* Centered avatar and name */}
       <div className="flex flex-col items-center text-center mb-6">
         <Avatar className="h-20 w-20 mb-4">
-          {imageUrl ? (
-            <AvatarImage src={imageUrl} alt={displayName || 'User'} />
-          ) : (
-            <AvatarImage
-              src={`https://avatar.vercel.sh/${user?.email}?text=${displayName?.[0]?.toUpperCase() || 'U'}`}
-              alt="avatar"
-            />
-          )}
+          <AvatarImage
+            src={`https://avatar.vercel.sh/${user?.email}?text=${displayName?.[0]?.toUpperCase() || 'U'}`}
+            alt="avatar"
+          />
           <AvatarFallback className="text-2xl bg-muted text-muted-foreground font-medium">
             {displayName?.[0]?.toUpperCase() || 'U'}
           </AvatarFallback>

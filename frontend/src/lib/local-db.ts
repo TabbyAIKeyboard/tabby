@@ -120,14 +120,10 @@ export function generateLocalTitle(firstUserMessage: UIMessage): string {
  */
 export async function generateTitle(firstUserMessage: UIMessage, model: string): Promise<string> {
   try {
-    const { getApiUrl, getAuthHeaders } = await import('@/lib/api-url')
-    const authHeaders = await getAuthHeaders()
+    const { getApiUrl } = await import('@/lib/api-url')
     const response = await fetch(getApiUrl('/api/generate-title'), {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeaders,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: firstUserMessage, model }),
     })
     const data = await response.json()

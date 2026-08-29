@@ -15,14 +15,12 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
 import Avatar from '@/components/supaauth/avatar'
-import { createSupabaseBrowser } from '@/lib/supabase/client'
 export function NavProfile({ user }: { user: any }) {
   const router = useRouter()
   const [isSignOut, startSignOut] = useTransition()
   const signout = () => {
     startSignOut(async () => {
-      const supabase = createSupabaseBrowser()
-      await supabase.auth.signOut()
+      await window.electron?.auth?.signOut()
       router.push('/signin')
     })
   }

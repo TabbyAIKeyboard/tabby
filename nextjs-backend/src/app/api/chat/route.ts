@@ -11,7 +11,6 @@ import { tavilySearchTool } from '@/lib/ai/tools/tavily-search'
 import { addMemoryTool, searchMemoryTool, getAllMemoriesTool } from '@/lib/ai/tools/memory'
 import { generateUUID } from '@/lib/utils/generate-uuid'
 import { defaultModel } from '@/lib/ai/models'
-import { getAuthenticatedUserId } from '@/lib/supabase/auth'
 
 const getSystemPrompt = (
   userId: string
@@ -223,17 +222,12 @@ export async function POST(req: Request) {
     return new Response('Missing messages', { status: 400 })
   }
 
-  // Get authenticated user from cookies or Authorization header
-  // Also accepts userId from body as fallback (for internal calls)
-  let userId: string | undefined = bodyUserId
+  // Auth is local to the desktop app: the client owns its user UUID and sends
+  // it with every request. It is only used to scope memory reads/writes.
+  const userId = bodyUserId
 
   if (!userId) {
-    const authenticatedId = await getAuthenticatedUserId(req)
-
-    if (!authenticatedId) {
-      return new Response('Unauthorized', { status: 401 })
-    }
-    userId = authenticatedId
+    return new Response('Missing userId', { status: 400 })
   }
 
   const mcpTools = await getMCPTools()
@@ -244,7 +238,7 @@ export async function POST(req: Request) {
     execute: async ({ writer: dataStream }) => {
       const result = streamText({
         model: myProvider.languageModel(model || defaultModel),
-        system: getSystemPrompt(userId!),
+        system: getSystemPrompt(userId),
         messages: modelMessages,
         tools: {
           tavilySearchTool,

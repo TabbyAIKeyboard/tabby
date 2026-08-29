@@ -9,10 +9,18 @@ import {
   cancelTyping,
 } from '../services'
 import { createBrainPanelWindow, createSuggestionWindow } from '../windows'
+import { ensureAuthFlow } from '../services/auth-flow'
 
 export const registerGlobalShortcuts = (): void => {
   globalShortcut.register('CommandOrControl+\\', async () => {
     if (!AppState.mainWindow) return
+
+    // Never surface the overlay before signin/onboarding are done - open the
+    // settings window on the pending step instead of a half-usable menu.
+    if (ensureAuthFlow()) {
+      AppState.mainWindow.hide()
+      return
+    }
 
     if (AppState.mainWindow.isVisible()) {
       AppState.mainWindow.hide()

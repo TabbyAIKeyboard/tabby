@@ -12,7 +12,6 @@ import { tavilySearchTool } from '@/lib/ai/tools/tavily-search'
 import { addMemoryTool, searchMemoryTool, getAllMemoriesTool } from '@/lib/ai/tools/memory'
 import { generateUUID } from '@/lib/utils/generate-uuid'
 import { defaultModel } from '@/lib/ai/models'
-import { getAuthenticatedUserId } from '@/lib/supabase/auth'
 
 const getSystemPrompt = (
   userId: string
@@ -99,15 +98,12 @@ export async function POST(req: Request) {
     return new Response('Missing messages', { status: 400 })
   }
 
-  let userId: string | undefined = bodyUserId
+  // Auth is local to the desktop app: the client owns its user UUID and sends
+  // it with every request. It is only used to scope memory reads/writes.
+  const userId = bodyUserId
 
   if (!userId) {
-    const authenticatedId = await getAuthenticatedUserId(req)
-
-    if (!authenticatedId) {
-      return new Response('Unauthorized', { status: 401 })
-    }
-    userId = authenticatedId
+    return new Response('Missing userId', { status: 400 })
   }
 
   console.log('API received:', { action, customPrompt: customPrompt?.slice(0, 50) })

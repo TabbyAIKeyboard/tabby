@@ -1,3 +1,5 @@
+import type { AuthResult, LocalUser } from '@/lib/auth/types'
+
 declare global {
   interface Window {
     electron: {
@@ -39,6 +41,17 @@ declare global {
       // User ID Persistence
       setUserId: (userId: string) => void
       getUserId: () => Promise<string | null>
+      // Local Auth (email/password stored on-device, no remote provider)
+      auth: {
+        register: (email: string, password: string, displayName?: string) => Promise<AuthResult>
+        signIn: (email: string, password: string) => Promise<AuthResult>
+        signOut: () => Promise<void>
+        getCurrentUser: () => Promise<LocalUser | null>
+        hasAnyUser: () => Promise<boolean>
+        updateDisplayName: (displayName: string) => Promise<AuthResult>
+        changePassword: (currentPassword: string, newPassword: string) => Promise<AuthResult>
+        onAuthChanged: (callback: () => void) => () => void
+      }
       // Cached Memories for Inline Suggestions
       setCachedMemories: (memories: string[]) => void
       getCachedMemories: () => Promise<string[]>
@@ -52,7 +65,7 @@ declare global {
       setDefaultFastModel: (model: string) => void
       // Onboarding
       getOnboardingComplete: () => Promise<boolean>
-      setOnboardingComplete: (complete: boolean) => void
+      setOnboardingComplete: (complete: boolean) => Promise<void>
     }
   }
 }

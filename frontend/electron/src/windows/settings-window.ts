@@ -4,8 +4,18 @@ import { join } from 'path'
 import { AppState } from '../app-state'
 import { getOrStartNextJSServer } from './main-window'
 
+const routeUrl = async (route: string): Promise<string> => {
+  if (is.dev) return `http://localhost:3000${route}`
+  const port = await getOrStartNextJSServer()
+  return `http://localhost:${port}${route}`
+}
+
 export const createSettingsWindow = (initialRoute: string = '/settings'): BrowserWindow => {
-  if (AppState.settingsWindow) {
+  if (AppState.settingsWindow && !AppState.settingsWindow.isDestroyed()) {
+    // Reuse the window, but honour the requested route - otherwise the caller
+    // silently gets whatever page happened to be open.
+    routeUrl(initialRoute).then((url) => AppState.settingsWindow?.loadURL(url))
+    AppState.settingsWindow.show()
     AppState.settingsWindow.focus()
     return AppState.settingsWindow
   }
@@ -38,13 +48,7 @@ export const createSettingsWindow = (initialRoute: string = '/settings'): Browse
   // Make window invisible to screen recorders/sharing (uses WDA_EXCLUDEFROMCAPTURE on Windows)
   AppState.settingsWindow.setContentProtection(true)
 
-  if (is.dev) {
-    AppState.settingsWindow.loadURL(`http://localhost:3000${initialRoute}`)
-  } else {
-    getOrStartNextJSServer().then((port) => {
-      AppState.settingsWindow?.loadURL(`http://localhost:${port}${initialRoute}`)
-    })
-  }
+  routeUrl(initialRoute).then((url) => AppState.settingsWindow?.loadURL(url))
 
   AppState.settingsWindow.on('closed', () => {
     AppState.settingsWindow = null

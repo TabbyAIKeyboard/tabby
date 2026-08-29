@@ -42,10 +42,26 @@ export function getDatabase(): Database.Database {
       FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      password_hash TEXT NOT NULL,
+      display_name TEXT,
+      onboarding_complete INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages(conversation_id);
     CREATE INDEX IF NOT EXISTS idx_conversations_type ON conversations(type);
     CREATE INDEX IF NOT EXISTS idx_conversations_updated_at ON conversations(updated_at);
   `)
+
+  // Added after the users table shipped - safe to run on every open.
+  const userColumns = db.prepare('PRAGMA table_info(users)').all() as { name: string }[]
+  if (!userColumns.some((column) => column.name === 'onboarding_complete')) {
+    db.exec('ALTER TABLE users ADD COLUMN onboarding_complete INTEGER NOT NULL DEFAULT 0')
+    console.log('[LocalDB] Added users.onboarding_complete')
+  }
 
   console.log('[LocalDB] Database initialized successfully')
   return db

@@ -84,6 +84,26 @@ contextBridge.exposeInMainWorld('electron', {
   setUserId: (userId: string) => ipcRenderer.send('set-user-id', userId),
   getUserId: () => ipcRenderer.invoke('get-user-id'),
 
+  // Local Auth (email/password stored on-device, no remote provider)
+  auth: {
+    register: (email: string, password: string, displayName?: string) =>
+      ipcRenderer.invoke('auth:register', { email, password, displayName }),
+    signIn: (email: string, password: string) =>
+      ipcRenderer.invoke('auth:signin', { email, password }),
+    signOut: () => ipcRenderer.invoke('auth:signout'),
+    getCurrentUser: () => ipcRenderer.invoke('auth:get-current-user'),
+    hasAnyUser: () => ipcRenderer.invoke('auth:has-any-user'),
+    updateDisplayName: (displayName: string) =>
+      ipcRenderer.invoke('auth:update-display-name', displayName),
+    changePassword: (currentPassword: string, newPassword: string) =>
+      ipcRenderer.invoke('auth:change-password', { currentPassword, newPassword }),
+    onAuthChanged: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('auth-changed', handler)
+      return () => ipcRenderer.removeListener('auth-changed', handler)
+    },
+  },
+
   // Cached Memories for Inline Suggestions
   setCachedMemories: (memories: string[]) => ipcRenderer.send('set-cached-memories', memories),
   getCachedMemories: () => ipcRenderer.invoke('get-cached-memories'),
@@ -102,7 +122,7 @@ contextBridge.exposeInMainWorld('electron', {
   // Onboarding
   getOnboardingComplete: () => ipcRenderer.invoke('get-onboarding-complete'),
   setOnboardingComplete: (complete: boolean) =>
-    ipcRenderer.send('set-onboarding-complete', complete),
+    ipcRenderer.invoke('set-onboarding-complete', complete),
 
   // Local Database
   db: {

@@ -5,7 +5,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button'
 import { IoMdSettings } from 'react-icons/io'
 import { PiSignOutFill } from 'react-icons/pi'
-import { createSupabaseBrowser } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { AiOutlineLoading3Quarters } from 'react-icons/ai'
@@ -18,8 +17,7 @@ export default function UserProfile() {
   const { data } = useUser()
   const signout = () => {
     startSignOut(async () => {
-      const supabase = createSupabaseBrowser()
-      await supabase.auth.signOut()
+      await window.electron?.auth?.signOut()
       router.push('/signin')
     })
   }
