@@ -2,9 +2,6 @@
   "title": "Features",
   "pages": [
     "chat-agent",
-    "interview-copilot",
-    "voice-agent",
-    "voice-interaction",
     "action-menu",
     "text-actions",
     "suggestions",

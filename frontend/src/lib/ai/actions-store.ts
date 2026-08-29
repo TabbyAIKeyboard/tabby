@@ -2,6 +2,9 @@ import { Action } from '@/lib/ai/types'
 
 const STORAGE_KEY = 'ai-keyboard-actions'
 
+// Actions from removed features, pruned from any previously saved list
+const REMOVED_ACTION_IDS = ['prep-mode', 'interview-copilot', 'voice-agent']
+
 export const DEFAULT_ACTIONS: Action[] = [
   {
     id: 'chat',
@@ -12,30 +15,12 @@ export const DEFAULT_ACTIONS: Action[] = [
     group: 'agent',
   },
   {
-    id: 'interview-copilot',
-    label: 'Interview Copilot',
-    icon: '🎯',
-    shortcut: 'I',
-    isDefault: true,
-    description: 'AI-powered coding interview assistant',
-    group: 'agent',
-  },
-  {
     id: 'text-agent',
     label: 'Text Agent',
     icon: '✏️',
     shortcut: 'T',
     isDefault: true,
     description: 'Quick text transformations and AI tools',
-    group: 'agent',
-  },
-  {
-    id: 'voice-agent',
-    label: 'Voice Agent',
-    icon: '🎙️',
-    shortcut: 'V',
-    isDefault: true,
-    description: 'Real-time voice conversation with AI',
     group: 'agent',
   },
   {
@@ -129,8 +114,8 @@ export function loadActions(): Action[] {
   if (saved) {
     try {
       const parsed: Action[] = JSON.parse(saved)
-      // Filter out legacy prep-mode action (replaced by text-agent)
-      const filteredParsed = parsed.filter((a) => a.id !== 'prep-mode')
+      // Filter out actions for features that have been removed
+      const filteredParsed = parsed.filter((a) => !REMOVED_ACTION_IDS.includes(a.id))
       const defaultIds = DEFAULT_ACTIONS.map((a) => a.id)
       const savedIds = filteredParsed.map((a) => a.id)
 

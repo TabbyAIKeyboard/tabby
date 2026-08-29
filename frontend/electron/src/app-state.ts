@@ -2,12 +2,9 @@ import { BrowserWindow, Tray } from 'electron'
 import Store from 'electron-store'
 import type { ContextCaptureService } from './services/context-capture'
 import type { GhostTextOverlay } from './services/ghost-overlay'
-import type { InterviewGhostService } from './services/interview-ghost'
 import type { KeyboardMonitor } from './services/keyboard-monitor'
 import type { KeystrokeListener } from './services/keystroke-listener'
 import type { TextOutputMode } from './services/text-handler'
-
-export type VoiceMode = 'transcribe' | 'command' | 'generate'
 
 const store = new Store()
 
@@ -21,7 +18,6 @@ export interface AppStateType {
 
   contextCaptureService: ContextCaptureService | null
   ghostOverlay: GhostTextOverlay | null
-  interviewGhostService: InterviewGhostService | null
   keyboardMonitor: KeyboardMonitor | null
   keystrokeListener: KeystrokeListener | null
 
@@ -41,7 +37,6 @@ export interface AppStateType {
 
   currentUserId: string | null
   cachedMemories: string[]
-  currentVoiceMode: VoiceMode
   onboardingComplete: boolean
 }
 
@@ -55,7 +50,6 @@ export const AppState: AppStateType = {
 
   contextCaptureService: null,
   ghostOverlay: null,
-  interviewGhostService: null,
   keyboardMonitor: null,
   keystrokeListener: null,
 
@@ -75,7 +69,6 @@ export const AppState: AppStateType = {
 
   currentUserId: store.get('userId') as string | null,
   cachedMemories: (store.get('cachedMemories') as string[]) || [],
-  currentVoiceMode: 'transcribe',
   onboardingComplete: (store.get('onboardingComplete') as boolean) || false,
 }
 

@@ -73,7 +73,7 @@ export function Hero() {
             </h1>
             <p className="max-w-xl text-base md:text-lg">
               Tabby is a system-wide AI assistant that lives at the point of input. Transform your
-              desktop into a real-time collaborator for coding, writing, and interviews.
+              desktop into a real-time collaborator for writing and coding.
             </p>
           </motion.div>
 
@@ -122,8 +122,8 @@ export function Hero() {
             >
               <div className="bg-[#141414] rounded overflow-hidden border border-white/5 shadow-sm">
                 <Image
-                  src="/landing/tabby-interview-ghost.png"
-                  alt="Tabby Interview Copilot"
+                  src="/landing/tabby-word-ghost.png"
+                  alt="Tabby Ghost Text"
                   width={2400}
                   height={1600}
                   quality={100}
@@ -143,8 +143,8 @@ export function Hero() {
           <div className="rounded-lg border border-white/5 bg-white/5 p-1 backdrop-blur-sm shadow-2xl">
             <div className="rounded overflow-hidden bg-[#141414] border border-white/5 shadow-sm">
               <Image
-                src="/landing/tabby-interview-ghost.png"
-                alt="Tabby Interview Copilot"
+                src="/landing/tabby-word-ghost.png"
+                alt="Tabby Ghost Text"
                 width={1200}
                 height={800}
                 className="w-full h-auto"

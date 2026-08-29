@@ -44,10 +44,9 @@ function generateTimeSeriesData(period: string) {
 // Generate mock distribution data
 function generateDistributionData() {
   return [
-    { name: 'Code Completion', value: 45, fill: '#3b82f6' },
-    { name: 'Chat', value: 25, fill: '#8b5cf6' },
-    { name: 'Voice', value: 15, fill: '#f59e0b' },
-    { name: 'Transcribe', value: 10, fill: '#10b981' },
+    { name: 'Code Completion', value: 55, fill: '#3b82f6' },
+    { name: 'Chat', value: 30, fill: '#8b5cf6' },
+    { name: 'Text Actions', value: 10, fill: '#f59e0b' },
     { name: 'Other', value: 5, fill: '#6b7280' },
   ]
 }

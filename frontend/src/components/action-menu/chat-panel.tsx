@@ -25,7 +25,7 @@ import {
 import { ChatMessages } from '../chat/chat-messages'
 import { Button } from '@/components/ui/button'
 import { Kbd } from '@/components/ui/kbd'
-import { ArrowLeft, X, MessageSquare, History, Plus, Trash2, Volume2, VolumeX } from 'lucide-react'
+import { ArrowLeft, X, MessageSquare, History, Plus, Trash2 } from 'lucide-react'
 import { generateUUID } from '@/lib/utils/generate-uuid'
 import {
   getConversations,
@@ -39,11 +39,8 @@ import {
 import { Conversation as ConversationType } from '@/lib/ai/types'
 import { defaultModel, models } from '@/lib/ai/models'
 import { ModelSelector } from '@/components/chat/model-selector'
-import { VoiceInputButton } from '@/components/chat/voice-input-button'
-import { VoiceModeToggle, type VoiceMode } from '@/components/chat/voice-mode-toggle'
-import { useAudioRecorder } from '@/hooks/use-audio-recorder'
-import { useSpeechPlayback } from '@/hooks/use-speech-playback'
 import { createAuthenticatedChatTransport } from '@/lib/api-url'
+
 interface ChatPanelProps {
   selectedText?: string
   onBack: () => void
@@ -57,11 +54,8 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
   const activeChatIdRef = useRef(activeChatId)
   const [conversations, setConversations] = useState<ConversationType[]>([])
   const [isLoadingConversations, setIsLoadingConversations] = useState(true)
-  const [voiceMode, setVoiceMode] = useState<VoiceMode>('input')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const lastMessageCountRef = useRef(0)
-
-  const { isPlaying, playText, stopPlayback } = useSpeechPlayback()
 
   const { messages, status, sendMessage, setMessages } = useChat({
     transport: createAuthenticatedChatTransport('/api/chat'),
@@ -89,60 +83,6 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
       loadConversations()
     },
   })
-
-  const handleVoiceTranscription = useCallback(
-    (text: string) => {
-      if (voiceMode === 'conversational') {
-        sendMessage(
-          { parts: [{ type: 'text', text }] },
-          {
-            body: {
-              model: selectedModel,
-              conversationId: activeChatId,
-            },
-          }
-        )
-      } else {
-        setInput((prev) => prev + (prev ? ' ' : '') + text)
-        textareaRef.current?.focus()
-      }
-    },
-    [voiceMode, sendMessage, selectedModel, activeChatId]
-  )
-
-  const { isRecording, isTranscribing, startRecording, stopRecording } = useAudioRecorder({
-    onTranscription: handleVoiceTranscription,
-  })
-
-  const prevStatusRef = useRef<string>(status)
-  const prevMessageCountRef = useRef<number>(0)
-
-  useEffect(() => {
-    if (voiceMode !== 'conversational') {
-      prevStatusRef.current = status
-      return
-    }
-
-    const assistantMessages = messages.filter((m) => m.role === 'assistant')
-    const wasStreaming = prevStatusRef.current === 'streaming'
-    const isNowReady = status === 'ready'
-    const hasNewMessage = assistantMessages.length > prevMessageCountRef.current
-
-    if (wasStreaming && isNowReady && hasNewMessage) {
-      const lastMessage = assistantMessages[assistantMessages.length - 1]
-      const textContent = lastMessage.parts
-        ?.filter((p): p is { type: 'text'; text: string } => p.type === 'text')
-        .map((p) => p.text)
-        .join(' ')
-
-      if (textContent) {
-        playText(textContent)
-      }
-      prevMessageCountRef.current = assistantMessages.length
-    }
-
-    prevStatusRef.current = status
-  }, [messages, voiceMode, playText, status])
 
   const loadConversations = useCallback(async () => {
     try {
@@ -222,7 +162,7 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
   )
 
   const isLoading = status === 'streaming' || status === 'submitted'
-  const isDisabled = isLoading || isRecording || isTranscribing
+  const isDisabled = isLoading
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -230,19 +170,11 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
         e.preventDefault()
         onBack()
       }
-      if (e.ctrlKey && e.key === 't') {
-        e.preventDefault()
-        if (isRecording) {
-          stopRecording()
-        } else if (!isTranscribing && !isLoading) {
-          startRecording()
-        }
-      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onBack, isRecording, isTranscribing, isLoading, startRecording, stopRecording])
+  }, [onBack])
 
   useEffect(() => {
     textareaRef.current?.focus()
@@ -266,16 +198,6 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
           </div>
         </div>
         <div className="flex items-center gap-1">
-          {isPlaying && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={stopPlayback}
-              className="h-8 w-8 text-primary transition-colors duration-150"
-            >
-              <VolumeX className="h-4 w-4" />
-            </Button>
-          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -334,7 +256,7 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
             <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
               <MessageSquare className="mb-4 h-12 w-12 opacity-50" />
               <h3 className="font-medium">Start a conversation</h3>
-              <p className="mt-1 text-sm">Ask me anything or use voice input</p>
+              <p className="mt-1 text-sm">Ask me anything</p>
             </div>
           )}
           <ChatMessages isLoading={isLoading} messages={messages} />
@@ -349,13 +271,7 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
               onChange={handleInputChange}
               ref={textareaRef}
               value={input}
-              placeholder={
-                isRecording
-                  ? 'Listening...'
-                  : isTranscribing
-                    ? 'Transcribing...'
-                    : 'Type or speak...'
-              }
+              placeholder="Type a message..."
               name="message"
               disabled={isDisabled}
             />
@@ -367,14 +283,6 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
               className="mr-2"
             />
             <div className="flex-1" />
-            <VoiceInputButton
-              isRecording={isRecording}
-              isTranscribing={isTranscribing}
-              onStartRecording={startRecording}
-              onStopRecording={stopRecording}
-              disabled={isLoading}
-              className="mr-1"
-            />
             <PromptInputSubmit
               disabled={!input.trim() || isLoading}
               status={isLoading ? 'streaming' : 'ready'}
@@ -389,13 +297,8 @@ export function ChatPanel({ selectedText, onBack, onClose }: ChatPanelProps) {
             <Kbd>esc</Kbd>
             <span className="text-muted-foreground/70">back</span>
           </div>
-          <VoiceModeToggle mode={voiceMode} onModeChange={setVoiceMode} />
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Kbd>ctrl+t</Kbd>
-            <span className="text-muted-foreground/70">mic</span>
-          </div>
           <div className="flex items-center gap-2">
             <Kbd>↵</Kbd>
             <span className="text-muted-foreground/70">send</span>

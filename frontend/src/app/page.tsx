@@ -2,14 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { ActionMenu } from '@/components/action-menu'
-import { useTranscribeRecorder } from '@/hooks/useTranscribeRecorder'
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedText, setSelectedText] = useState('')
-
-  // Initialize transcribe recorder (listens for IPC events for audio recording)
-  useTranscribeRecorder()
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.electron) {

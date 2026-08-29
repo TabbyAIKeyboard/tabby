@@ -93,63 +93,6 @@ contextBridge.exposeInMainWorld('electron', {
   setContentProtectionEnabled: (enabled: boolean) =>
     ipcRenderer.send('set-content-protection-enabled', enabled),
 
-  // Voice Agent Panel
-  onVoiceAgentStart: (callback: () => void) => {
-    const handler = () => callback()
-    ipcRenderer.on('voice-agent-start', handler)
-    return () => ipcRenderer.removeListener('voice-agent-start', handler)
-  },
-  onVoiceAgentStop: (callback: () => void) => {
-    const handler = () => callback()
-    ipcRenderer.on('voice-agent-stop', handler)
-    return () => ipcRenderer.removeListener('voice-agent-stop', handler)
-  },
-  onVoiceAgentState: (callback: (data: { state: string }) => void) => {
-    const handler = (_: IpcRendererEvent, data: { state: string }) => callback(data)
-    ipcRenderer.on('voice-agent-state', handler)
-    return () => ipcRenderer.removeListener('voice-agent-state', handler)
-  },
-  onVoiceAgentReset: (callback: () => void) => {
-    const handler = () => callback()
-    ipcRenderer.on('voice-agent-reset', handler)
-    return () => ipcRenderer.removeListener('voice-agent-reset', handler)
-  },
-  onVoiceAgentTranscript: (callback: (data: { role: string; text: string }) => void) => {
-    const handler = (_: IpcRendererEvent, data: { role: string; text: string }) => callback(data)
-    ipcRenderer.on('voice-agent-transcript', handler)
-    return () => ipcRenderer.removeListener('voice-agent-transcript', handler)
-  },
-  voiceAgentSessionStarted: () => ipcRenderer.send('voice-agent-session-started'),
-  voiceAgentSessionStopped: () => ipcRenderer.send('voice-agent-session-stopped'),
-  voiceAgentStateChange: (state: string) => ipcRenderer.send('voice-agent-state-change', state),
-  voiceAgentHide: () => ipcRenderer.send('voice-agent-hide'),
-  getVoiceAgentActive: () => ipcRenderer.invoke('get-voice-agent-active'),
-
-  // Transcribe Mode
-  onTranscribeStart: (callback: () => void) => {
-    const handler = () => callback()
-    ipcRenderer.on('transcribe-start', handler)
-    return () => ipcRenderer.removeListener('transcribe-start', handler)
-  },
-  onTranscribeStop: (callback: () => void) => {
-    const handler = () => callback()
-    ipcRenderer.on('transcribe-stop', handler)
-    return () => ipcRenderer.removeListener('transcribe-stop', handler)
-  },
-  onTranscribeState: (callback: (data: { state: string }) => void) => {
-    const handler = (_: IpcRendererEvent, data: { state: string }) => callback(data)
-    ipcRenderer.on('transcribe-state', handler)
-    return () => ipcRenderer.removeListener('transcribe-state', handler)
-  },
-  onTranscribeAudioLevel: (callback: (data: { level: number }) => void) => {
-    const handler = (_: IpcRendererEvent, data: { level: number }) => callback(data)
-    ipcRenderer.on('transcribe-audio-level', handler)
-    return () => ipcRenderer.removeListener('transcribe-audio-level', handler)
-  },
-  sendTranscribeAudio: (audioBase64: string) =>
-    ipcRenderer.send('transcribe-audio-data', audioBase64),
-  getTranscribeState: () => ipcRenderer.invoke('get-transcribe-state'),
-
   // Model Settings
   getDefaultModel: () => ipcRenderer.invoke('get-default-model'),
   setDefaultModel: (model: string) => ipcRenderer.send('set-default-model', model),

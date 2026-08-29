@@ -46,16 +46,6 @@ export async function getConversations(): Promise<Conversation[]> {
   return rows as Conversation[]
 }
 
-export async function getInterviewConversations(): Promise<Conversation[]> {
-  const rows = await getDb().getConversations('interview')
-  return rows as Conversation[]
-}
-
-export async function getPrepConversations(): Promise<Conversation[]> {
-  const rows = await getDb().getConversations('prep')
-  return rows as Conversation[]
-}
-
 export async function getConversationMessages(conversationId: string): Promise<UIMessage[]> {
   const rows = await getDb().getMessages(conversationId)
   return (rows || []).map((msg: any) => ({

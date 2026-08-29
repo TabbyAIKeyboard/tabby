@@ -56,7 +56,7 @@ export interface Conversation {
   updated_at: string
   created_at: string
   lastContext?: AppUsage
-  type?: 'chat' | 'interview' | string
+  type?: 'chat' | string
 }
 
 export interface Message {
@@ -65,57 +65,6 @@ export interface Message {
   parts: unknown[]
   created_at: string
   metadata?: TelemetryMetadata
-}
-
-export interface InterviewSession {
-  id: string
-  user_id?: string
-  title: string
-  updated_at: string
-  created_at: string
-}
-
-export interface InterviewAnalysis {
-  idea?: string
-  code?: string
-  walkthrough?: string
-  testCases?: Array<{ input?: string; output?: string; reason?: string }>
-  mistakes?: Array<{ mistake: string; correction: string; pattern: string }>
-  memories?: Array<{ memory?: string; createdAt?: string }>
-}
-
-export interface PrepAnalysis {
-  pattern?: string
-  difficulty?: string
-  hints?: Array<{
-    level: number
-    content: string
-  }>
-  similar?: Array<{
-    name: string
-    slug?: string
-    reason: string
-  }>
-  mistakes?: Array<{
-    mistake: string
-    correction: string
-    pattern: string
-  }>
-  solution?: string
-  complexity?: {
-    time: string
-    space: string
-  }
-  memories?: Array<{ memory?: string; createdAt?: string }>
-}
-
-export interface InterviewMessage {
-  id: string
-  session_id: string
-  role: 'user' | 'assistant'
-  content: string
-  analysis?: InterviewAnalysis
-  created_at: string
 }
 
 export interface TavilySearchResult {

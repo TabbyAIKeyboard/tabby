@@ -27,7 +27,7 @@ export const footerConfig: FooterConfig = {
       title: 'Platform',
       links: [
         { href: '/chat', label: 'Chat' },
-        { href: '/dashboard', label: 'Voice Assistant' },
+        { href: '/dashboard', label: 'Dashboard' },
       ],
     },
     {

@@ -20,28 +20,12 @@ const AGENTS = [
     borderColor: 'border-blue-500/30',
   },
   {
-    id: 'interview-copilot',
-    label: 'Interview Copilot',
-    image: '/images/tabby-interview.png',
-    description: 'Coding interview assistant',
-    gradient: 'from-purple-500/20 to-pink-500/20',
-    borderColor: 'border-purple-500/30',
-  },
-  {
     id: 'text-agent',
     label: 'Text Agent',
     image: '/images/tabby-textagent.png',
     description: 'Text transformations & tools',
     gradient: 'from-orange-500/20 to-amber-500/20',
     borderColor: 'border-orange-500/30',
-  },
-  {
-    id: 'voice-agent',
-    label: 'Voice Agent',
-    image: '/images/tabby-voiceagent.png',
-    description: 'Real-time voice conversation',
-    gradient: 'from-green-500/20 to-emerald-500/20',
-    borderColor: 'border-green-500/30',
   },
 ] as const
 

@@ -18,12 +18,6 @@ interface Highlight {
 
 const highlights: Highlight[] = [
   {
-    text: 'Interview Copilot',
-    description:
-      'Real-time coding interview assistance with screen capture. Analyze problems, get solutions, and ace your interviews.',
-    image: '/landing/tabby-interview-copilot.png',
-  },
-  {
     text: 'Action Menu',
     description:
       'Quick AI actions at your fingertips. Fix grammar, change tone, expand text, and run custom prompts.',
@@ -32,20 +26,14 @@ const highlights: Highlight[] = [
   {
     text: 'Ghost Text',
     description:
-      'Context-aware autocomplete that learns your coding style. Get intelligent suggestions as you type.',
-    image: '/landing/tabby-interview-ghost.png',
+      'Context-aware autocomplete that learns your writing style. Get intelligent suggestions as you type.',
+    image: '/landing/tabby-word-ghost.png',
   },
   {
     text: 'Persistent Memory',
     description:
       'AI that remembers you. Your preferences, coding style, and past interactions are always in context.',
     image: '/landing/tabby-memories.png',
-  },
-  {
-    text: 'Voice Agent',
-    description:
-      'Voice-to-text and text-to-voice capabilities. Interact with AI using natural speech.',
-    image: '/landing/tabbyb-voice-agent.png',
   },
   {
     text: 'Desktop Automation',
@@ -74,7 +62,7 @@ const highlights: Highlight[] = [
   {
     text: 'System Tray',
     description: 'Lives quietly in your system tray. Always accessible, never gets in the way.',
-    image: '/landing/tabby-interview-copilot.png',
+    image: '/landing/tabby-settings.png',
   },
 ]
 
@@ -207,7 +195,7 @@ export function HoverHighlights() {
                 Your AI lives at the keyboard
               </h2>
               <p className="text-lg text-neutral-400">
-                Everything you need to code smarter and ace interviews
+                Everything you need to write and code smarter
               </p>
             </div>
 

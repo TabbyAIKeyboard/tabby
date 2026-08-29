@@ -9,9 +9,7 @@ import { createAuthenticatedChatTransport } from '@/lib/api-url'
 import { ActionList } from './action-list'
 import { ResultPanel } from './result-panel'
 import { ChatPanel } from './chat-panel'
-import { InterviewCopilotPanel } from './interview-copilot-panel'
 import { TextAgentPanel } from './text-agent-panel'
-import { VoiceAgentPanel } from './voice-agent-panel'
 import { HomescreenLayout } from './homescreen-layout'
 import { Kbd } from '@/components/ui/kbd'
 import { Search, Settings, Sun, Moon, LayoutGrid, List, Eye, EyeOff } from 'lucide-react'
@@ -32,9 +30,7 @@ export function ActionMenu({ selectedText, onClose, onReplace }: ActionMenuProps
   const [customPrompt, setCustomPrompt] = useState('')
   const [showCustomInput, setShowCustomInput] = useState(false)
   const [showChatMode, setShowChatMode] = useState(false)
-  const [showCopilotMode, setShowCopilotMode] = useState(false)
   const [showTextAgentMode, setShowTextAgentMode] = useState(false)
-  const [showVoiceAgentMode, setShowVoiceAgentMode] = useState(false)
   const [layoutMode, setLayoutMode] = useState<'command-palette' | 'homescreen'>('command-palette')
   const [invisibilityEnabled, setInvisibilityEnabled] = useState(true)
   const [allActions, setAllActions] = useState<Action[]>([])
@@ -85,18 +81,8 @@ export function ActionMenu({ selectedText, onClose, onReplace }: ActionMenuProps
         return
       }
 
-      if (action.id === 'interview-copilot') {
-        setShowCopilotMode(true)
-        return
-      }
-
       if (action.id === 'text-agent') {
         setShowTextAgentMode(true)
-        return
-      }
-
-      if (action.id === 'voice-agent') {
-        setShowVoiceAgentMode(true)
         return
       }
 
@@ -163,9 +149,7 @@ export function ActionMenu({ selectedText, onClose, onReplace }: ActionMenuProps
     setMessages([])
     setShowCustomInput(false)
     setShowChatMode(false)
-    setShowCopilotMode(false)
     setShowTextAgentMode(false)
-    setShowVoiceAgentMode(false)
   }, [setMessages])
 
   const handleAgentSelect = useCallback(
@@ -192,7 +176,7 @@ export function ActionMenu({ selectedText, onClose, onReplace }: ActionMenuProps
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (showChatMode || showCopilotMode || showTextAgentMode || showVoiceAgentMode) return
+      if (showChatMode || showTextAgentMode) return
 
       if (e.key === 'Escape') {
         if (currentAction || showCustomInput) {
@@ -267,10 +251,6 @@ export function ActionMenu({ selectedText, onClose, onReplace }: ActionMenuProps
     inputRef.current?.focus()
   }, [])
 
-  if (showVoiceAgentMode) {
-    return <VoiceAgentPanel onBack={handleBack} onClose={onClose} />
-  }
-
   if (showTextAgentMode) {
     return (
       <TextAgentPanel
@@ -280,10 +260,6 @@ export function ActionMenu({ selectedText, onClose, onReplace }: ActionMenuProps
         onReplace={onReplace}
       />
     )
-  }
-
-  if (showCopilotMode) {
-    return <InterviewCopilotPanel onBack={handleBack} onClose={onClose} onReplace={onReplace} />
   }
 
   if (showChatMode) {

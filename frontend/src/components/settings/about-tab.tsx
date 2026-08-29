@@ -34,7 +34,7 @@ export function AboutTab() {
         {/* Description */}
         <p className="text-muted-foreground leading-relaxed font-light max-w-md">
           Your intelligent writing assistant. Enhance your workflow with AI-powered text
-          transformations, coding interview assistance, and persistent memory.
+          transformations, inline suggestions, and persistent memory.
         </p>
 
         {/* Footer */}

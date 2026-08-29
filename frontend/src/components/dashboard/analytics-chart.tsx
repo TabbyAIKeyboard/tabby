@@ -23,17 +23,13 @@ const chartConfig = {
     label: 'Chat',
     color: CHART_COLORS[1],
   },
-  Voice: {
-    label: 'Voice',
+  'Text Actions': {
+    label: 'Text Actions',
     color: CHART_COLORS[2],
-  },
-  Transcribe: {
-    label: 'Transcribe',
-    color: CHART_COLORS[3],
   },
   Other: {
     label: 'Other',
-    color: CHART_COLORS[4],
+    color: CHART_COLORS[3],
   },
 }
 

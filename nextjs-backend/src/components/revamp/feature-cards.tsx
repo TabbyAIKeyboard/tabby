@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { motion, useMotionTemplate, useMotionValue } from 'framer-motion'
-import { Brain, Keyboard, Monitor, Sparkles, MessageSquare, Zap, Mic, Eye } from 'lucide-react'
+import { Brain, Keyboard, Sparkles, MessageSquare, Zap, Eye } from 'lucide-react'
 import React, { MouseEvent } from 'react'
 import { BackgroundGrid } from './background-grid'
 import { Gutter } from './gutter'
@@ -14,12 +14,6 @@ interface FeatureCard {
 }
 
 const features: FeatureCard[] = [
-  {
-    title: 'Interview Copilot',
-    description:
-      'Screen capture, problem analysis, and real-time code suggestions for technical interviews.',
-    icon: <Monitor className="h-6 w-6" />,
-  },
   {
     title: 'Action Menu',
     description:
@@ -43,11 +37,6 @@ const features: FeatureCard[] = [
     description:
       'Visualize your cognitive architecture. Discover connections between snippets and past sessions.',
     icon: <Eye className="h-6 w-6" />,
-  },
-  {
-    title: 'Voice Agent',
-    description: 'Voice-to-text and text-to-voice for hands-free, natural AI interaction.',
-    icon: <Mic className="h-6 w-6" />,
   },
   {
     title: 'Intelligent Chat',
@@ -121,7 +110,7 @@ export function FeatureCards() {
             Powerful features
           </h2>
           <p className="text-lg text-neutral-400">
-            Everything you need to supercharge your coding workflow and ace interviews.
+            Everything you need to supercharge your writing and coding workflow.
           </p>
         </motion.div>
 

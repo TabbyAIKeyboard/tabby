@@ -11,14 +11,6 @@ export default function Home() {
           <li>/api/completion</li>
           <li>/api/suggest</li>
           <li>/api/suggest-inline</li>
-          <li>/api/speech</li>
-          <li>/api/transcribe</li>
-          <li>/api/voice-agent</li>
-          <li>/api/voice-command</li>
-          <li>/api/voice-generate</li>
-          <li>/api/interview-copilot</li>
-          <li>/api/interview-ghost-suggest</li>
-          <li>/api/prep-mode</li>
           <li>/api/dashboard/stats</li>
           <li>/api/dashboard/analytics</li>
           <li>/api/conversations/*</li>

@@ -22,13 +22,12 @@ const steps: Step[] = [
     number: '02',
     title: 'Learn the Shortcuts',
     description:
-      'Master Ctrl+\\ for actions, Alt+X for interview mode, and Ctrl+Space for suggestions.',
+      'Master Ctrl+\\ for actions, Ctrl+Alt+G for ghost text, and Ctrl+Space for suggestions.',
   },
   {
     number: '03',
-    title: 'Start Coding',
-    description:
-      'Use the Interview Copilot for real-time assistance or Ghost Text for autocomplete.',
+    title: 'Start Writing',
+    description: 'Use Ghost Text for inline autocomplete or the Action Menu for quick AI actions.',
   },
   {
     number: '04',

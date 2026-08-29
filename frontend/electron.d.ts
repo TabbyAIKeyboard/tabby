@@ -45,26 +45,6 @@ declare global {
       // Content Protection (Invisibility)
       getContentProtectionEnabled: () => Promise<boolean>
       setContentProtectionEnabled: (enabled: boolean) => void
-      // Voice Agent Panel
-      onVoiceAgentStart: (callback: () => void) => () => void
-      onVoiceAgentStop: (callback: () => void) => () => void
-      onVoiceAgentState: (callback: (data: { state: string }) => void) => () => void
-      onVoiceAgentReset: (callback: () => void) => () => void
-      onVoiceAgentTranscript: (
-        callback: (data: { role: string; text: string }) => void
-      ) => () => void
-      voiceAgentSessionStarted: () => void
-      voiceAgentSessionStopped: () => void
-      voiceAgentStateChange: (state: string) => void
-      voiceAgentHide: () => void
-      getVoiceAgentActive: () => Promise<boolean>
-      // Transcribe Mode
-      onTranscribeStart: (callback: () => void) => () => void
-      onTranscribeStop: (callback: () => void) => () => void
-      onTranscribeState: (callback: (data: { state: string }) => void) => () => void
-      onTranscribeAudioLevel: (callback: (data: { level: number }) => void) => () => void
-      sendTranscribeAudio: (audioBase64: string) => void
-      getTranscribeState: () => Promise<{ state: string }>
       // Model Settings
       getDefaultModel: () => Promise<string>
       setDefaultModel: (model: string) => void
