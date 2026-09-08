@@ -1,0 +1,1322 @@
+{
+  "dataset": "tabby_autocomplete_persona_seed",
+  "version": "2.0",
+  "note": "Synthetic test fixtures. All names, companies, institutions, datasets, hostnames, ticket handles and credentials are fabricated. Safe to commit.",
+  "personas": [
+    {
+      "id": "P1",
+      "name": "Rhea Menon",
+      "graph_shape": "dense, semantic, relation-rich",
+      "profile": {
+        "institution": "University of Edinburgh, School of Informatics",
+        "company": "Lingua Labs (part-time research intern, 2 days/week)",
+        "industry": "Higher education and NLP research",
+        "title": "Doctoral researcher, third year; Teaching assistant for INFR11125 Text Technologies",
+        "field_of_study": "Computational linguistics, specifically discourse coherence modelling in long documents",
+        "skills": [
+          "PyTorch",
+          "HuggingFace Transformers",
+          "Discourse parsing (RST and PDTB)",
+          "Annotation scheme design and inter-annotator agreement",
+          "LaTeX and BibTeX",
+          "Python data pipelines with pandas",
+          "Mixed-effects statistical modelling in R",
+          "Academic peer review",
+          "Malayalam and Hindi linguistic annotation"
+        ],
+        "interests": [
+          "Coherence modelling beyond sentence pairs",
+          "Low-resource NLP for Dravidian languages",
+          "Reproducibility and dataset documentation",
+          "Hillwalking in the Pentlands",
+          "Filter coffee and single-origin roasts",
+          "Academic publishing reform"
+        ],
+        "goals": [
+          "Submit thesis Chapter 4 draft to advisor by 15 November",
+          "Get the ACL NORA submission in before the 22 October deadline",
+          "Release the CoheReD-v2 dataset under CC BY-SA with a datasheet",
+          "Start postdoc applications in January",
+          "Recruit two more Malayalam annotators before the pilot closes"
+        ]
+      },
+      "graph_seed": {
+        "approx_memory_count": 640,
+        "dominant_memory_types": ["SEMANTIC", "LONG_TERM"],
+        "sample_memories": [
+          {
+            "type": "SEMANTIC",
+            "text": "Rhea's primary dataset is CoheReD-v2, 4,120 annotated academic abstracts with span-level coherence labels."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "Her proposed method is called SpanRank; the ablated variant without relation features is SpanRank-flat."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "Her advisor is Prof. Helena Broughton; her second supervisor is Dr. Tomas Reinhardt."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "Frequent coauthors: Yuki Tanabe (Kyoto), Priya Raghavan (IIT Madras)."
+          },
+          {
+            "type": "LONG_TERM",
+            "text": "Recurring claim: entity-grid baselines degrade sharply past 500 tokens, which motivates the span-level formulation."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "Baselines she always compares against: Barzilay and Lapata entity grid, LongCoh, and a fine-tuned Longformer."
+          },
+          {
+            "type": "LONG_TERM",
+            "text": "She reports Krippendorff's alpha rather than Cohen's kappa because her annotation has three annotators."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "Cluster access is on the 'artemis' GPU partition, jobs submitted through Slurm with the account code inf-nlp-24."
+          },
+          {
+            "type": "LONG_TERM",
+            "text": "Reviewer 2 on her last submission argued the entity-grid baseline was undertuned; she now reports a tuned and untuned variant of every baseline."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "CoheReD-v2 was annotated by three annotators with Krippendorff's alpha of 0.71 on the span-level labels."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "She is a teaching assistant for INFR11125 Text Technologies, tutorial group 4, Thursdays."
+          },
+          {
+            "type": "PROCEDURAL",
+            "text": "Cluster jobs: sbatch on the artemis partition, account inf-nlp-24, always with --time=08:00:00 because the default walltime kills long runs."
+          },
+          {
+            "type": "LONG_TERM",
+            "text": "Yuki Tanabe handles the figures and plotting on their joint papers; Rhea writes the analysis sections."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "She walks with a Sunday group in the Pentlands, usually meeting at Flotterstone."
+          }
+        ]
+      },
+      "tasks": [
+        {
+          "task_id": "P1-T1",
+          "title": "Draft the Related Work paragraph on coherence baselines",
+          "surface": "Overleaf (browser)",
+          "duration_minutes": 20,
+          "context_given_to_participant": "Continue the Related Work section of your ACL submission. Cover the entity-grid line of work and explain why it motivates your method.",
+          "typed_prefix": "Entity-based approaches to local coherence originate with the entity grid of ",
+          "expected_completion": "Barzilay and Lapata (2008), which represents a document as a matrix of entity mentions and their grammatical roles across sentences.",
+          "target_memories": [
+            "Baselines she always compares against",
+            "Recurring claim about entity-grid degradation"
+          ],
+          "memory_type_expected": "SEMANTIC",
+          "tests": "Acceptance on citation and technical noun phrases; low post-acceptance edit distance; long time-to-decision because the citation is verified before accepting."
+        },
+        {
+          "task_id": "P1-T2",
+          "title": "Weekly progress email to advisor",
+          "surface": "Email (webmail)",
+          "duration_minutes": 10,
+          "context_given_to_participant": "Write your Friday update to your supervisor covering this week's experiments and what is blocking you.",
+          "typed_prefix": "Hi Helena,\n\nQuick update before Monday. I finished the ablation on ",
+          "expected_completion": "SpanRank-flat and the relation features account for roughly 3.4 F1 on CoheReD-v2, so the gain is not coming from model size alone.",
+          "target_memories": [
+            "Advisor is Prof. Helena Broughton",
+            "SpanRank / SpanRank-flat naming",
+            "CoheReD-v2"
+          ],
+          "memory_type_expected": "SEMANTIC",
+          "tests": "Whether relation edges (person -> supervises -> person, method -> ablation_of -> method) surface correctly under KG-ON."
+        },
+        {
+          "task_id": "P1-T3",
+          "title": "Annotate a paper in the reference manager",
+          "surface": "Zotero note field",
+          "duration_minutes": 8,
+          "context_given_to_participant": "Write a short note on a paper you have just read, in the style of your existing notes, so future-you knows whether to cite it.",
+          "typed_prefix": "Relevant to Ch. 4. Uses a sliding window rather than a global grid, so it sidesteps the ",
+          "expected_completion": "length degradation problem I raise against entity-grid baselines past 500 tokens. Worth citing as a partial precedent rather than a competitor.",
+          "target_memories": [
+            "Recurring claim: entity-grid baselines degrade past 500 tokens",
+            "Chapter 4 deadline"
+          ],
+          "memory_type_expected": "LONG_TERM",
+          "tests": "Whether a recurring argument (not a named entity) is retrievable and accepted."
+        },
+        {
+          "task_id": "P1-T4",
+          "title": "Draft a rebuttal to a reviewer comment",
+          "surface": "OpenReview response box",
+          "duration_minutes": 15,
+          "context_given_to_participant": "Respond to a reviewer who says your entity-grid baseline was not tuned properly.",
+          "typed_prefix": "We thank R2 for the point on baseline tuning. In the revision we report ",
+          "expected_completion": "both a tuned and an untuned entity-grid variant; the gap to SpanRank narrows by 1.1 F1 but does not close.",
+          "target_memories": [
+            "Reviewer 2 baseline tuning objection",
+            "SpanRank naming",
+            "Baseline list"
+          ],
+          "memory_type_expected": "LONG_TERM",
+          "staleness_trap": false,
+          "tests": "Whether a remembered past criticism, not an entity, is retrieved and shapes the completion."
+        },
+        {
+          "task_id": "P1-T5",
+          "title": "Write a cluster job submission script",
+          "surface": "Terminal",
+          "duration_minutes": 8,
+          "context_given_to_participant": "Submit a training run to the GPU cluster with your usual settings.",
+          "typed_prefix": "$ sbatch --partition=",
+          "expected_completion": "artemis --account=inf-nlp-24 --time=08:00:00 train_spanrank.sh",
+          "target_memories": [
+            "Cluster access on artemis partition",
+            "Slurm walltime habit"
+          ],
+          "memory_type_expected": "PROCEDURAL",
+          "staleness_trap": false,
+          "tests": "Cross-type control: does a semantic-dominant graph still surface its few procedural items?"
+        },
+        {
+          "task_id": "P1-T6",
+          "title": "Write the datasheet section for the dataset release",
+          "surface": "Overleaf (browser)",
+          "duration_minutes": 18,
+          "context_given_to_participant": "Describe annotation procedure and agreement for the dataset appendix.",
+          "typed_prefix": "CoheReD-v2 contains 4,120 academic abstracts annotated by ",
+          "expected_completion": "three annotators, with Krippendorff's alpha of 0.71 on span-level coherence labels.",
+          "target_memories": [
+            "CoheReD-v2 size",
+            "Three annotators and alpha 0.71",
+            "Reports alpha not kappa"
+          ],
+          "memory_type_expected": "SEMANTIC",
+          "staleness_trap": false,
+          "tests": "Numeric fact recall. Wrong numbers should be dismissed fast, which separates retrieval error from phrasing error."
+        },
+        {
+          "task_id": "P1-T7",
+          "title": "Email to recruit annotators",
+          "surface": "Email (webmail)",
+          "duration_minutes": 12,
+          "context_given_to_participant": "Write to a mailing list looking for two Malayalam-speaking annotators.",
+          "typed_prefix": "I am looking for two annotators with native or near-native Malayalam for a ",
+          "expected_completion": "span-level coherence annotation task, roughly six hours of work, paid at the school's standard rate.",
+          "target_memories": [
+            "Goal: recruit two Malayalam annotators",
+            "Low-resource Dravidian NLP interest"
+          ],
+          "memory_type_expected": "SEMANTIC",
+          "staleness_trap": false,
+          "tests": "Whether goal-type memories are retrievable at all, or only entity and claim memories."
+        },
+        {
+          "task_id": "P1-T8",
+          "title": "Leave feedback on a student assignment",
+          "surface": "VLE comment box",
+          "duration_minutes": 10,
+          "context_given_to_participant": "Comment on a tutorial submission for the course you teach.",
+          "typed_prefix": "Good use of the evaluation section. For tutorial 4 next week, bring ",
+          "expected_completion": "your confusion matrix so we can go through the precision-recall tradeoff together.",
+          "target_memories": ["TA for INFR11125, tutorial group 4"],
+          "memory_type_expected": "SEMANTIC",
+          "staleness_trap": false,
+          "tests": "Weak-support control within a strong graph: only one relevant memory exists, so the delta should be small."
+        },
+        {
+          "task_id": "P1-T9",
+          "title": "Message a coauthor about a figure",
+          "surface": "Slack DM",
+          "duration_minutes": 6,
+          "context_given_to_participant": "Ask your coauthor to redo a plot before the deadline.",
+          "typed_prefix": "Can you redo figure 3 with the tuned baselines included? Deadline is ",
+          "expected_completion": "the 22nd, and you usually want two days for plots, so anything before Friday works.",
+          "target_memories": [
+            "Yuki handles figures",
+            "ACL deadline 22 October"
+          ],
+          "memory_type_expected": "EPISODIC",
+          "staleness_trap": false,
+          "tests": "Relation traversal: person -> role -> deliverable, plus a date from a goal memory."
+        },
+        {
+          "task_id": "P1-T10",
+          "title": "Reply to a weekend hiking email",
+          "surface": "Email (webmail)",
+          "duration_minutes": 5,
+          "context_given_to_participant": "Answer a friend asking whether you are coming on Sunday.",
+          "typed_prefix": "Yes, count me in. Usual meeting point at ",
+          "expected_completion": "Flotterstone, though I may be slow, the chapter draft has eaten my week.",
+          "target_memories": ["Sunday walking group at Flotterstone"],
+          "memory_type_expected": "SEMANTIC",
+          "staleness_trap": false,
+          "tests": "Off-domain control. A dense research graph should give almost no benefit here; a large delta suggests over-retrieval."
+        }
+      ],
+      "study_design": {
+        "graph_signature": "Roughly eighteen months of accumulated use. Deep and narrow: method names, dataset names, coauthors, recurring claims, and the relations between them are well populated in Neo4j.",
+        "typing_surfaces": [
+          "Overleaf in the browser",
+          "Zotero reference manager notes",
+          "Email to advisor"
+        ],
+        "why_in_study": "Provides the upper bound case for relation based retrieval. If graph grounding never helps here, it is unlikely to help anywhere.",
+        "expected_behavioral_signature": "Largest acceptance gain under KG-ON, concentrated on noun phrases and citations. Low post acceptance edit distance. Time to decision runs long because verifying a retrieved citation costs more than skimming a generic phrase.",
+        "instrumentation_note": "Best case for memory type attribution: retrieved items are almost all semantic, so a mixed attribution profile would flag a retrieval bug rather than a user difference.",
+        "ethical_handling": "Buffer contains unpublished results. Logging is scoped to declared drafting sessions and the trace is reviewed before analysis.",
+        "measure_stressed": "Acceptance on technical spans",
+        "expected_kg_on_delta": "Large and positive",
+        "sparse_failure_mode_note": ""
+      }
+    },
+    {
+      "id": "P2",
+      "name": "Daniel Okoro",
+      "graph_shape": "broad, episodic, high churn",
+      "profile": {
+        "institution": "University of Lagos, BSc Computer Science; Kellogg, Product Management certificate",
+        "company": "Ferrolane",
+        "industry": "B2B SaaS, freight and logistics analytics",
+        "title": "Head of Product (team of nine: four engineers, two designers, two analysts, one PMM)",
+        "field_of_study": "Computer science, with later coursework in operations and pricing strategy",
+        "skills": [
+          "Product discovery and customer interviews",
+          "Roadmap prioritisation (RICE)",
+          "Linear and Jira administration",
+          "SQL for product analytics",
+          "Amplitude and dashboard design",
+          "Pricing and packaging",
+          "Sprint facilitation",
+          "Written async communication"
+        ],
+        "interests": [
+          "Async-first team operations",
+          "Pricing psychology",
+          "Logistics and port infrastructure",
+          "Five-a-side football on Wednesdays",
+          "Long-form business podcasts",
+          "Mentoring junior PMs"
+        ],
+        "goals": [
+          "Ship the Route Compare beta to twelve design partners by end of Q3",
+          "Cut time-to-first-value for new accounts from 11 days to under 5",
+          "Close the Series A bridge before December",
+          "Hire a second backend engineer",
+          "Reduce meeting load to under 10 hours per week"
+        ]
+      },
+      "graph_seed": {
+        "approx_memory_count": 410,
+        "dominant_memory_types": ["EPISODIC", "SHORT_TERM"],
+        "sample_memories": [
+          {
+            "type": "EPISODIC",
+            "stored_days_ago": 3,
+            "text": "On Monday the team agreed to cut the CSV export from the Route Compare beta and ship it in the following release.",
+            "stale": false
+          },
+          {
+            "type": "SHORT_TERM",
+            "stored_days_ago": 2,
+            "text": "The beta launch date is 30 September.",
+            "stale": false
+          },
+          {
+            "type": "EPISODIC",
+            "stored_days_ago": 21,
+            "text": "Priya Nair is running the design partner interviews.",
+            "stale": true,
+            "staleness_note": "Priya moved to the onboarding workstream two weeks ago; Marcus Ellery now runs the interviews. Correct when stored, wrong now."
+          },
+          {
+            "type": "EPISODIC",
+            "stored_days_ago": 30,
+            "text": "The beta launch date is 12 September.",
+            "stale": true,
+            "staleness_note": "Superseded by the 30 September date. Deliberate contradiction pair for staleness testing."
+          },
+          {
+            "type": "SHORT_TERM",
+            "stored_days_ago": 5,
+            "text": "Ticket handles in use this sprint: FER-412 (route diff engine), FER-418 (partner onboarding), FER-431 (billing webhook retry)."
+          },
+          {
+            "type": "EPISODIC",
+            "stored_days_ago": 6,
+            "text": "Yemi Adeyemi flagged that the billing webhook retries are silently dropping after three attempts."
+          },
+          {
+            "type": "SEMANTIC",
+            "stored_days_ago": 90,
+            "text": "Ferrolane's design partners include Coastway Freight, Meridian Haulage and Tarrant Logistics."
+          },
+          {
+            "type": "EPISODIC",
+            "stored_days_ago": 24,
+            "text": "The team agreed to move daily standup to 09:30.",
+            "stale": true,
+            "staleness_note": "Reversed after two weeks; standup went back to 09:15. Contradiction pair with the memory below."
+          },
+          {
+            "type": "EPISODIC",
+            "stored_days_ago": 4,
+            "text": "Standup is back at 09:15 after the 09:30 experiment was dropped.",
+            "stale": false
+          },
+          {
+            "type": "SEMANTIC",
+            "stored_days_ago": 150,
+            "text": "Yemi Adeyemi is a backend engineer who joined Ferrolane in March and owns the billing surface."
+          },
+          {
+            "type": "EPISODIC",
+            "stored_days_ago": 8,
+            "text": "Coastway Freight asked for CSV export specifically and was told it lands in the release after the beta."
+          },
+          {
+            "type": "SHORT_TERM",
+            "stored_days_ago": 1,
+            "text": "Marcus Ellery now runs the design partner interviews, taking over from Priya Nair."
+          }
+        ]
+      },
+      "tasks": [
+        {
+          "task_id": "P2-T1",
+          "title": "Weekly Slack update to the whole team",
+          "surface": "Slack (#general)",
+          "duration_minutes": 12,
+          "context_given_to_participant": "Post your Friday update. Cover what shipped, what slipped, and what is happening next week.",
+          "typed_prefix": "Weekly update :rolled_up_newspaper:\n\nShipped: route diff engine is behind a flag in staging. Slipped: ",
+          "expected_completion": "the billing webhook retry (FER-431) is still open, Yemi found it drops silently after three attempts.",
+          "target_memories": [
+            "Ticket handles this sprint",
+            "Yemi's webhook retry flag"
+          ],
+          "memory_type_expected": "SHORT_TERM",
+          "tests": "High acceptance on short factual spans: ticket handles, colleague names."
+        },
+        {
+          "task_id": "P2-T2",
+          "title": "Write the description on a new issue tracker ticket",
+          "surface": "Linear (issue description field)",
+          "duration_minutes": 8,
+          "context_given_to_participant": "File the ticket for the onboarding checklist work discussed this week and assign an owner.",
+          "typed_prefix": "Follow-on from the partner onboarding thread. Owner: ",
+          "expected_completion": "Priya Nair, who is running the design partner interviews.",
+          "target_memories": [
+            "Priya Nair runs design partner interviews (STALE)"
+          ],
+          "memory_type_expected": "EPISODIC",
+          "staleness_trap": true,
+          "tests": "The key case: the memory is factually accurate as stored but wrong today. Expect dismissal despite retrieval confidence. Log retrieval timestamp alongside the dismissal."
+        },
+        {
+          "task_id": "P2-T3",
+          "title": "Investor update email",
+          "surface": "Email (Gmail)",
+          "duration_minutes": 15,
+          "context_given_to_participant": "Draft the monthly update to your seed investors. Include the beta timeline and named design partners.",
+          "typed_prefix": "Hi all,\n\nAugust in brief. Route Compare beta is on track for ",
+          "expected_completion": "12 September with three design partners confirmed: Coastway Freight, Meridian Haulage and Tarrant Logistics.",
+          "target_memories": [
+            "Beta launch date 12 September (STALE)",
+            "Beta launch date 30 September (CURRENT)",
+            "Design partner list"
+          ],
+          "memory_type_expected": "EPISODIC + SEMANTIC",
+          "staleness_trap": true,
+          "tests": "Contradiction pair. Whether the graph surfaces the newer date or the older one, and whether the participant accepts the partner list (stable semantic fact) while rejecting the date in the same span."
+        },
+        {
+          "task_id": "P2-T4",
+          "title": "Post the daily standup note",
+          "surface": "Slack (#standup)",
+          "duration_minutes": 5,
+          "context_given_to_participant": "Write your async standup for today.",
+          "typed_prefix": "Yesterday: reviewed the route diff PR. Today: unblocking billing. Standup is at ",
+          "expected_completion": "09:30 as agreed.",
+          "target_memories": [
+            "Standup moved to 09:30 (STALE)",
+            "Standup back at 09:15 (CURRENT)"
+          ],
+          "memory_type_expected": "EPISODIC",
+          "staleness_trap": true,
+          "tests": "Second contradiction pair. Tests whether recency ordering generalises beyond the launch-date case."
+        },
+        {
+          "task_id": "P2-T5",
+          "title": "Reply to a design partner",
+          "surface": "Email (Gmail)",
+          "duration_minutes": 12,
+          "context_given_to_participant": "Answer Coastway Freight asking again about CSV export.",
+          "typed_prefix": "Thanks for chasing. CSV export is not in the beta, it lands ",
+          "expected_completion": "in the release straight after, which is what we discussed on the 28th.",
+          "target_memories": [
+            "CSV export cut from beta",
+            "Coastway asked for CSV export"
+          ],
+          "memory_type_expected": "EPISODIC",
+          "staleness_trap": false,
+          "tests": "Mixes a stable semantic fact (partner name) with a fresh episodic one in a single span."
+        },
+        {
+          "task_id": "P2-T6",
+          "title": "Write the scope section of a PRD",
+          "surface": "Notion document",
+          "duration_minutes": 20,
+          "context_given_to_participant": "Define what is and is not in the Route Compare beta.",
+          "typed_prefix": "Out of scope for the beta: ",
+          "expected_completion": "CSV export, custom date ranges, and anything touching billing until FER-431 is closed.",
+          "target_memories": [
+            "CSV export cut",
+            "FER-431 billing webhook retry"
+          ],
+          "memory_type_expected": "SHORT_TERM",
+          "staleness_trap": false,
+          "tests": "Multi-memory composition. Watch whether all three retrieved items land in one accepted span."
+        },
+        {
+          "task_id": "P2-T7",
+          "title": "Draft a performance review note",
+          "surface": "HR tool text field",
+          "duration_minutes": 15,
+          "context_given_to_participant": "Write mid-year feedback for a backend engineer on your team.",
+          "typed_prefix": "Yemi has owned the billing surface since ",
+          "expected_completion": "joining in March and caught the silent webhook retry failure before any customer reported it.",
+          "target_memories": [
+            "Yemi joined in March, owns billing",
+            "Yemi flagged webhook retries"
+          ],
+          "memory_type_expected": "SEMANTIC",
+          "staleness_trap": false,
+          "tests": "Ethical stress case. Completions name a colleague and make evaluative claims; the pseudonymisation step is exercised here."
+        },
+        {
+          "task_id": "P2-T8",
+          "title": "Close out a ticket with a comment",
+          "surface": "Linear (comment)",
+          "duration_minutes": 6,
+          "context_given_to_participant": "Comment on the billing ticket explaining the fix and closing it.",
+          "typed_prefix": "Fixed in the retry handler. Root cause was what ",
+          "expected_completion": "Yemi flagged: retries dropped silently after three attempts with no dead-letter path.",
+          "target_memories": ["Yemi's webhook flag", "FER-431"],
+          "memory_type_expected": "EPISODIC",
+          "staleness_trap": false,
+          "tests": "Short factual span with a ticket handle. Expect the highest acceptance and lowest edit distance of his ten tasks."
+        },
+        {
+          "task_id": "P2-T9",
+          "title": "Write a job description",
+          "surface": "Hiring tool",
+          "duration_minutes": 18,
+          "context_given_to_participant": "Draft the opening for a second backend engineer role.",
+          "typed_prefix": "We are a team of nine building freight analytics, and we are hiring a ",
+          "expected_completion": "second backend engineer to own the billing and integrations surface alongside Yemi.",
+          "target_memories": [
+            "Team of nine",
+            "Goal: hire a second backend engineer",
+            "Yemi owns billing"
+          ],
+          "memory_type_expected": "SEMANTIC",
+          "staleness_trap": false,
+          "tests": "Goal-type retrieval on a surface he uses rarely, which tests whether benefit tracks graph content or surface familiarity."
+        },
+        {
+          "task_id": "P2-T10",
+          "title": "Reschedule a meeting over Slack",
+          "surface": "Slack DM",
+          "duration_minutes": 4,
+          "context_given_to_participant": "Tell a report you need to move your one-to-one.",
+          "typed_prefix": "Can we push our 1:1? I have the partner interview sync with ",
+          "expected_completion": "Priya right after standup.",
+          "target_memories": [
+            "Priya runs interviews (STALE)",
+            "Marcus now runs interviews (CURRENT)"
+          ],
+          "memory_type_expected": "EPISODIC",
+          "staleness_trap": true,
+          "tests": "Third staleness trap, on a very short span. Tests whether span length changes how a stale entity is treated."
+        }
+      ],
+      "study_design": {
+        "graph_signature": "Broad and shallow, with high turnover. People, meetings, decisions, deadlines, ticket handles. Many memories are correct on Monday and stale by Friday.",
+        "typing_surfaces": ["Slack", "Linear issue tracker fields", "Email"],
+        "why_in_study": "Separates relevance from recency. He is the only participant for whom a factually accurate memory can still produce a rejected completion.",
+        "expected_behavioral_signature": "High acceptance on short factual completions such as names, dates and project handles. Dismissals cluster on stale entries, so the acceptance and edit distance pair should diverge more here than for any other participant.",
+        "instrumentation_note": "Motivates logging retrieval timestamps alongside memory type, so staleness can be read off the trace without a new instrument.",
+        "ethical_handling": "Completions routinely name colleagues who did not consent. Third party names are pseudonymised before any release.",
+        "measure_stressed": "Acceptance against staleness",
+        "expected_kg_on_delta": "Positive but uneven",
+        "sparse_failure_mode_note": ""
+      }
+    },
+    {
+      "id": "P3",
+      "name": "Iman Haddad",
+      "graph_shape": "procedural, binary correctness",
+      "profile": {
+        "institution": "American University of Beirut, BEng Computer and Communications Engineering",
+        "company": "Self-employed, trading as Haddad Systems; four concurrent clients",
+        "industry": "Cloud infrastructure and platform engineering consulting",
+        "title": "Freelance infrastructure engineer / SRE consultant",
+        "field_of_study": "Computer and communications engineering; self-taught in distributed systems",
+        "skills": [
+          "Terraform and OpenTofu",
+          "Kubernetes and Helm",
+          "AWS (EKS, IAM, VPC design)",
+          "GitHub Actions and GitLab CI",
+          "Bash and Python tooling",
+          "Prometheus, Grafana, Loki",
+          "PostgreSQL operations and failover drills",
+          "Incident response and postmortem writing",
+          "Zero-downtime migration planning"
+        ],
+        "interests": [
+          "Reproducible builds and Nix",
+          "Cost optimisation for small teams",
+          "Mechanical keyboards",
+          "Open source contribution on weekends",
+          "Bouldering",
+          "Arabic calligraphy"
+        ],
+        "goals": [
+          "Reduce active clients from four to three and raise the day rate",
+          "Standardise a reusable Terraform module set across all clients",
+          "Get the Orbital Freight migration off EC2 and onto EKS by November",
+          "Publish a runbook template as an open source repo",
+          "Stop working Fridays by Q1"
+        ]
+      },
+      "graph_seed": {
+        "approx_memory_count": 520,
+        "dominant_memory_types": ["PROCEDURAL"],
+        "sample_memories": [
+          {
+            "type": "PROCEDURAL",
+            "text": "Client Orbital Freight: staging cluster is orb-stg-euw1, production is orb-prd-euw1. Deploys go through 'make deploy ENV=stg' never kubectl apply directly."
+          },
+          {
+            "type": "PROCEDURAL",
+            "text": "Client Northwind Retail: uses GitLab CI, not GitHub Actions. Terraform state is in a GCS bucket, workspace names are prefixed nw-."
+          },
+          {
+            "type": "PROCEDURAL",
+            "text": "Client Calder Health: HIPAA-adjacent. No production access from personal laptop; always jump through the bastion at bastion.calder.internal with the yubikey."
+          },
+          {
+            "type": "PROCEDURAL",
+            "text": "Client Vantage Media: legacy, still on Docker Compose. Restart order is postgres, then redis, then api, then worker."
+          },
+          {
+            "type": "PROCEDURAL",
+            "text": "Iman's standard rollback sequence: helm rollback <release> <previous-revision> --wait, then verify with kubectl rollout status, then post in the client channel."
+          },
+          {
+            "type": "PROCEDURAL",
+            "text": "He always runs terraform plan -out=tfplan and applies the saved plan file, never a bare terraform apply."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "Naming convention across his clients: <client-prefix>-<env>-<region-short>, region-short uses euw1, use1, aps1."
+          },
+          {
+            "type": "PROCEDURAL",
+            "text": "Calder Health postmortems use a blameless template kept in the calder-runbooks repo under templates/postmortem.md."
+          },
+          {
+            "type": "PROCEDURAL",
+            "text": "Invoices go out on the first of the month, NET 15, raised in Wave with the client PO number in the reference field."
+          },
+          {
+            "type": "PROCEDURAL",
+            "text": "Orbital Freight incident channel is #orb-incidents; he posts a status line there before and after every rollback."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "His reusable Terraform module set lives in the haddad-systems/tf-modules repo, versioned with git tags like v0.4.2."
+          }
+        ]
+      },
+      "tasks": [
+        {
+          "task_id": "P3-T1",
+          "title": "Run a staging deploy for a client",
+          "surface": "Terminal",
+          "duration_minutes": 10,
+          "context_given_to_participant": "Deploy the current branch to Orbital Freight staging using the client's normal procedure.",
+          "typed_prefix": "$ make deploy ENV=",
+          "expected_completion": "stg CLUSTER=orb-stg-euw1",
+          "target_memories": [
+            "Orbital Freight cluster naming",
+            "Deploys go through make, not kubectl"
+          ],
+          "memory_type_expected": "PROCEDURAL",
+          "tests": "Cheapest possible verification. Expect fast, bimodal time-to-decision and near-zero edit distance."
+        },
+        {
+          "task_id": "P3-T2",
+          "title": "Write a pull request description for a Terraform change",
+          "surface": "GitHub PR body",
+          "duration_minutes": 12,
+          "context_given_to_participant": "Describe a change that adds a second node group to the Northwind Retail cluster, including how you verified it.",
+          "typed_prefix": "## What\nAdds a second node group to the nw-prd cluster.\n\n## How I verified\nRan ",
+          "expected_completion": "terraform plan -out=tfplan against the nw-prd workspace and applied the saved plan file. GitLab CI pipeline green.",
+          "target_memories": [
+            "Northwind uses GitLab CI not GitHub Actions",
+            "Always plan -out then apply the plan file",
+            "nw- workspace prefix"
+          ],
+          "memory_type_expected": "PROCEDURAL",
+          "tests": "Cross-client interference: does the graph correctly scope 'GitLab CI' to Northwind rather than pulling Orbital's GitHub Actions habit?"
+        },
+        {
+          "task_id": "P3-T3",
+          "title": "Add a comment to a runbook during an incident",
+          "surface": "Code comment / runbook markdown",
+          "duration_minutes": 8,
+          "context_given_to_participant": "The Vantage Media stack came back up in the wrong order. Document the correct sequence in the runbook.",
+          "typed_prefix": "# Restart order matters here. Bring services up as: ",
+          "expected_completion": "postgres, then redis, then api, then worker. Starting the worker before redis leaves it in a crash loop.",
+          "target_memories": ["Vantage Media restart order"],
+          "memory_type_expected": "PROCEDURAL",
+          "tests": "Ordered-sequence retrieval. A partially correct order should be dismissed outright rather than repaired, which is the edit-distance-near-zero prediction."
+        },
+        {
+          "task_id": "P3-T4",
+          "title": "Roll back a bad release",
+          "surface": "Terminal",
+          "duration_minutes": 6,
+          "context_given_to_participant": "Production is degraded after a deploy. Roll back to the previous revision.",
+          "typed_prefix": "$ helm rollback route-api ",
+          "expected_completion": "14 --wait && kubectl rollout status deploy/route-api -n orb-prd-euw1",
+          "target_memories": [
+            "Standard rollback sequence",
+            "Orbital production cluster name"
+          ],
+          "memory_type_expected": "PROCEDURAL",
+          "staleness_trap": false,
+          "tests": "Ordered multi-step procedure under time pressure. Fastest expected time-to-decision in the study."
+        },
+        {
+          "task_id": "P3-T5",
+          "title": "Open a session on a restricted client",
+          "surface": "Terminal",
+          "duration_minutes": 5,
+          "context_given_to_participant": "Get access to Calder Health production to investigate an alert.",
+          "typed_prefix": "$ ssh -J ",
+          "expected_completion": "bastion.calder.internal calder-prd-use1 # yubikey touch required",
+          "target_memories": [
+            "Calder bastion and yubikey rule",
+            "Naming convention"
+          ],
+          "memory_type_expected": "PROCEDURAL",
+          "staleness_trap": false,
+          "tests": "Security-scoped memory. A completion that skips the bastion is a correctness failure, not a style one."
+        },
+        {
+          "task_id": "P3-T6",
+          "title": "Write a postmortem",
+          "surface": "Markdown document",
+          "duration_minutes": 25,
+          "context_given_to_participant": "Document last night's incident for the client.",
+          "typed_prefix": "Following the blameless template in ",
+          "expected_completion": "calder-runbooks under templates/postmortem.md. Impact window was 23:10 to 23:52 UTC.",
+          "target_memories": ["Calder blameless postmortem template location"],
+          "memory_type_expected": "PROCEDURAL",
+          "staleness_trap": false,
+          "tests": "Long-form procedural surface. Tests whether edit distance stays near zero when the accepted span is prose, not a command."
+        },
+        {
+          "task_id": "P3-T7",
+          "title": "Raise a client invoice",
+          "surface": "Wave invoicing form",
+          "duration_minutes": 8,
+          "context_given_to_participant": "Invoice a client for last month's work.",
+          "typed_prefix": "Terms: NET 15, issued on the 1st, reference ",
+          "expected_completion": "the client PO number in the reference field as usual.",
+          "target_memories": [
+            "Invoice procedure: NET 15, Wave, PO in reference"
+          ],
+          "memory_type_expected": "PROCEDURAL",
+          "staleness_trap": false,
+          "tests": "Non-technical procedural memory. Separates 'procedural' from 'terminal-shaped' in the memory-type attribution."
+        },
+        {
+          "task_id": "P3-T8",
+          "title": "Write a module README",
+          "surface": "Markdown in repo",
+          "duration_minutes": 15,
+          "context_given_to_participant": "Document a Terraform module for reuse across clients.",
+          "typed_prefix": "Consume this module by pinning a tag from ",
+          "expected_completion": "haddad-systems/tf-modules, for example v0.4.2, never by tracking main.",
+          "target_memories": ["tf-modules repo and tagging convention"],
+          "memory_type_expected": "SEMANTIC",
+          "staleness_trap": false,
+          "tests": "Convention recall rather than command recall, on the same persona. Useful contrast pair with P3-T1."
+        },
+        {
+          "task_id": "P3-T9",
+          "title": "Post an incident status line",
+          "surface": "Slack (#orb-incidents)",
+          "duration_minutes": 3,
+          "context_given_to_participant": "Tell the client channel you are starting a rollback.",
+          "typed_prefix": "Starting rollback on route-api now, posting again when ",
+          "expected_completion": "rollout status is green. Expect two to three minutes of mixed responses.",
+          "target_memories": [
+            "Posts status before and after every rollback",
+            "Orbital incident channel"
+          ],
+          "memory_type_expected": "PROCEDURAL",
+          "staleness_trap": false,
+          "tests": "Very short span with a strong habit memory behind it. Ceiling case for acceptance rate."
+        },
+        {
+          "task_id": "P3-T10",
+          "title": "Deploy without naming the client",
+          "surface": "Terminal",
+          "duration_minutes": 6,
+          "context_given_to_participant": "Deploy the branch you have open. The prompt does not say which client it belongs to.",
+          "typed_prefix": "$ terraform apply ",
+          "expected_completion": "-- AMBIGUOUS: correct completion depends on which client context is inferred",
+          "target_memories": ["All four client procedural sets"],
+          "memory_type_expected": "PROCEDURAL",
+          "staleness_trap": false,
+          "tests": "Deliberate cross-client interference trap. Any completion is wrong unless the client is inferred from the working directory; also tests his plan-file-only habit against a bare apply."
+        }
+      ],
+      "study_design": {
+        "graph_signature": "Command sequences, config conventions, repository and host naming, per client ordering of routine operations.",
+        "typing_surfaces": [
+          "Terminal",
+          "Code comments and runbooks",
+          "Pull request descriptions"
+        ],
+        "why_in_study": "Correctness is visible at a glance, so accept and dismiss approach a clean relevance judgment with almost no deliberation cost.",
+        "expected_behavioral_signature": "Fastest and most bimodal time to decision. Edit distance close to zero on accepted suggestions, since a partly correct command is usually discarded rather than repaired. Sharpest KG-ON against KG-OFF separation.",
+        "instrumentation_note": "Useful calibration point for the time to decision measure, which is otherwise hard to interpret without a task where verification is known to be cheap.",
+        "ethical_handling": "Terminal buffers can contain tokens and client identifiers. The pause control is exercised routinely rather than treated as an edge case.",
+        "measure_stressed": "Time to decision",
+        "expected_kg_on_delta": "Large and sharply separated",
+        "sparse_failure_mode_note": ""
+      }
+    },
+    {
+      "id": "P4",
+      "name": "Sofia Lindqvist",
+      "graph_shape": "stylistic, voice-oriented",
+      "profile": {
+        "institution": "Stockholm University, MA Literary Studies; Columbia Journalism School, non-degree fellowship",
+        "company": "Independent; publishes the newsletter 'The Long Way Round' (approx. 14,000 subscribers), occasional freelance for magazines",
+        "industry": "Independent publishing and media",
+        "title": "Essayist and newsletter writer; occasional book critic",
+        "field_of_study": "Literary studies, with a focus on twentieth-century essay form",
+        "skills": [
+          "Long-form essay structure",
+          "Interviewing and reported narrative",
+          "Line editing and self-editing",
+          "Audience growth and reader surveys",
+          "Newsletter operations and paid conversion",
+          "Swedish to English literary translation",
+          "Public speaking at literary festivals"
+        ],
+        "interests": [
+          "Urbanism and walkable cities",
+          "The ethics of attention and distraction",
+          "Nordic post-war architecture",
+          "Cold water swimming",
+          "Second-hand bookshops",
+          "Slow travel by rail"
+        ],
+        "goals": [
+          "Hold the Thursday 07:00 publishing cadence for the full year",
+          "Convert 6 percent of free subscribers to paid",
+          "Finish the essay collection proposal by March",
+          "Write one reported piece per quarter rather than only reflective ones",
+          "Stop rewriting openings more than three times"
+        ]
+      },
+      "graph_seed": {
+        "approx_memory_count": 380,
+        "dominant_memory_types": ["LONG_TERM", "SEMANTIC"],
+        "sample_memories": [
+          {
+            "type": "LONG_TERM",
+            "text": "Sofia opens essays with a small concrete scene before naming the argument, usually within the first three sentences."
+          },
+          {
+            "type": "LONG_TERM",
+            "text": "She prefers 'attention' to 'focus', avoids the word 'journey', and never uses 'unpack' as a verb."
+          },
+          {
+            "type": "LONG_TERM",
+            "text": "Recurring position: convenience is not the opposite of effort, it is the relocation of effort onto someone else."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "Themes she returns to: walkability, the cost of frictionlessness, the ethics of attention, Nordic post-war housing."
+          },
+          {
+            "type": "LONG_TERM",
+            "text": "She uses em-dashes sparingly and favours short declarative sentences after a long one, as a rhythm device."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "Previous pieces: 'The Fifteen Minute Alibi' (walkability), 'Nothing To Do In Vallingby' (post-war housing), 'The Ninety Second Rule' (attention)."
+          },
+          {
+            "type": "LONG_TERM",
+            "text": "Her newsletter sign-off is always a single line, no exhortation to subscribe or share."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "Her commissioning editor at The Coastal Review is Ines Duarte; pitches go to her directly, two paragraphs maximum."
+          },
+          {
+            "type": "LONG_TERM",
+            "text": "Her reusable festival bio: 'Sofia Lindqvist writes about cities, attention and the things we stop noticing.'"
+          },
+          {
+            "type": "LONG_TERM",
+            "text": "She answers reader email in the same register as the newsletter, never with a template, and always signs off with just her first name."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "Her newsletter is called The Long Way Round and publishes Thursdays at 07:00."
+          }
+        ]
+      },
+      "tasks": [
+        {
+          "task_id": "P4-T1",
+          "title": "Write the opening of a new essay",
+          "surface": "Plain text drafting editor",
+          "duration_minutes": 25,
+          "context_given_to_participant": "Begin a new essay about self-checkout machines and what they moved rather than removed.",
+          "typed_prefix": "The machine asked me to place the item in the bagging area, and I did, and then it asked again. ",
+          "expected_completion": "What we call convenience is rarely the removal of effort. It is the relocation of effort onto whoever is least able to refuse it.",
+          "target_memories": [
+            "Opens with a concrete scene then names the argument",
+            "Recurring position on convenience"
+          ],
+          "memory_type_expected": "LONG_TERM",
+          "tests": "The central case for this persona: a completion in her voice is worth accepting as scaffold even when the wording is wrong. Expect acceptance followed by heavy rewriting."
+        },
+        {
+          "task_id": "P4-T2",
+          "title": "Write the newsletter intro above the essay",
+          "surface": "Newsletter composer",
+          "duration_minutes": 10,
+          "context_given_to_participant": "Write the short note to readers that sits above this week's piece, in your usual register.",
+          "typed_prefix": "A note before we begin. This one started as a complaint and turned into something closer to ",
+          "expected_completion": "an argument about who absorbs the work we stop doing. If you read 'The Fifteen Minute Alibi' back in spring, this is its bad-tempered cousin.",
+          "target_memories": [
+            "Previous piece titles",
+            "Themes she returns to",
+            "Sign-off habits"
+          ],
+          "memory_type_expected": "SEMANTIC + LONG_TERM",
+          "tests": "Whether back-references to her own prior work are retrieved and accepted, and how much they are rewritten."
+        },
+        {
+          "task_id": "P4-T3",
+          "title": "Outline the next three pieces in a notes app",
+          "surface": "Notes application",
+          "duration_minutes": 12,
+          "context_given_to_participant": "Sketch what you might write over the next month. Rough notes, not prose.",
+          "typed_prefix": "Possible next: something on train stations as the last unpriced ",
+          "expected_completion": "public rooms. Connects to the walkability thread and to the Vallingby piece, so it should not repeat the housing argument.",
+          "target_memories": [
+            "Walkability theme",
+            "'Nothing To Do In Vallingby'"
+          ],
+          "memory_type_expected": "SEMANTIC",
+          "tests": "Stress case for edit distance normalisation: accepted spans here are long, so raw Levenshtein will overstate revision unless normalised by span length."
+        },
+        {
+          "task_id": "P4-T4",
+          "title": "Reply to a reader email",
+          "surface": "Email (webmail)",
+          "duration_minutes": 10,
+          "context_given_to_participant": "Answer a reader who disagreed with last week's piece.",
+          "typed_prefix": "Thank you for this, and for disagreeing carefully, which is rarer than it should be. ",
+          "expected_completion": "You are right that I skated over the cost side, and I think that is the piece I owe you next.",
+          "target_memories": [
+            "Answers reader mail in newsletter register",
+            "Signs off with first name only"
+          ],
+          "memory_type_expected": "LONG_TERM",
+          "staleness_trap": false,
+          "tests": "Voice transfer to a non-essay surface. Tests whether stylistic memory generalises across surfaces."
+        },
+        {
+          "task_id": "P4-T5",
+          "title": "Pitch a piece to an editor",
+          "surface": "Email (webmail)",
+          "duration_minutes": 14,
+          "context_given_to_participant": "Send a two-paragraph pitch to your commissioning editor.",
+          "typed_prefix": "Hi Ines,\n\nTwo paragraphs as promised. I want to write about ",
+          "expected_completion": "railway stations as the last rooms you can sit in without buying anything.",
+          "target_memories": [
+            "Editor is Ines Duarte, two paragraphs max",
+            "Walkability and unpriced public space themes"
+          ],
+          "memory_type_expected": "SEMANTIC",
+          "staleness_trap": false,
+          "tests": "Constraint memory (two paragraphs) plus theme memory. Tests whether a format rule is retrieved alongside content."
+        },
+        {
+          "task_id": "P4-T6",
+          "title": "Rewrite an opening you abandoned",
+          "surface": "Plain text drafting editor",
+          "duration_minutes": 20,
+          "context_given_to_participant": "You have three failed openings for this essay. Try a fourth.",
+          "typed_prefix": "Fourth attempt. Start smaller: ",
+          "expected_completion": "a woman ahead of me in the queue puts her bag down on the scale and the machine accuses her of stealing.",
+          "target_memories": [
+            "Opens with a concrete scene",
+            "Goal: stop rewriting openings more than three times"
+          ],
+          "memory_type_expected": "LONG_TERM",
+          "staleness_trap": false,
+          "tests": "The purest accept-then-rewrite case. Expect the highest edit distance in the whole study on this one task."
+        },
+        {
+          "task_id": "P4-T7",
+          "title": "Write a festival speaker bio",
+          "surface": "Web form",
+          "duration_minutes": 5,
+          "context_given_to_participant": "Supply a 25-word bio for an event programme.",
+          "typed_prefix": "Sofia Lindqvist writes about ",
+          "expected_completion": "cities, attention and the things we stop noticing.",
+          "target_memories": ["Reusable festival bio"],
+          "memory_type_expected": "LONG_TERM",
+          "staleness_trap": false,
+          "tests": "Near-verbatim reuse. Should invert her usual profile: high acceptance, near-zero edit distance."
+        },
+        {
+          "task_id": "P4-T8",
+          "title": "Announce the piece on social",
+          "surface": "Social composer",
+          "duration_minutes": 4,
+          "context_given_to_participant": "Post a short line pointing at this week's essay.",
+          "typed_prefix": "New one out. On self-checkout, and on who ",
+          "expected_completion": "actually absorbs the work when something gets easier.",
+          "target_memories": [
+            "Recurring position on convenience",
+            "Newsletter publishes Thursdays 07:00"
+          ],
+          "memory_type_expected": "LONG_TERM",
+          "staleness_trap": false,
+          "tests": "Short-span contrast case. Her edit distance should collapse here, showing the measure tracks span length as well as persona."
+        },
+        {
+          "task_id": "P4-T9",
+          "title": "Draft interview questions",
+          "surface": "Notes application",
+          "duration_minutes": 12,
+          "context_given_to_participant": "Prepare questions for a reported piece, which you do rarely.",
+          "typed_prefix": "For the shop floor interviews: start with what changed for them, not with ",
+          "expected_completion": "what I think it means. Ask about the week the machines arrived, not about convenience.",
+          "target_memories": [
+            "Goal: one reported piece per quarter",
+            "Avoids abstract framing early"
+          ],
+          "memory_type_expected": "LONG_TERM",
+          "staleness_trap": false,
+          "tests": "Tests a goal memory on an unfamiliar surface, where her stylistic graph offers structure but no phrasing."
+        },
+        {
+          "task_id": "P4-T10",
+          "title": "Send an invoice chase",
+          "surface": "Email (webmail)",
+          "duration_minutes": 6,
+          "context_given_to_participant": "Chase a magazine for a late payment.",
+          "typed_prefix": "Following up on invoice 0114, sent on 3 August and now ",
+          "expected_completion": "five weeks outstanding. Could you let me know when it is scheduled?",
+          "target_memories": [
+            "None; administrative task with no stylistic support"
+          ],
+          "memory_type_expected": "MIXED",
+          "staleness_trap": false,
+          "tests": "Within-persona control. No relevant stylistic memory exists, so KG-ON should sit near KG-OFF for her too."
+        }
+      ],
+      "study_design": {
+        "graph_signature": "Fewer hard facts than P1 or P2. Memories encode preferred phrasings, recurring positions, subjects written about before, and structural habits.",
+        "typing_surfaces": [
+          "Plain text drafting editor",
+          "Newsletter composer",
+          "Notes application"
+        ],
+        "why_in_study": "The only participant for whom the interesting outcome is accepted and then rewritten. A completion in her voice is worth taking as a scaffold even when the wording is wrong.",
+        "expected_behavioral_signature": "Moderate acceptance with the highest post acceptance edit distance in the study. Demonstrates why edit distance is logged beside acceptance rather than as an afterthought.",
+        "instrumentation_note": "Stress case for the normalisation of the edit distance measure, because her accepted spans are longer than everyone else's.",
+        "ethical_handling": "Drafts contain personal material and opinions about named people. She reviews and redacts the trace before it is analysed.",
+        "measure_stressed": "Post acceptance edit distance",
+        "expected_kg_on_delta": "Small on acceptance, large on revision",
+        "sparse_failure_mode_note": ""
+      }
+    },
+    {
+      "id": "P5",
+      "name": "Arjun Verma",
+      "graph_shape": "sparse, cold start",
+      "profile": {
+        "institution": "Christ University, Bengaluru, BCom",
+        "company": "Kestrel Retail Group",
+        "industry": "Retail operations",
+        "title": "Operations associate",
+        "field_of_study": "Commerce, with an incomplete online certificate in data analytics",
+        "skills": [
+          "Excel and Google Sheets",
+          "Inventory reconciliation",
+          "Vendor coordination",
+          "Basic SQL (learning)",
+          "Customer escalation handling"
+        ],
+        "interests": [
+          "Cricket",
+          "Cooking, mostly badly",
+          "Learning to play guitar",
+          "Weekend trips around Karnataka"
+        ],
+        "goals": [
+          "Finish the analytics certificate",
+          "Move into a reporting or analyst role within a year",
+          "Sort out the flat deposit dispute",
+          "Get to the gym three times a week"
+        ]
+      },
+      "graph_seed": {
+        "approx_memory_count": 34,
+        "dominant_memory_types": ["MIXED"],
+        "sample_memories": [
+          {
+            "type": "SEMANTIC",
+            "text": "Arjun works at Kestrel Retail Group as an operations associate."
+          },
+          {
+            "type": "EPISODIC",
+            "text": "He asked about formatting a resignation letter two weeks ago."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "He is based in Bengaluru."
+          },
+          {
+            "type": "EPISODIC",
+            "text": "He asked for a chicken curry recipe on his first day using the tool."
+          },
+          {
+            "type": "SHORT_TERM",
+            "text": "He is dealing with a rental deposit that has not been returned."
+          },
+          {
+            "type": "EPISODIC",
+            "text": "He asked how to word a leave request to his manager last week."
+          },
+          {
+            "type": "SEMANTIC",
+            "text": "His manager at Kestrel Retail Group is called Divya."
+          }
+        ]
+      },
+      "tasks": [
+        {
+          "task_id": "P5-T1",
+          "title": "Email the former landlord about a deposit",
+          "surface": "Email (Gmail)",
+          "duration_minutes": 10,
+          "context_given_to_participant": "Write a firm but polite email chasing a rental deposit that is six weeks overdue.",
+          "typed_prefix": "Dear Mr Prasad,\n\nI am writing to follow up on the security deposit for ",
+          "expected_completion": "the flat I vacated in July. It has now been six weeks and I have not received the refund or an itemised deduction list.",
+          "target_memories": ["Rental deposit not returned"],
+          "memory_type_expected": "SHORT_TERM",
+          "tests": "The one task where his sparse graph has a genuinely relevant memory. KG-ON should help slightly here and nowhere else."
+        },
+        {
+          "task_id": "P5-T2",
+          "title": "Fill in a course application form",
+          "surface": "Browser form fields",
+          "duration_minutes": 8,
+          "context_given_to_participant": "Complete the free-text fields on an application for a part-time data analytics course.",
+          "typed_prefix": "Why do you want to take this course? I currently work in ",
+          "expected_completion": "retail operations and want to move into a reporting role, so I need SQL and dashboarding beyond spreadsheets.",
+          "target_memories": [
+            "Works at Kestrel Retail Group",
+            "Goal: move into an analyst role"
+          ],
+          "memory_type_expected": "SEMANTIC",
+          "tests": "Sparse retrieval failure mode. Watch whether the resignation-letter memory is pulled in here and produces an irrelevant completion."
+        },
+        {
+          "task_id": "P5-T3",
+          "title": "Message a friend about weekend plans",
+          "surface": "Messaging app",
+          "duration_minutes": 5,
+          "context_given_to_participant": "Reply to a friend proposing a trip this weekend.",
+          "typed_prefix": "yeah I'm free saturday, was thinking we could drive out to ",
+          "expected_completion": "Coorg if we leave early, otherwise Nandi Hills is easier.",
+          "target_memories": [
+            "Based in Bengaluru",
+            "Weekend trips around Karnataka"
+          ],
+          "memory_type_expected": "MIXED",
+          "tests": "Lower bound. KG-ON should be indistinguishable from KG-OFF; a large delta here indicates the effect comes from prompt length rather than graph content."
+        },
+        {
+          "task_id": "P5-T4",
+          "title": "Report an inventory discrepancy",
+          "surface": "Email (Outlook)",
+          "duration_minutes": 10,
+          "context_given_to_participant": "Email your manager about a stock count that does not match the system.",
+          "typed_prefix": "Hi Divya,\n\nThe Tuesday count for the Whitefield store is off by ",
+          "expected_completion": "eleven units on the same SKU as last month, so I think it is a receiving error rather than shrinkage.",
+          "target_memories": ["Manager is Divya", "Works in retail operations"],
+          "memory_type_expected": "SEMANTIC",
+          "staleness_trap": false,
+          "tests": "One of the few tasks where his thin graph holds a directly relevant fact."
+        },
+        {
+          "task_id": "P5-T5",
+          "title": "Comment on a practice SQL query",
+          "surface": "Code comment",
+          "duration_minutes": 6,
+          "context_given_to_participant": "Annotate a query you wrote for the analytics course.",
+          "typed_prefix": "-- joining on store_id because ",
+          "expected_completion": "-- WEAK: no stored memory covers his schema or coursework",
+          "target_memories": ["None; no relevant memory stored"],
+          "memory_type_expected": "MIXED",
+          "staleness_trap": false,
+          "tests": "True null case. Any confident completion here is a hallucination rather than a retrieval."
+        },
+        {
+          "task_id": "P5-T6",
+          "title": "Follow up on a resignation letter",
+          "surface": "Email (Gmail)",
+          "duration_minutes": 8,
+          "context_given_to_participant": "You drafted a resignation letter earlier and decided against sending it. Write to a friend about it.",
+          "typed_prefix": "I never sent that letter in the end. Decided to wait until ",
+          "expected_completion": "the analytics certificate is finished, then move properly instead of just leaving.",
+          "target_memories": [
+            "Asked about resignation letter formatting",
+            "Goal: finish analytics certificate"
+          ],
+          "memory_type_expected": "EPISODIC",
+          "staleness_trap": false,
+          "tests": "The resignation memory is genuinely relevant here. Contrast with P5-T10, where it is not."
+        },
+        {
+          "task_id": "P5-T7",
+          "title": "Ask a cooking question",
+          "surface": "Messaging app",
+          "duration_minutes": 4,
+          "context_given_to_participant": "Ask a friend how to fix a dish that went wrong.",
+          "typed_prefix": "the curry came out way too sour, is it ",
+          "expected_completion": "the tomatoes or did I add the tamarind too early?",
+          "target_memories": ["Asked for a chicken curry recipe on day one"],
+          "memory_type_expected": "EPISODIC",
+          "staleness_trap": false,
+          "tests": "Tests whether a single old episodic memory is retrieved appropriately when the domain actually matches."
+        },
+        {
+          "task_id": "P5-T8",
+          "title": "Fill in a gym signup form",
+          "surface": "Browser form",
+          "duration_minutes": 5,
+          "context_given_to_participant": "Complete the free-text goal field on a membership form.",
+          "typed_prefix": "What are you hoping to achieve? Mainly consistency, aiming for ",
+          "expected_completion": "three sessions a week rather than anything specific.",
+          "target_memories": ["Goal: gym three times a week"],
+          "memory_type_expected": "SEMANTIC",
+          "staleness_trap": false,
+          "tests": "Single-memory match on a form field. Small positive delta expected, and little else."
+        },
+        {
+          "task_id": "P5-T9",
+          "title": "Request leave from your manager",
+          "surface": "Email (Outlook)",
+          "duration_minutes": 7,
+          "context_given_to_participant": "Ask for two days off next month.",
+          "typed_prefix": "Hi Divya,\n\nI would like to take the 14th and 15th off to ",
+          "expected_completion": "travel, I have no open reconciliations that week and can hand over the vendor calls.",
+          "target_memories": [
+            "Manager is Divya",
+            "Asked how to word a leave request last week"
+          ],
+          "memory_type_expected": "EPISODIC",
+          "staleness_trap": false,
+          "tests": "Two thin memories combine. Watch whether both are retrieved or only the more recent one."
+        },
+        {
+          "task_id": "P5-T10",
+          "title": "Enquire about guitar lessons",
+          "surface": "Browser contact form",
+          "duration_minutes": 5,
+          "context_given_to_participant": "Ask a local teacher about beginner lessons.",
+          "typed_prefix": "Hi, I am a complete beginner and wanted to ask about ",
+          "expected_completion": "-- TRAP: unrelated domain; deposit and resignation memories likely over-retrieved here",
+          "target_memories": [
+            "None relevant; expect deposit or resignation memory to intrude"
+          ],
+          "memory_type_expected": "MIXED",
+          "staleness_trap": false,
+          "tests": "The sparse over-retrieval failure mode, isolated. With so few memories stored, irrelevant ones get pulled into unrelated prompts."
+        }
+      ],
+      "study_design": {
+        "graph_signature": "Under forty stored memories and very few relations, so the Neo4j layer contributes little beyond what the vector index already returns.",
+        "typing_surfaces": ["Email", "Browser forms", "Messaging app"],
+        "why_in_study": "Addresses the confound named in the limitations, that graphs differ in size as well as in kind. He supplies the near zero delta against which the other four are read.",
+        "expected_behavioral_signature": "KG-ON should sit close to KG-OFF on all four measures. A large delta here would suggest the effect comes from prompt length or scaffold differences rather than from graph content.",
+        "instrumentation_note": "Also surfaces the sparse retrieval failure mode, where the same one or two memories are pulled into unrelated prompts.",
+        "ethical_handling": "Lowest sensitivity of the five, which makes him the appropriate participant for any example trace shown in the paper.",
+        "measure_stressed": "All four, as a lower bound",
+        "expected_kg_on_delta": "Near zero by design",
+        "sparse_failure_mode_note": "With so few memories, expect the resignation-letter and deposit memories to be pulled into unrelated prompts. That over-retrieval is itself a logged finding."
+      }
+    }
+  ],
+  "schema": {
+    "personas[].profile": "institution, company, industry, title, field_of_study, skills, interests, goals",
+    "personas[].study_design": "graph_signature, typing_surfaces, why_in_study, expected_behavioral_signature, instrumentation_note, ethical_handling, measure_stressed, expected_kg_on_delta, sparse_failure_mode_note",
+    "personas[].graph_seed.sample_memories[]": "type, text, optional stored_days_ago / stale / staleness_note",
+    "personas[].tasks[]": "task_id, title, surface, duration_minutes, context_given_to_participant, typed_prefix, expected_completion, target_memories, memory_type_expected, optional staleness_trap, tests",
+    "conventions": "typed_prefix is the cursor position when the completion fires. stored_days_ago is populated only where recency is under test. staleness_trap marks tasks where the stored memory was true when written and is false now."
+  },
+  "counts": {
+    "personas": 5,
+    "tasks": 50,
+    "memories": 55,
+    "staleness_traps": 4,
+    "null_control_tasks": 3,
+    "distinct_surfaces": 32,
+    "tasks_per_persona": {
+      "P1": 10,
+      "P2": 10,
+      "P3": 10,
+      "P4": 10,
+      "P5": 10
+    },
+    "memories_per_persona": {
+      "P1": 14,
+      "P2": 12,
+      "P3": 11,
+      "P4": 11,
+      "P5": 7
+    },
+    "memory_type_distribution": {
+      "SEMANTIC": 20,
+      "LONG_TERM": 11,
+      "PROCEDURAL": 10,
+      "EPISODIC": 10,
+      "SHORT_TERM": 4
+    }
+  }
+}

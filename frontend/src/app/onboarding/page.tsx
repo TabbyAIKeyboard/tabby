@@ -17,22 +17,32 @@ import {
 import { addMemory } from '@/lib/ai/tools/memory/client'
 import useUser, { useRefreshUser } from '@/hooks/use-user'
 import { postAuthPath } from '@/lib/constants'
-import { ArrowRight, ArrowLeft, Check, Loader2 } from 'lucide-react'
+import { ArrowRight, ArrowLeft, Check, Loader2, ClipboardPaste, PencilLine, X } from 'lucide-react'
+import {
+  emptyOnboardingData,
+  parsePersonaJson,
+  type OnboardingData,
+  type ParsedPersona,
+  type SeedMemory,
+} from './persona-import'
 
-interface OnboardingData {
-  name: string
-  age: string
-  organization: string
-  organizationType: string
-  role: string
-  educationLevel: string
-  fieldOfStudy: string
-  institution: string
-  skills: string
-  interests: string
-  goals: string
-  additionalInfo: string
-}
+const PERSONA_JSON_PLACEHOLDER = `{
+  "name": "Rhea Menon",
+  "profile": {
+    "institution": "University of Edinburgh",
+    "company": "Lingua Labs",
+    "title": "Doctoral researcher",
+    "field_of_study": "Computational linguistics",
+    "skills": ["PyTorch", "LaTeX"],
+    "interests": ["Low-resource NLP"],
+    "goals": ["Submit Chapter 4 by 15 November"]
+  },
+  "graph_seed": {
+    "sample_memories": [
+      { "type": "SEMANTIC", "text": "Her advisor is Prof. Helena Broughton." }
+    ]
+  }
+}`
 
 const steps = [
   { id: 1, title: 'Personal Info', description: 'Tell us about yourself' },
@@ -47,23 +57,53 @@ export default function OnboardingPage() {
   const refreshUser = useRefreshUser()
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [data, setData] = useState<OnboardingData>({
-    name: '',
-    age: '',
-    organization: '',
-    organizationType: '',
-    role: '',
-    educationLevel: '',
-    fieldOfStudy: '',
-    institution: '',
-    skills: '',
-    interests: '',
-    goals: '',
-    additionalInfo: '',
-  })
+  const [data, setData] = useState<OnboardingData>(emptyOnboardingData)
+
+  // Persona import: paste a personas.json-shaped blob instead of typing the
+  // form. Memories from graph_seed.sample_memories are seeded on submit.
+  const [mode, setMode] = useState<'form' | 'paste'>('form')
+  const [jsonInput, setJsonInput] = useState('')
+  const [jsonError, setJsonError] = useState<string | null>(null)
+  const [candidates, setCandidates] = useState<ParsedPersona[]>([])
+  const [importedPersona, setImportedPersona] = useState<ParsedPersona | null>(null)
+  const [seedProgress, setSeedProgress] = useState<{ done: number; total: number } | null>(null)
 
   const updateData = (field: keyof OnboardingData, value: string) => {
     setData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  /** Parses the pasted JSON; with several personas the user picks one first. */
+  const handleParseJson = () => {
+    setJsonError(null)
+    try {
+      const personas = parsePersonaJson(jsonInput)
+      if (personas.length === 1) {
+        applyPersona(personas[0])
+      } else {
+        setCandidates(personas)
+      }
+    } catch (error) {
+      setCandidates([])
+      setJsonError(error instanceof Error ? error.message : 'Could not read that JSON.')
+    }
+  }
+
+  /** Fills the form from a parsed persona and drops back into it for review. */
+  const applyPersona = (persona: ParsedPersona) => {
+    setData(persona.data)
+    setImportedPersona(persona)
+    setCandidates([])
+    setJsonError(null)
+    setCurrentStep(1)
+    setMode('form')
+  }
+
+  const clearImport = () => {
+    setImportedPersona(null)
+    setData(emptyOnboardingData)
+    setJsonInput('')
+    setCandidates([])
+    setJsonError(null)
   }
 
   const progress = (currentStep / steps.length) * 100
@@ -105,6 +145,35 @@ export default function OnboardingPage() {
     router.replace(postAuthPath)
   }
 
+  /**
+   * Writes each seed memory one at a time, passing memory_type through so the
+   * backend keeps the declared type instead of re-classifying it. One failure
+   * does not abort the rest; the count is reported to the user.
+   */
+  const seedMemories = async (memories: SeedMemory[], userId: string, personaId?: string) => {
+    let failed = 0
+    setSeedProgress({ done: 0, total: memories.length })
+
+    for (const [index, memory] of memories.entries()) {
+      try {
+        await addMemory([{ role: 'user', content: memory.text }], userId, {
+          ...memory.metadata,
+          ...(memory.type ? { memory_type: memory.type } : {}),
+          source: 'persona_import',
+          ...(personaId ? { persona_id: personaId } : {}),
+          timestamp: new Date().toISOString(),
+        })
+      } catch (error) {
+        failed += 1
+        console.error('Failed to seed memory:', memory.text, error)
+      }
+      setSeedProgress({ done: index + 1, total: memories.length })
+    }
+
+    setSeedProgress(null)
+    return failed
+  }
+
   const handleSubmit = async () => {
     if (!user?.id) return
 
@@ -130,9 +199,21 @@ export default function OnboardingPage() {
         {
           type: 'user_profile',
           onboarding: true,
+          ...(importedPersona?.id ? { persona_id: importedPersona.id } : {}),
           timestamp: new Date().toISOString(),
         }
       )
+
+      if (importedPersona && importedPersona.memories.length > 0) {
+        const failed = await seedMemories(
+          importedPersona.memories,
+          user.id,
+          importedPersona.id
+        )
+        if (failed > 0) {
+          console.warn(`${failed} of ${importedPersona.memories.length} seed memories failed`)
+        }
+      }
 
       await completeOnboarding()
     } catch (error) {
@@ -187,8 +268,131 @@ export default function OnboardingPage() {
             </p>
           </motion.div>
 
+          {/* Mode toggle: fill the form in, or paste a persona JSON */}
+          <div className="flex items-center justify-center gap-1 mb-8 p-1 rounded-full bg-stone-100 dark:bg-zinc-900 border border-stone-200 dark:border-zinc-800 w-fit mx-auto">
+            <button
+              type="button"
+              onClick={() => setMode('form')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-colors ${
+                mode === 'form'
+                  ? 'bg-white dark:bg-zinc-800 text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <PencilLine className="w-3.5 h-3.5" />
+              Fill in
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('paste')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-colors ${
+                mode === 'paste'
+                  ? 'bg-white dark:bg-zinc-800 text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <ClipboardPaste className="w-3.5 h-3.5" />
+              Paste JSON
+            </button>
+          </div>
+
+          {mode === 'paste' && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white dark:bg-zinc-900 border border-stone-200 dark:border-zinc-800 rounded-xl p-8 md:p-10"
+            >
+              <div className="mb-6">
+                <h2 className="text-2xl font-serif font-normal text-foreground">Paste a persona</h2>
+                <p className="text-sm text-muted-foreground mt-1 font-light">
+                  Drop in a persona JSON to fill the profile and seed its memories. Tasks and study
+                  design are ignored.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="personaJson" className="text-sm font-normal text-foreground">
+                  Persona JSON
+                </Label>
+                <Textarea
+                  id="personaJson"
+                  spellCheck={false}
+                  placeholder={PERSONA_JSON_PLACEHOLDER}
+                  value={jsonInput}
+                  onChange={(e) => {
+                    setJsonInput(e.target.value)
+                    setJsonError(null)
+                    setCandidates([])
+                  }}
+                  className="min-h-64 font-mono text-xs resize-y bg-stone-50 dark:bg-zinc-800/50 border-stone-200 dark:border-zinc-700 focus:border-foreground"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Accepts the whole personas.json file, a single persona, or a bare profile object.
+                  Memories come from <code>graph_seed.sample_memories</code>.
+                </p>
+              </div>
+
+              {jsonError && (
+                <p className="mt-4 text-sm text-red-600 dark:text-red-400">{jsonError}</p>
+              )}
+
+              {candidates.length > 0 && (
+                <div className="mt-6 space-y-2">
+                  <p className="text-sm text-foreground">
+                    Found {candidates.length} personas. Which one is you?
+                  </p>
+                  <div className="space-y-2">
+                    {candidates.map((persona, index) => (
+                      <button
+                        key={persona.id ?? index}
+                        type="button"
+                        onClick={() => applyPersona(persona)}
+                        className="w-full text-left px-4 py-3 rounded-lg border border-stone-200 dark:border-zinc-700 hover:border-foreground transition-colors"
+                      >
+                        <span className="text-sm text-foreground">{persona.label}</span>
+                        <span className="block text-xs text-muted-foreground mt-0.5">
+                          {persona.data.role || 'No role listed'} · {persona.memories.length}{' '}
+                          memories
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end mt-8 pt-6 border-t border-stone-200 dark:border-zinc-800">
+                <Button
+                  onClick={handleParseJson}
+                  disabled={jsonInput.trim() === ''}
+                  className="gap-2 bg-foreground text-background hover:bg-foreground/90 rounded-full px-6"
+                >
+                  Load persona
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
+          {mode === 'form' && importedPersona && (
+            <div className="mb-6 flex items-center justify-between gap-4 px-4 py-3 rounded-lg border border-stone-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+              <p className="text-sm text-muted-foreground">
+                Loaded <span className="text-foreground">{importedPersona.label}</span>
+                {importedPersona.memories.length > 0 &&
+                  ` · ${importedPersona.memories.length} memories will be seeded`}
+              </p>
+              <button
+                type="button"
+                onClick={clearImport}
+                className="text-muted-foreground hover:text-foreground shrink-0"
+                aria-label="Clear imported persona"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {/* Progress */}
-          <div className="mb-10">
+          <div className={`mb-10 ${mode === 'paste' ? 'hidden' : ''}`}>
             <div className="flex items-center justify-center gap-2 mb-6">
               {steps.map((step, index) => {
                 const isActive = currentStep === step.id
@@ -227,7 +431,9 @@ export default function OnboardingPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white dark:bg-zinc-900 border border-stone-200 dark:border-zinc-800 rounded-xl p-8 md:p-10"
+            className={`bg-white dark:bg-zinc-900 border border-stone-200 dark:border-zinc-800 rounded-xl p-8 md:p-10 ${
+              mode === 'paste' ? 'hidden' : ''
+            }`}
           >
             <AnimatePresence mode="wait">
               <motion.div
@@ -479,7 +685,9 @@ export default function OnboardingPage() {
                   {isSubmitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Saving...
+                      {seedProgress
+                        ? `Seeding memories ${seedProgress.done}/${seedProgress.total}`
+                        : 'Saving...'}
                     </>
                   ) : (
                     <>

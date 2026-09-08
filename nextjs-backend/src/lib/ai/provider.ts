@@ -11,6 +11,7 @@ export const titleGenerationModels: Record<string, string> = {
   'gpt-5-mini': 'gpt-4o-mini',
   'gpt-5.1-codex-mini': 'gpt-4o-mini',
   'gpt-5.1': 'gpt-4o-mini',
+  'gpt-5.6-luna': 'gpt-4o-mini',
   'gpt-5-nano': 'gpt-4o-mini',
   'gpt-4.1-nano': 'gpt-4.1-nano',
 
@@ -79,6 +80,7 @@ export function createMyProvider(
       'gpt-5-mini': openai('gpt-5-mini'),
       'gpt-5.1-codex-mini': openai('gpt-5.1-codex-mini'),
       'gpt-5.1': openai('gpt-5.1'),
+      'gpt-5.6-luna': openai('gpt-5.6-luna'),
       'gpt-5-nano': openai('gpt-5-nano'),
 
       'gemini-2.5-flash': google('gemini-2.5-flash'),

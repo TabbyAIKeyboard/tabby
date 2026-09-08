@@ -5,6 +5,7 @@ export interface Model {
 }
 
 export const models: Model[] = [
+  { id: 'gpt-5.6-luna', label: 'GPT-5.6 Luna', provider: 'OpenAI' },
   { id: 'gpt-5.1', label: 'GPT-5.1', provider: 'OpenAI' },
   { id: 'gpt-4.1-mini', label: 'GPT-4.1 Mini', provider: 'OpenAI' },
   { id: 'gpt-5-mini', label: 'GPT-5 Mini', provider: 'OpenAI' },
