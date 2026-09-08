@@ -9,7 +9,18 @@ import { MemoryTab } from './memory-tab'
 import { GraphTab } from './graph-tab'
 import { AccountTab } from './account-tab'
 import { ShortcutsTab } from './shortcuts-tab'
-import { Settings, Keyboard, Zap, Database, GitBranch, User, Info, LogOut } from 'lucide-react'
+import { SuggestionsTab } from './suggestions-tab'
+import {
+  Settings,
+  Keyboard,
+  Zap,
+  Database,
+  GitBranch,
+  User,
+  Info,
+  LogOut,
+  BarChart3,
+} from 'lucide-react'
 
 const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Tabby'
 
@@ -50,6 +61,12 @@ const navItems: NavItem[] = [
     label: 'Graph',
     description: 'Knowledge graph',
     icon: <GitBranch className="w-4 h-4" />,
+  },
+  {
+    id: 'suggestions',
+    label: 'Suggestions',
+    description: 'Ghost-text log',
+    icon: <BarChart3 className="w-4 h-4" />,
   },
   {
     id: 'account',
@@ -121,6 +138,8 @@ export function SettingsLayout() {
         return <MemoryTab />
       case 'graph':
         return <GraphTab />
+      case 'suggestions':
+        return <SuggestionsTab />
       case 'account':
         return <AccountTab />
       case 'about':

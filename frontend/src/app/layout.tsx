@@ -3,7 +3,6 @@ import { Inter, Outfit } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import { QueryProvider } from '@/components/query-provider'
 import { SettingsSynchronizer } from '@/components/settings-synchronizer'
-import { MemoryInitializer } from '@/components/memory-initializer'
 import { AuthGuard } from '@/components/auth-guard'
 import './globals.css'
 
@@ -34,7 +33,6 @@ export default function RootLayout({
           >
             <AuthGuard />
             <SettingsSynchronizer />
-            <MemoryInitializer />
             {children}
           </ThemeProvider>
         </QueryProvider>

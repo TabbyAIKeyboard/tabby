@@ -105,9 +105,6 @@ contextBridge.exposeInMainWorld('electron', {
   },
 
   // Cached Memories for Inline Suggestions
-  setCachedMemories: (memories: { memory: string; memoryType: string }[]) =>
-    ipcRenderer.send('set-cached-memories', memories),
-  getCachedMemories: () => ipcRenderer.invoke('get-cached-memories'),
 
   // Content Protection (Invisibility)
   getContentProtectionEnabled: () => ipcRenderer.invoke('get-content-protection-enabled'),
@@ -144,6 +141,19 @@ contextBridge.exposeInMainWorld('electron', {
         metadata?: unknown
       }>
     ) => ipcRenderer.invoke('db:saveMessages', messages),
+    getSuggestionLogEntries: (options?: {
+      limit?: number
+      offset?: number
+      userId?: string | null
+    }) => ipcRenderer.invoke('db:getSuggestionLogEntries', options),
+    getSuggestionLogCount: (userId?: string | null) =>
+      ipcRenderer.invoke('db:getSuggestionLogCount', userId),
+    getSuggestionLogStats: (userId?: string | null) =>
+      ipcRenderer.invoke('db:getSuggestionLogStats', userId),
+    getSuggestionLogUsers: () => ipcRenderer.invoke('db:getSuggestionLogUsers'),
+    getSuggestionLogPath: () => ipcRenderer.invoke('db:getSuggestionLogPath'),
+    clearSuggestionLog: (userId?: string | null) =>
+      ipcRenderer.invoke('db:clearSuggestionLog', userId),
   },
 
   // Local File Storage

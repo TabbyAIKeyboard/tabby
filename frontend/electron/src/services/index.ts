@@ -8,24 +8,29 @@ import { GhostTextOverlay } from './ghost-overlay'
 import { KeyboardMonitor } from './keyboard-monitor'
 import { KeystrokeListener } from './keystroke-listener'
 import { showSuggestionForContext } from '../windows/suggestion-window'
-import { recordSuggestionShown, recordSuggestionDecision, feedPostAcceptKeystroke } from './suggestion-logger'
+import {
+  recordSuggestionShown,
+  recordSuggestionDecision,
+  feedPostAcceptKeystroke,
+} from './suggestion-logger'
 
 export const createKeyboardMonitor = (): KeyboardMonitor => {
   return new KeyboardMonitor({
     debounceMs: 500,
     minContextLength: 10,
-    onSuggestionReady: async (suggestion, context, memoryTypes) => {
-      console.log('[GhostText] Suggestion ready:', suggestion.slice(0, 30))
+    onSuggestionReady: async (context, result) => {
+      console.log('[GhostText] Suggestion ready:', result.suggestion.slice(0, 30))
       const id = randomUUID()
       recordSuggestionShown({
         id,
         userId: AppState.currentUserId,
         memoryBaselineMode: AppState.memoryBaselineMode,
-        memoryTypes,
+        memoryTypes: result.memoryTypes,
+        memories: result.memories,
         context,
-        suggestion,
+        suggestion: result.suggestion,
       })
-      await AppState.ghostOverlay?.showSuggestion(suggestion, id)
+      await AppState.ghostOverlay?.showSuggestion(result.suggestion, id)
     },
     onClear: () => {
       // Implicit dismiss: the user kept typing through a shown suggestion
@@ -42,28 +47,23 @@ export const createKeyboardMonitor = (): KeyboardMonitor => {
           body: JSON.stringify({
             context,
             userId: AppState.currentUserId,
-            // Pilot memory-free baseline: omit cached memories client-side
-            // too, not just the server-side disableMemory flag, so the two
-            // conditions can't accidentally share a code path.
-            cachedMemories: AppState.memoryBaselineMode
-              ? []
-              : AppState.cachedMemories.map((m) => m.memory),
-            // Sent parallel to cachedMemories so the route can report memory-type
-            // attribution without re-querying mem0 on every keystroke.
-            cachedMemoryTypes: AppState.memoryBaselineMode
-              ? []
-              : AppState.cachedMemories.map((m) => m.memoryType),
+            // The route retrieves memories itself, against this context. Under
+            // the pilot memory-free baseline it skips that search entirely.
             disableMemory: AppState.memoryBaselineMode,
           }),
           signal,
         })
         const data = await response.json()
-        return { suggestion: data.suggestion || '', memoryTypes: data.memoryTypes || [] }
+        return {
+          suggestion: data.suggestion || '',
+          memoryTypes: data.memoryTypes || [],
+          memories: data.memories || [],
+        }
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
           console.error('[GhostText] API error:', error)
         }
-        return { suggestion: '', memoryTypes: [] }
+        return { suggestion: '', memoryTypes: [], memories: [] }
       }
     },
   })

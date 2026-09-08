@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron'
-import { AppState, getStore, normalizeCachedMemories } from '../app-state'
+import { AppState, getStore } from '../app-state'
 import {
   startClipboardWatcher,
   stopClipboardWatcher,
@@ -102,18 +102,6 @@ export const registerSettingsHandlers = (): void => {
 
   ipcMain.handle('get-user-id', () => {
     return getStore().get('userId')
-  })
-
-  // Cached Memories for Inline Suggestions
-  ipcMain.on('set-cached-memories', (_, memories: unknown) => {
-    const normalized = normalizeCachedMemories(memories)
-    console.log('[Settings] Caching', normalized.length, 'memories for inline suggestions')
-    getStore().set('cachedMemories', normalized)
-    AppState.cachedMemories = normalized
-  })
-
-  ipcMain.handle('get-cached-memories', () => {
-    return AppState.cachedMemories
   })
 
   // Content Protection (Invisibility to screen recorders)

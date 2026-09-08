@@ -7,7 +7,13 @@ import {
   deleteConversation,
   getMessages,
   saveMessages,
+  getSuggestionLogEntries,
+  getSuggestionLogRowCount,
+  getSuggestionLogStats,
+  getSuggestionLogUsers,
+  clearSuggestionLog,
 } from '../services/local-db'
+import { getSuggestionLogPath } from '../services/suggestion-logger'
 
 export function registerDbHandlers(): void {
   // ─── Conversations ──────────────────────────────────────────
@@ -56,6 +62,37 @@ export function registerDbHandlers(): void {
       saveMessages(messages)
     }
   )
+
+  // ─── Suggestion Log (pilot instrumentation) ─────────────────
+  // Every read takes an optional userId: the Settings > Suggestions tab scopes
+  // its figures to one participant, or pools all of them when it is omitted.
+
+  ipcMain.handle(
+    'db:getSuggestionLogEntries',
+    (_event, options?: { limit?: number; offset?: number; userId?: string | null }) => {
+      return getSuggestionLogEntries(options)
+    }
+  )
+
+  ipcMain.handle('db:getSuggestionLogCount', (_event, userId?: string | null) => {
+    return getSuggestionLogRowCount(userId)
+  })
+
+  ipcMain.handle('db:getSuggestionLogStats', (_event, userId?: string | null) => {
+    return getSuggestionLogStats(userId)
+  })
+
+  ipcMain.handle('db:getSuggestionLogUsers', () => {
+    return getSuggestionLogUsers()
+  })
+
+  ipcMain.handle('db:getSuggestionLogPath', () => {
+    return getSuggestionLogPath()
+  })
+
+  ipcMain.handle('db:clearSuggestionLog', (_event, userId?: string | null) => {
+    clearSuggestionLog(userId)
+  })
 
   console.log('[IPC] Database handlers registered')
 }

@@ -6,6 +6,7 @@ import { initializeContextCapture } from './services'
 import { ensureAuthFlow } from './services/auth-flow'
 import { registerGlobalShortcuts, unregisterGlobalShortcuts } from './shortcuts'
 import { registerAllIpcHandlers } from './ipc'
+import { importJsonlLogIntoDatabase } from './services/suggestion-logger'
 
 console.log('[Main] Loaded User ID:', AppState.currentUserId)
 
@@ -15,6 +16,10 @@ app.whenReady().then(() => {
   initializeContextCapture()
   registerGlobalShortcuts()
   registerAllIpcHandlers()
+
+  // Backfills suggestions logged before the SQLite table existed; a no-op once
+  // every JSONL line has been imported.
+  importJsonlLogIntoDatabase()
 
   // Sends the user to register / signin / onboarding if any step is pending.
   ensureAuthFlow()

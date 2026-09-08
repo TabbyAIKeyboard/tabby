@@ -59,7 +59,12 @@ const verifyPassword = (password: string, stored: string): boolean => {
 
   try {
     const expected = Buffer.from(hashHex, 'hex')
-    const derived = scryptSync(password, Buffer.from(saltHex, 'hex'), expected.length, SCRYPT_PARAMS)
+    const derived = scryptSync(
+      password,
+      Buffer.from(saltHex, 'hex'),
+      expected.length,
+      SCRYPT_PARAMS
+    )
     return timingSafeEqual(derived, expected)
   } catch (error) {
     console.error('[Auth] Password verification failed:', error)
@@ -87,21 +92,9 @@ const setCurrentUser = (userId: string | null): void => {
   } else {
     getStore().delete(CURRENT_USER_KEY)
   }
-
-  // Memories are cached globally for low-latency inline suggestions, so they
-  // must be dropped on any account change - otherwise the previous account's
-  // memories get sent to the API under the new user's id.
-  if (previousUserId !== userId) {
-    AppState.cachedMemories = []
-    getStore().set('cachedMemories', [])
-  }
 }
 
-export const registerUser = (
-  email: string,
-  password: string,
-  displayName?: string
-): AuthResult => {
+export const registerUser = (email: string, password: string, displayName?: string): AuthResult => {
   const normalized = normalizeEmail(email)
 
   if (!normalized.includes('@')) {

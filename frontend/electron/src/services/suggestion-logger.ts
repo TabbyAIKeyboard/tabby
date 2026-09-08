@@ -1,11 +1,15 @@
 import { app } from 'electron'
-import { appendFileSync, existsSync, mkdirSync } from 'fs'
+import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'fs'
 import { join } from 'path'
+import { insertSuggestionLogEntries, insertSuggestionLogEntry } from './local-db'
 
 // Behavioral instrumentation for the NORA pilot: every ghost-text suggestion
 // becomes one JSONL line recording whether it was accepted, edited after
 // acceptance, or dismissed, plus timing and which memory condition produced
-// it. See docs/pilot-protocol.md for how to run a session and read this log.
+// it. Every entry is written twice: to SQLite (read back by the Settings >
+// Suggestions tab) and to a JSONL file (consumed by
+// scripts/analyze-suggestion-log.js). See docs/pilot-protocol.md for how to
+// run a session and read this log.
 
 export type SuggestionOutcome = 'pending' | 'accepted' | 'dismissed_explicit' | 'dismissed_implicit'
 
@@ -14,6 +18,7 @@ export interface SuggestionLogEntry {
   userId: string | null
   memoryBaselineMode: boolean // true = memory retrieval was disabled for this suggestion
   memoryTypes: string[] // classifier labels (EPISODIC/SEMANTIC/PROCEDURAL/...) of memories used, if any
+  memories: string[] // the memory text sent to the model, parallel in meaning to memoryTypes
   context: string
   suggestion: string
   shownAt: number
@@ -46,6 +51,26 @@ function getLogFilePath(): string {
 
 let hasLoggedPath = false
 
+function toDbInput(entry: SuggestionLogEntry) {
+  return {
+    id: entry.id,
+    userId: entry.userId,
+    memoryBaselineMode: entry.memoryBaselineMode,
+    memoryTypes: entry.memoryTypes,
+    memories: entry.memories,
+    context: entry.context,
+    suggestion: entry.suggestion,
+    shownAt: entry.shownAt,
+    decisionAt: entry.decisionAt,
+    timeToDecisionMs: entry.timeToDecisionMs,
+    outcome: entry.outcome,
+    finalText: entry.finalText,
+    editDistance: entry.editDistance,
+  }
+}
+
+// The two stores are written independently, so a failure in one (a locked
+// database, a full disk) still leaves the pilot with the other.
 function persist(entry: SuggestionLogEntry): void {
   try {
     const path = getLogFilePath()
@@ -55,7 +80,13 @@ function persist(entry: SuggestionLogEntry): void {
     }
     appendFileSync(path, JSON.stringify(entry) + '\n', 'utf-8')
   } catch (error) {
-    console.error('[SuggestionLogger] Failed to persist entry:', error)
+    console.error('[SuggestionLogger] Failed to persist entry to JSONL:', error)
+  }
+
+  try {
+    insertSuggestionLogEntry(toDbInput(entry))
+  } catch (error) {
+    console.error('[SuggestionLogger] Failed to persist entry to database:', error)
   }
 }
 
@@ -86,6 +117,7 @@ export function recordSuggestionShown(params: {
   userId: string | null
   memoryBaselineMode: boolean
   memoryTypes: string[]
+  memories: string[]
   context: string
   suggestion: string
 }): void {
@@ -94,6 +126,7 @@ export function recordSuggestionShown(params: {
     userId: params.userId,
     memoryBaselineMode: params.memoryBaselineMode,
     memoryTypes: params.memoryTypes,
+    memories: params.memories,
     context: params.context,
     suggestion: params.suggestion,
     shownAt: Date.now(),
@@ -176,4 +209,40 @@ function finalizeEditCapture(): void {
 
 export function getSuggestionLogPath(): string {
   return getLogFilePath()
+}
+
+/**
+ * One-time import of a pre-existing suggestion-log.jsonl into SQLite, so
+ * sessions recorded before the database existed still show up in Settings >
+ * Suggestions. Inserts are OR IGNORE keyed on the entry id, so running this on
+ * every launch is harmless and never duplicates a row.
+ */
+export function importJsonlLogIntoDatabase(): number {
+  const path = getLogFilePath()
+  if (!existsSync(path)) return 0
+
+  try {
+    const entries: SuggestionLogEntry[] = []
+    for (const line of readFileSync(path, 'utf-8').split('\n')) {
+      const trimmed = line.trim()
+      if (!trimmed) continue
+      try {
+        entries.push(JSON.parse(trimmed) as SuggestionLogEntry)
+      } catch {
+        // A truncated final line (app killed mid-write) shouldn't sink the import.
+        console.warn('[SuggestionLogger] Skipping unparseable log line')
+      }
+    }
+
+    const imported = insertSuggestionLogEntries(
+      entries.map((entry) => toDbInput({ ...entry, memories: entry.memories ?? [] }))
+    )
+    if (imported > 0) {
+      console.log(`[SuggestionLogger] Imported ${imported} entries from ${path} into SQLite`)
+    }
+    return imported
+  } catch (error) {
+    console.error('[SuggestionLogger] Failed to import JSONL log:', error)
+    return 0
+  }
 }

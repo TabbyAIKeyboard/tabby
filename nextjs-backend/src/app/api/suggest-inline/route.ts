@@ -140,7 +140,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ suggestion: '' })
     }
 
-    const { context, userId, cachedMemories, cachedMemoryTypes, disableMemory } = body
+    const { context, userId, disableMemory } = body
     console.log('[suggest-inline] Context:', context)
 
     if (!context || context.length < 5) {
@@ -153,42 +153,33 @@ export async function POST(req: Request) {
 
     const lastChunk = context.slice(-200)
 
-    // Memory-free baseline mode (pilot A/B toggle): skip both the cached
-    // memories and the fallback search entirely so relevantMemories is
-    // guaranteed empty, not just unused.
-    let relevantMemories: string[] = disableMemory ? [] : cachedMemories || []
+    // Memories are retrieved per request against the text the user just typed,
+    // so a completion is grounded in what is relevant *now* rather than in a
+    // snapshot taken at app start. Memory-free baseline mode (pilot A/B
+    // toggle) skips the search entirely, so relevantMemories is guaranteed
+    // empty rather than merely unused.
+    let relevantMemories: string[] = []
+    // Type attribution for the NORA pilot log ("which memory types underlie
+    // accepted completions"). Read off the same search that builds
+    // relevantMemories, so the types describe exactly the memories that went
+    // into the prompt below - and cost no extra lookup.
     let memoryTypes: string[] = []
 
-    // Type attribution for the NORA pilot log ("which memory types underlie
-    // accepted completions"). The types describe exactly the memories that go
-    // into the prompt below - nothing else - so they cost no extra lookup:
-    //   - cached path: the client already knew each memory's type when it
-    //     cached it, and ships them parallel to cachedMemories.
-    //   - fallback path: reuses the search that has to run anyway to build
-    //     relevantMemories.
     if (!disableMemory) {
-      if (relevantMemories.length > 0) {
-        memoryTypes = dedupe(
-          Array.isArray(cachedMemoryTypes)
-            ? cachedMemoryTypes.filter((t: unknown): t is string => typeof t === 'string')
-            : []
-        )
-      } else {
-        try {
-          const memoryResult = await searchMemory(lastChunk, userId, 5, undefined, req.signal)
-          const memories = memoryResult?.results?.results || []
-          if (Array.isArray(memories)) {
-            relevantMemories = memories.map((m: any) => m.memory)
-          }
-          memoryTypes = dedupe(extractMemoryTypes(memories))
-        } catch (err) {
-          if (isAbort(err)) return NextResponse.json({ suggestion: '' })
-          console.warn('[suggest-inline] Failed to fetch memories/types:', err)
+      try {
+        const memoryResult = await searchMemory(lastChunk, userId, 5, undefined, req.signal)
+        const memories = memoryResult?.results?.results || []
+        if (Array.isArray(memories)) {
+          relevantMemories = memories.map((m: any) => m.memory)
         }
+        memoryTypes = dedupe(extractMemoryTypes(memories))
+      } catch (err) {
+        if (isAbort(err)) return NextResponse.json({ suggestion: '' })
+        console.warn('[suggest-inline] Failed to fetch memories/types:', err)
       }
     }
 
-    // The client aborts the previous prefetch on nearly every keystroke. Without
+    // The client aborts in-flight requests when the user keeps typing. Without
     // this the socket closes but the model call still runs (and bills) to
     // completion, for a result nothing will ever read.
     if (req.signal.aborted) {
@@ -198,9 +189,7 @@ export async function POST(req: Request) {
     console.log(
       '[suggest-inline] Using',
       relevantMemories.length,
-      'memories (cached:',
-      !!cachedMemories,
-      ', disableMemory:',
+      'memories (disableMemory:',
       !!disableMemory,
       ')'
     )
@@ -229,7 +218,9 @@ export async function POST(req: Request) {
 
     console.log('[suggest-inline] Context:', context.slice(-50), '→', suggestion.slice(0, 50))
 
-    return NextResponse.json({ suggestion, memoryTypes })
+    // relevantMemories is exactly what grounded this completion, so the pilot
+    // log can record the memory text alongside its classifier type.
+    return NextResponse.json({ suggestion, memoryTypes, memories: relevantMemories })
   } catch (error) {
     if (!isAbort(error)) {
       console.error('[suggest-inline] Error:', error)

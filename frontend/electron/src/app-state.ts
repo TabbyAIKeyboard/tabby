@@ -8,33 +8,6 @@ import type { TextOutputMode } from './services/text-handler'
 
 const store = new Store()
 
-export type MemoryType = 'LONG_TERM' | 'SHORT_TERM' | 'EPISODIC' | 'SEMANTIC' | 'PROCEDURAL'
-
-export interface CachedMemory {
-  memory: string
-  // Classifier label from backend/main.py's MemoryClassifier. 'UNKNOWN' covers
-  // memories cached by a build that predates type-carrying (see normalize below).
-  memoryType: MemoryType | 'UNKNOWN'
-}
-
-// Older builds persisted cachedMemories as a bare string[]. Reading that shape
-// as CachedMemory[] would blow up on `.memory`, so coerce on load.
-export const normalizeCachedMemories = (raw: unknown): CachedMemory[] => {
-  if (!Array.isArray(raw)) return []
-  return raw
-    .map((entry) => {
-      if (typeof entry === 'string') return { memory: entry, memoryType: 'UNKNOWN' as const }
-      if (entry && typeof entry.memory === 'string') {
-        return {
-          memory: entry.memory,
-          memoryType: (entry.memoryType || 'UNKNOWN') as CachedMemory['memoryType'],
-        }
-      }
-      return null
-    })
-    .filter((m): m is CachedMemory => m !== null)
-}
-
 export interface AppStateType {
   mainWindow: BrowserWindow | null
   settingsWindow: BrowserWindow | null
@@ -63,7 +36,6 @@ export interface AppStateType {
   isInternalClipboardOp: boolean
 
   currentUserId: string | null
-  cachedMemories: CachedMemory[]
 
   // Pilot instrumentation: when true, ghost-text suggestions are fetched with
   // memory retrieval disabled (memory-free baseline condition). Toggle via
@@ -99,7 +71,6 @@ export const AppState: AppStateType = {
   isInternalClipboardOp: false,
 
   currentUserId: store.get('userId') as string | null,
-  cachedMemories: normalizeCachedMemories(store.get('cachedMemories')),
 
   memoryBaselineMode: false,
 }
