@@ -233,7 +233,7 @@ export function saveMessages(
 }
 
 // ─── Suggestion Log ──────────────────────────────────────────────
-// Behavioral instrumentation for the NORA pilot. Rows are written by
+// Behavioral instrumentation for the memory-evaluation pilot. Rows are written by
 // suggestion-logger.ts (which also mirrors them to suggestion-log.jsonl for
 // the offline analysis script) and read back by the Settings > Suggestions
 // tab. Reads take an optional user id so the tab can scope every figure to one

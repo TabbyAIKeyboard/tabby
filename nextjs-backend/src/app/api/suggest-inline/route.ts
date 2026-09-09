@@ -159,7 +159,7 @@ export async function POST(req: Request) {
     // toggle) skips the search entirely, so relevantMemories is guaranteed
     // empty rather than merely unused.
     let relevantMemories: string[] = []
-    // Type attribution for the NORA pilot log ("which memory types underlie
+    // Type attribution for the pilot log ("which memory types underlie
     // accepted completions"). Read off the same search that builds
     // relevantMemories, so the types describe exactly the memories that went
     // into the prompt below - and cost no extra lookup.
@@ -197,8 +197,8 @@ export async function POST(req: Request) {
       model: myProvider.languageModel(defaultFastModel),
       system: getFastSystemPrompt(relevantMemories, new Date().toLocaleString()),
       prompt: `Complete this naturally. Return ONLY the completion:\n\n"${lastChunk}"`,
-      // Deterministic on purpose: this endpoint is instrumented for the NORA
-      // pilot, and any memory-ON vs. memory-OFF difference has to be
+      // Deterministic on purpose: this endpoint is instrumented for the
+      // memory-evaluation pilot, and any memory-ON vs. memory-OFF difference has to be
       // attributable to memory grounding, not sampling noise.
       temperature: 0,
       // Tools disabled for low-latency inline suggestions

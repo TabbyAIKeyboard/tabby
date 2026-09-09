@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Isolation sanity check for the NORA pilot (docs/pilot-protocol.md): confirms
+// Isolation sanity check for the memory-evaluation pilot: confirms
 // the per-user_id memory boundary that stands in for "a different memgraph
 // per persona" actually holds - i.e. one user's seeded facts never surface
 // in another user's search results. Run this against the live memory

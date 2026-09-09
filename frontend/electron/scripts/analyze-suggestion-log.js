@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Summarizes a suggestion-log.jsonl file produced by suggestion-logger.ts into
-// the metrics the NORA pilot paper reports: acceptance rate, post-acceptance
+// the metrics the pilot paper reports: acceptance rate, post-acceptance
 // edit distance, and time-to-decision, split by memory condition.
 //
 // Usage: node scripts/analyze-suggestion-log.js <path-to-suggestion-log.jsonl>

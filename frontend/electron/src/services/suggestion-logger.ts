@@ -3,7 +3,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'fs'
 import { join } from 'path'
 import { insertSuggestionLogEntries, insertSuggestionLogEntry } from './local-db'
 
-// Behavioral instrumentation for the NORA pilot: every ghost-text suggestion
+// Behavioral instrumentation for the memory-evaluation pilot: every ghost-text suggestion
 // becomes one JSONL line recording whether it was accepted, edited after
 // acceptance, or dismissed, plus timing and which memory condition produced
 // it. Every entry is written twice: to SQLite (read back by the Settings >
