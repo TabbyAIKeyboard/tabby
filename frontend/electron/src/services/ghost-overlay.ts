@@ -20,6 +20,7 @@ export class GhostTextOverlay {
   private isEnabled = false
   private nextJSPort: number | null = null
   private ipcSetup = false
+  private contentProtectionEnabled = true
 
   constructor(port?: number) {
     this.nextJSPort = port || null
@@ -58,8 +59,9 @@ export class GhostTextOverlay {
         },
       })
 
-      // Make window invisible to screen recorders/sharing (uses WDA_EXCLUDEFROMCAPTURE on Windows)
-      window.setContentProtection(true)
+      // Hide from screen recorders/sharing when invisibility mode is on
+      // (uses WDA_EXCLUDEFROMCAPTURE on Windows)
+      window.setContentProtection(this.contentProtectionEnabled)
 
       // Critical: Make entire window click-through
       window.setIgnoreMouseEvents(true, { forward: true })
@@ -250,6 +252,7 @@ export class GhostTextOverlay {
   }
 
   setContentProtection(enabled: boolean): void {
+    this.contentProtectionEnabled = enabled
     for (const window of this.windows) {
       if (!window.isDestroyed()) {
         window.setContentProtection(enabled)

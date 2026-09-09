@@ -31,7 +31,7 @@ export const createBrainPanelWindow = (): BrowserWindow => {
   })
 
   // Make window invisible to screen recorders/sharing (uses WDA_EXCLUDEFROMCAPTURE on Windows)
-  AppState.brainPanelWindow.setContentProtection(true)
+  AppState.brainPanelWindow.setContentProtection(AppState.contentProtectionEnabled)
 
   if (is.dev) {
     AppState.brainPanelWindow.loadURL('http://localhost:3000/brain-panel')

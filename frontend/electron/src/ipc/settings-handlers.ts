@@ -110,6 +110,7 @@ export const registerSettingsHandlers = (): void => {
   ipcMain.on('set-content-protection-enabled', (_, enabled: boolean) => {
     console.log('[Settings] Content protection (invisibility):', enabled)
     AppState.contentProtectionEnabled = enabled
+    getStore().set('contentProtectionEnabled', enabled)
 
     // Apply to all windows
     const windows = [

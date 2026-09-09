@@ -46,7 +46,7 @@ export const createSettingsWindow = (initialRoute: string = '/settings'): Browse
   })
 
   // Make window invisible to screen recorders/sharing (uses WDA_EXCLUDEFROMCAPTURE on Windows)
-  AppState.settingsWindow.setContentProtection(true)
+  AppState.settingsWindow.setContentProtection(AppState.contentProtectionEnabled)
 
   routeUrl(initialRoute).then((url) => AppState.settingsWindow?.loadURL(url))
 

@@ -96,6 +96,7 @@ export const initializeGhostText = (): void => {
   if (!AppState.ghostOverlay) {
     AppState.ghostOverlay = new GhostTextOverlay()
     AppState.ghostOverlay.setPort(is.dev ? 3000 : AppState.nextJSPort || 3000)
+    AppState.ghostOverlay.setContentProtection(AppState.contentProtectionEnabled)
     AppState.ghostOverlay.create()
   }
   AppState.ghostOverlay.setEnabled(true)

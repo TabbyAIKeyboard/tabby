@@ -61,7 +61,7 @@ export const AppState: AppStateType = {
   ghostTextEnabled: false,
   ghostTextAutoTrigger: false,
   ghostTextAutoTriggerDelay: 3000,
-  contentProtectionEnabled: true,
+  contentProtectionEnabled: (store.get('contentProtectionEnabled') as boolean) ?? true,
 
   defaultModel: (store.get('defaultModel') as string) || 'gpt-4.1-mini',
   defaultFastModel: (store.get('defaultFastModel') as string) || 'gpt-4.1-mini',

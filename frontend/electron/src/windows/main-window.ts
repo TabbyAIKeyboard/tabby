@@ -58,7 +58,7 @@ export const createMainWindow = (): BrowserWindow => {
   })
 
   // Make window invisible to screen recorders/sharing (uses WDA_EXCLUDEFROMCAPTURE on Windows)
-  AppState.mainWindow.setContentProtection(true)
+  AppState.mainWindow.setContentProtection(AppState.contentProtectionEnabled)
 
   const loadURL = async () => {
     if (is.dev) {
