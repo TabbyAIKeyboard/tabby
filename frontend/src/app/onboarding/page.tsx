@@ -26,24 +26,6 @@ import {
   type SeedMemory,
 } from './persona-import'
 
-const PERSONA_JSON_PLACEHOLDER = `{
-  "name": "Rhea Menon",
-  "profile": {
-    "institution": "University of Edinburgh",
-    "company": "Lingua Labs",
-    "title": "Doctoral researcher",
-    "field_of_study": "Computational linguistics",
-    "skills": ["PyTorch", "LaTeX"],
-    "interests": ["Low-resource NLP"],
-    "goals": ["Submit Chapter 4 by 15 November"]
-  },
-  "graph_seed": {
-    "sample_memories": [
-      { "type": "SEMANTIC", "text": "Her advisor is Prof. Helena Broughton." }
-    ]
-  }
-}`
-
 const steps = [
   { id: 1, title: 'Personal Info', description: 'Tell us about yourself' },
   { id: 2, title: 'Organization', description: 'Your work or business' },
@@ -317,7 +299,6 @@ export default function OnboardingPage() {
                 <Textarea
                   id="personaJson"
                   spellCheck={false}
-                  placeholder={PERSONA_JSON_PLACEHOLDER}
                   value={jsonInput}
                   onChange={(e) => {
                     setJsonInput(e.target.value)

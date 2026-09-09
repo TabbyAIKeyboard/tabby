@@ -88,11 +88,11 @@ class MemoryClassifier:
   Key indicators: "currently", "right now", "today", "at the moment", "working on", "need to"
 
 - LONG_TERM: PERMANENT personal facts, preferences, identity, habits that persist over time.
-  Examples: "I prefer dark mode", "My name is John", "I like pizza", "I'm a software engineer"
+  Examples: "I prefer dark mode", "I like pizza", "I'm a software engineer"
   Key indicators: general preferences, identity statements, lasting characteristics
 
 - EPISODIC: PAST events with specific time context - things that already HAPPENED.
-  Examples: "Yesterday I had a meeting", "Last week I went to...", "I met John at the conference"
+  Examples: "Yesterday I had a meeting", "Last week I went to...", "I met my team lead at the conference"
   Key indicators: "yesterday", "last week", "last month", past tense events
 
 - SEMANTIC: General KNOWLEDGE or facts about the world (not personal preferences).

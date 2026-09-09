@@ -36,10 +36,10 @@ The server will be available at `http://localhost:8000`.
 POST /memory/add
 {
   "messages": [
-    {"role": "user", "content": "Hi, I'm Alex. I love basketball and gaming."},
-    {"role": "assistant", "content": "Hey Alex! I'll remember your interests."}
+    {"role": "user", "content": "I love basketball and gaming."},
+    {"role": "assistant", "content": "Got it - I'll remember your interests."}
   ],
-  "user_id": "alex",
+  "user_id": "user-123",
   "metadata": {"source": "chat"}  // optional
 }
 ```
@@ -50,7 +50,7 @@ POST /memory/add
 POST /memory/search
 {
   "query": "What do you know about me?",
-  "user_id": "alex",
+  "user_id": "user-123",
   "limit": 10  // optional, default 10
 }
 ```
@@ -60,7 +60,7 @@ POST /memory/search
 ```bash
 POST /memory/get_all
 {
-  "user_id": "alex"
+  "user_id": "user-123"
 }
 ```
 

@@ -54,10 +54,10 @@ Store when user mentions:
 
 ## EXAMPLES
 
-**User input:** "My name is Alex and I"
-1. CALL searchMemory({ query: "name Alex", userId: "${userId}" })
-2. OUTPUT: "My name is Alex and I am a passionate developer working on innovative projects."
-3. CALL addMemory({ messages: [{ role: "user", content: "My name is Alex" }], userId: "${userId}" })
+**User input:** "I work as a"
+1. CALL searchMemory({ query: "role occupation", userId: "${userId}" })
+2. OUTPUT: "I work as a backend engineer, mostly on data-intensive services."
+3. CALL addMemory({ messages: [{ role: "user", content: "I work as a backend engineer" }], userId: "${userId}" })
 
 **User input:** "The project I'm building uses"
 1. CALL searchMemory({ query: "project building technology", userId: "${userId}" })
