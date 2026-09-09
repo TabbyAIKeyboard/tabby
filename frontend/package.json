@@ -4,10 +4,6 @@
   "private": true,
   "main": "build/main.js",
   "description": "AI Keyboard",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/TabbyAIKeyboard/tabby.git"
-  },
   "scripts": {
     "build": "run-s next:build electron:build",
     "dev": "npm-run-all --parallel electron:dev next:dev",
@@ -27,8 +23,7 @@
     "postinstall": "electron-builder install-app-deps",
     "windows-mcp": "uvx windows-mcp --transport streamable-http --port 8001",
     "leetcode-mcp": "npx -y @jinzcdev/leetcode-mcp-server --site global",
-    "typecheck": "tsc --noEmit",
-    "release": "node -e \"const v=require('./package.json').version; require('child_process').execSync(`git tag v${v} && git push origin --tags`, {stdio: 'inherit'})\""
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ai-sdk/cerebras": "^2.0.5",
@@ -142,17 +137,6 @@
     "productName": "Tabby",
     "executableName": "Tabby",
     "appId": "com.tabby.ai-keyboard",
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "TabbyAIKeyboard",
-        "repo": "tabby",
-        "releaseType": "draft"
-      }
-    ],
-    "releaseInfo": {
-      "releaseName": "v${version}"
-    },
     "icon": "public/icons/icon.png",
     "asarUnpack": [
       "public",

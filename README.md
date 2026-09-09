@@ -2,26 +2,16 @@
 
 <div align="center">
 
-<img src="nextjs-backend/public/logos/tabby-header.png" alt="Tabby Logo" />
+<img src="nextjs-backend/public/logos/tabby-logo.png" alt="Tabby" width="180" />
 
-
-**A system-wide AI keyboard layer that transforms your input device into a real-time AI collaborator.**
-
-[![CI](https://github.com/TabbyAIKeyboard/tabby/actions/workflows/ci.yml/badge.svg)](https://github.com/TabbyAIKeyboard/tabby/actions/workflows/ci.yml)
-[![GitHub stars](https://img.shields.io/github/stars/TabbyAIKeyboard/tabby?style=flat&logo=github)](https://github.com/TabbyAIKeyboard/tabby/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/TabbyAIKeyboard/tabby?style=flat&logo=github)](https://github.com/TabbyAIKeyboard/tabby/network/members)
-[![GitHub issues](https://img.shields.io/github/issues/TabbyAIKeyboard/tabby?style=flat&logo=github)](https://github.com/TabbyAIKeyboard/tabby/issues)
-[![GitHub last commit](https://img.shields.io/github/last-commit/TabbyAIKeyboard/tabby?style=flat&logo=github)](https://github.com/TabbyAIKeyboard/tabby/commits/main)
-[![GitHub release](https://img.shields.io/github/v/release/TabbyAIKeyboard/tabby?style=flat&logo=github)](https://github.com/TabbyAIKeyboard/tabby/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+**A system-wide AI keyboard layer that turns your input device into a real-time writing collaborator.**
 
 [![Electron](https://img.shields.io/badge/Electron-38-47848F?logo=electron&logoColor=white)](https://www.electronjs.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![Supabase](https://img.shields.io/badge/Supabase-Local_Docker-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-[Features](#features) · [Screenshots](#screenshots) · [Tech Stack](#tech-stack) · [Getting Started](#getting-started) · [Architecture](docs/architecture.md) · [Docs](https://tabby-org.vercel.app/docs) · [Contributing](#contributing) · [License](#license)
+[Features](#features) · [Tech Stack](#tech-stack) · [Shortcuts](#keyboard-shortcuts) · [Getting Started](#getting-started) · [Architecture](docs/architecture.md) · [License](#license)
 
 </div>
 
@@ -29,51 +19,33 @@
 
 ## Features
 
-Tabby lives at the point of input - no more switching between apps for AI help.
+Tabby lives at the point of input, so assistance arrives without switching applications.
 
 | Feature | Description |
 |---|---|
-| **Interview Copilot** | Real-time coding interview assistance with screen capture and multi-tab analysis |
-| **Context-Aware Autocomplete** | Inline AI suggestions based on what you're typing, anywhere on your system |
-| **Desktop Automation** | Full Windows MCP integration for system-level control |
-| **Persistent Memory** | Remembers your preferences, coding style, and past interactions via Mem0 |
-| **Invisible Typing** | AI types directly into any application, character-by-character |
-| **Voice Agent** | Voice-to-text, text-to-voice, and live conversational agent |
-| **Action Menu** | Quick AI actions on selected text — fix grammar, change tone, expand, summarize |
+| **Ghost Text Autocomplete** | Inline, memory-grounded continuations of what you are typing, rendered as grey ghost text over any application and accepted with `Shift+Tab` |
+| **Knowledge Graph** | Memories are extracted into a Neo4j entity–relation graph, browsable as an interactive node-link view |
+| **Chat Mode** | A streaming chat panel over the focused window, with tools for memory retrieval and web search |
 
----
+### Ghost Text Autocomplete
 
-## Screenshots
+A low-level keystroke listener maintains a debounced buffer of what you type. When the buffer settles, the app retrieves the memories relevant to that text, sends both to a fast completion endpoint, and paints the returned continuation as grey ghost text in a transparent, click-through overlay positioned at the caret.
 
-<div align="center">
-
-### Interview Copilot
-<img src="nextjs-backend/public/landing/tabby-interview-copilot.png" alt="Interview Copilot" width="700" />
-
-<br /><br />
-
-### Interview Ghost Text
-<img src="nextjs-backend/public/landing/tabby-interview-ghost.png" alt="Interview Ghost Text" width="700" />
-
-<br /><br />
-
-### Action Menu
-<img src="nextjs-backend/public/landing/tabby-actions.png" alt="Action Menu" width="700" />
-
-<br /><br />
-
-### Voice Agent
-<img src="nextjs-backend/public/landing/tabby-voice-agent.png" alt="Voice Agent" width="700" />
-
-<br /><br />
+- `Shift+Tab` accepts the suggestion and injects it into the focused application
+- `Shift+Escape` dismisses the overlay and stops any in-progress typing
+- Suggestions are cached (LRU, 25 entries) and keyed on the typed text
+- Each suggestion records the memory content and memory types (episodic / semantic / procedural) that grounded it
 
 ### Knowledge Graph
-<img src="nextjs-backend/public/landing/tabby-kg.png" alt="Knowledge Graph" width="700" />
 
-<br /><br />
+The memory backend runs [Mem0](https://mem0.ai) with a Neo4j graph store. Beyond the flat vector-searchable memories, Mem0 extracts entities and the relations between them; the app renders that graph with `@neo4j-nvl/react` as an interactive, zoomable node-link diagram in the Graph tab.
 
-### Memories Dashboard
-<img src="nextjs-backend/public/landing/tabby-memories.png" alt="Memories Dashboard" width="700" />
+### Chat Mode
+
+Opened from the action menu (`Ctrl+\`), Chat Mode is a frameless always-on-top panel that streams responses from the configured model. It has access to memory tools (add, search, retrieve-all) and web search, so a conversation can both draw on and write back to the memory layer.
+
+<div align="center">
+<img src="nextjs-backend/public/images/tabby-chat.png" alt="Chat Mode" width="600" />
 </div>
 
 ---
@@ -86,106 +58,74 @@ Tabby lives at the point of input - no more switching between apps for AI help.
 | Frontend | Next.js 15, React 19, Tailwind CSS |
 | AI | Vercel AI SDK, OpenAI / Groq / Cerebras / Google Gemini |
 | Memory | Mem0 (Supabase vector store + Neo4j graph) |
-| Desktop Automation | nut-js, node-window-manager, Windows MCP |
-| Database | Supabase (Local Docker) |
+| Database | Supabase (local, Docker) |
 
 ---
 
 ## Keyboard Shortcuts
 
-<details>
-<summary><b>Global Shortcuts</b></summary>
-
 | Shortcut | Action |
 |---|---|
-| `Ctrl+\` | Open / close action menu |
-| `Ctrl+Space` | Get AI suggestion |
-| `Ctrl+Shift+B` | Toggle brain panel |
-| `Ctrl+Alt+I` | Interview ghost text |
-| `Ctrl+Alt+J` | Voice Agent |
-| `Ctrl+Shift+X` | Stop autotyping |
-| `Ctrl+Shift+T` | Cycle transcribe modes |
-| `Ctrl+Alt+T` | Toggle voice transcription |
+| `Ctrl+\` | Open / close the action menu (entry point to Chat Mode) |
+| `Ctrl+Space` | Request a suggestion for the selected text |
+| `Ctrl+Alt+G` | Enable and trigger ghost text on the current context |
+| `Shift+Tab` | Accept the ghost text suggestion |
+| `Shift+Escape` | Dismiss the suggestion and stop typing |
+| `Ctrl+Shift+B` | Toggle the brain panel |
+| `Ctrl+Alt+Shift+M` | Toggle the memory-free baseline condition |
 
-</details>
-
-<details>
-<summary><b>Interview Copilot</b></summary>
-
-| Shortcut | Action |
-|---|---|
-| `Alt+X` | Capture screen & analyze coding problem |
-| `Alt+Shift+X` | Update analysis with new constraints |
-| `Alt+N` | Get code suggestions / improvements |
-| `Ctrl+1-6` | Switch tabs (Chat, Idea, Code, Walkthrough, Test Cases, Memories) |
-
-</details>
-
-<details>
-<summary><b>Navigation</b></summary>
-
-| Shortcut | Action |
-|---|---|
-| `Ctrl+Arrow` | Move floating window |
-| `Esc` | Back / close |
-| `Enter` | Accept & paste |
-
-</details>
+---
 
 ## Getting Started
 
 ### Prerequisites
 
 - **Node.js** 18+
-- **Python** 3.12+ (for memory backend)
+- **Python** 3.12+ (memory backend)
 - [uv](https://github.com/astral-sh/uv) — Python package manager
 - [pnpm](https://pnpm.io) — JavaScript package manager
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) — for local Supabase
-- An [OpenAI](https://openai.com) API key
+- An OpenAI API key
+- A [Neo4j](https://neo4j.com) instance — required for the knowledge graph
 
 <details>
 <summary><b>Optional API keys</b></summary>
 
 - Google Generative AI API key
-- XAI API key
 - Groq API key
 - Cerebras API key
 - OpenRouter API key
-- [Tavily](https://tavily.ai/) API key (web search)
-- [Neo4j](https://neo4j.com) instance (knowledge graph)
+- Tavily API key (web search in Chat Mode)
 
 </details>
 
-### 1. Clone & Install
+### 1. Install
 
 ```bash
-git clone https://github.com/TabbyAIKeyboard/tabby.git
-cd tabby
-
 # Frontend
 cd frontend && pnpm install
 
-# Next.js Backend
+# Next.js backend
 cd ../nextjs-backend && pnpm install
 
-# Memory Backend
+# Memory backend
 cd ../backend && uv sync
 ```
 
 ### 2. Database Setup
 
-We use a **local Supabase instance** running in Docker.
+The project uses a **local Supabase instance** running in Docker.
 
 ```bash
 # Start Docker Desktop first, then:
 npx supabase init     # first time only
-npx supabase start    # starts all services (~10 s after first run)
+npx supabase start    # starts all services
 ```
 
 After startup, note the **API URL**, **anon key**, and **service_role key** printed in the terminal.
 
 <details>
-<summary><b>Supabase Quick Reference</b></summary>
+<summary><b>Supabase quick reference</b></summary>
 
 | Action | Command |
 | --- | --- |
@@ -195,22 +135,22 @@ After startup, note the **API URL**, **anon key**, and **service_role key** prin
 | Admin UI | `http://localhost:54323` |
 | Reset DB | `npx supabase db reset` |
 
-> **Note:** Docker Desktop must be running before `npx supabase start`.
+> Docker Desktop must be running before `npx supabase start`.
 
 </details>
 
 <details>
-<summary><b>Neo4j (Knowledge Graph — Optional)</b></summary>
+<summary><b>Neo4j (knowledge graph)</b></summary>
 
-1. Create a free instance at [Neo4j AuraDB](https://neo4j.com/cloud/platform/aura-graph-database/).
-2. Save the credentials text file (URI, username, password).
-3. Note the **Instance ID** and **Instance Name** from the dashboard.
+1. Create an instance (a free [AuraDB](https://neo4j.com/cloud/platform/aura-graph-database/) tier is sufficient).
+2. Save the generated credentials — URI, username, password.
+3. Put them in `backend/.env` as `NEO4J_URL`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`.
+
+Without a Neo4j instance the app still runs, but the Graph tab stays empty — Mem0 falls back to vector-only memories with no extracted relations.
 
 </details>
 
 ### 3. Environment Variables
-
-Copy the example env files, then fill in your credentials:
 
 ```bash
 cp frontend/env.example frontend/.env.local
@@ -219,15 +159,11 @@ cp backend/env.example backend/.env
 ```
 
 <details>
-<summary><b>Frontend</b> - <code>frontend/.env.local</code></summary>
+<summary><b>Frontend</b> — <code>frontend/.env.local</code></summary>
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:54321"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="<ANON_KEY from supabase status>"
-SUPABASE_ADMIN="<SERVICE_ROLE_KEY from supabase status>"
-
-NEXT_PUBLIC_APP_NAME="Tabby"
-NEXT_PUBLIC_APP_ICON="/logos/tabby-logo.png"
 
 NEXT_PUBLIC_API_URL="http://localhost:3001"
 NEXT_PUBLIC_MEMORY_API_URL="http://localhost:8000"
@@ -236,26 +172,21 @@ NEXT_PUBLIC_MEMORY_API_URL="http://localhost:8000"
 </details>
 
 <details>
-<summary><b>Next.js Backend</b> - <code>nextjs-backend/.env.local</code></summary>
+<summary><b>Next.js backend</b> — <code>nextjs-backend/.env.local</code></summary>
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL="http://127.0.0.1:54321"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="<ANON_KEY from supabase status>"
 SUPABASE_ADMIN="<SERVICE_ROLE_KEY from supabase status>"
 
-RESEND_API_KEY=""
-RESEND_DOMAIN=""
-
-NEXT_PUBLIC_APP_NAME=Tabby
-NEXT_PUBLIC_APP_ICON='/logos/tabby-logo.png'
-
-# AI Providers
+# AI providers
 OPENAI_API_KEY=""
 GOOGLE_GENERATIVE_AI_API_KEY=""
 GROQ_API_KEY=""
 CEREBRAS_API_KEY=""
 OPENROUTER_API_KEY=""
 
+# Web search (optional)
 TAVILY_API_KEY=""
 
 MEMORY_API_URL="http://localhost:8000"
@@ -264,13 +195,12 @@ MEMORY_API_URL="http://localhost:8000"
 </details>
 
 <details>
-<summary><b>Backend</b> - <code>backend/.env</code></summary>
+<summary><b>Memory backend</b> — <code>backend/.env</code></summary>
 
 ```env
 OPENAI_API_KEY=
 SUPABASE_CONNECTION_STRING="postgresql://postgres:postgres@127.0.0.1:54322/postgres"
 
-# Neo4j (optional)
 NEO4J_URL=
 NEO4J_USERNAME=
 NEO4J_PASSWORD=
@@ -284,26 +214,21 @@ NEO4J_PASSWORD=
 # Start Supabase first (Docker Desktop must be running)
 npx supabase start
 
-# Start all services in dev mode (backend + frontend + nextjs-backend)
+# Start all three services in dev mode
 pnpm dev
 ```
-
-All three services start in parallel with color-coded logs.
 
 <details>
 <summary><b>Run services individually</b></summary>
 
 ```bash
-# Terminal 1 — Memory backend
+# Terminal 1 — memory backend
 cd backend && uv run main.py
 
 # Terminal 2 — Next.js backend
 cd nextjs-backend && pnpm dev
 
-# Terminal 3 — Windows MCP server (optional)
-cd frontend && pnpm run windows-mcp
-
-# Terminal 4 — Electron app
+# Terminal 3 — Electron app
 cd frontend && pnpm dev
 ```
 
@@ -313,12 +238,11 @@ cd frontend && pnpm dev
 <summary><b>Production mode</b></summary>
 
 ```bash
-# Build and start everything
 pnpm prod
 
-# Or step-by-step:
+# Or step by step:
 pnpm build    # builds frontend + nextjs-backend
-pnpm start    # starts all services in production mode
+pnpm start
 ```
 
 </details>
@@ -326,21 +250,23 @@ pnpm start    # starts all services in production mode
 <details>
 <summary><b>Linux (X11)</b></summary>
 
-The Linux build uses `xdotool` for window activation and synthetic key input, and reads the X11 PRIMARY selection directly for capture (so highlighting text in any X11 app is enough — no need to also Ctrl+C). It is tested on GNOME / X11; Wayland sessions will need to fall back to XWayland.
-
-**Prerequisites**
+The Linux build uses `xdotool` for window activation and synthetic key input, and reads the X11 PRIMARY selection directly for capture, so highlighting text in any X11 app is enough. It is tested on GNOME / X11; Wayland sessions fall back to XWayland.
 
 ```bash
 sudo apt install xdotool
+cd frontend && pnpm install && pnpm dev
 ```
 
-Then run as on the other platforms:
+</details>
+
+<details>
+<summary><b>Local build</b></summary>
 
 ```bash
-cd frontend
-pnpm install
-pnpm dev
+cd frontend && pnpm run dist
 ```
+
+The packaged executable is written to `frontend/dist`.
 
 </details>
 
@@ -351,63 +277,8 @@ Once running:
 | Supabase API | `http://127.0.0.1:54321` |
 | Supabase Studio | `http://localhost:54323` |
 | Frontend (Electron) | `http://localhost:3000` |
-| Next.js Backend | `http://localhost:3001` |
+| Next.js backend | `http://localhost:3001` |
 | Memory API | `http://localhost:8000` |
-| Windows MCP | `http://localhost:8001` |
-
-
----
-
-## Building & Releasing
-
-<details>
-<summary><b>Local Build</b></summary>
-
-```bash
-cd frontend
-pnpm run dist
-```
-
-The `.exe` will be in `frontend/dist`.
-
-</details>
-
-<details>
-<summary><b>GitHub Releases (CI)</b></summary>
-
-Automated Windows releases via GitHub Actions.
-
-1. **GitHub Secrets** — Add to repository settings:
-   - `GH_TOKEN` — Personal Access Token (classic) with `repo` scope
-   - All `NEXT_PUBLIC_*` and `SUPABASE_*` variables from `.env.local`
-2. **Trigger a release:**
-   ```bash
-   cd frontend && pnpm run release
-   ```
-   This creates a git tag from `package.json` version, pushes it, and triggers a GitHub Action to build and publish.
-
-</details>
-
-<details>
-<summary><b>Python Backend — Azure</b></summary>
-
-- **Workflow:** `.github/workflows/backend-deploy.yml`
-- **Trigger:** Push to `backend/` on `main`
-- **URL:** [tabby-backend.azurecontainerapps.io](https://tabby-backend.jollydesert-22a4756c.centralindia.azurecontainerapps.io)
-- Builds Docker image → pushes to Docker Hub (`thecubestar/tabby-backend`) → updates Azure Container App
-
-</details>
-
-
-</details>
-
-<details>
-<summary><b>Next.js Backend — Vercel</b></summary>
-
-- **Deployment:** Automatic from `main`
-- **URL:** [tabby-api-psi.vercel.app](https://tabby-api-psi.vercel.app)
-
-</details>
 
 ---
 
@@ -418,40 +289,25 @@ tabby/
 ├── frontend/                   # Electron + Next.js desktop app
 │   ├── electron/src/           # Electron main process
 │   │   ├── main.ts             # Window management, shortcuts
-│   │   ├── text-handler.ts     # Clipboard, typewriter mode
-│   │   └── context-capture.ts  # Periodic screenshot capture
+│   │   ├── shortcuts/          # Global shortcut registration
+│   │   └── services/           # Ghost overlay, keystroke listener,
+│   │                           #   keyboard monitor, text injection
 │   └── src/
-│       ├── app/                # Next.js pages
+│       ├── app/                # Next.js routes (action menu, brain
+│       │                       #   panel, settings, ghost overlay)
 │       └── components/         # React components
-│           ├── action-menu/    # Main AI menu, copilot, chat
-│           ├── brain-panel/    # Memory dashboard
-│           └── ai-elements/    # Message rendering
-├── nextjs-backend/             # Shared API backend (Next.js)
-│   └── src/app/api/            # AI and auth API routes
+├── nextjs-backend/             # API backend (Next.js)
+│   └── src/app/api/            # Chat, completion, inline suggestion,
+│                               #   auth, dashboard routes
 ├── backend/                    # FastAPI memory server
-│   └── main.py                 # Mem0 API endpoints
+│   └── main.py                 # Mem0 endpoints (vector + graph)
 └── supabase/                   # Database migrations & config
 ```
 
----
-
-## Contributing
-
-Contributions are what make the open-source community amazing. **We'd love for you to contribute!**
-
-**Check out our [Documentation](https://tabby-org.vercel.app/docs)** for detailed guides on architecture, features, and APIs.
-
-Please read our [Contributing Guide](CONTRIBUTING.md) to get started. In short:
-
-1. Fork the repo
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes using [Conventional Commits](https://www.conventionalcommits.org/)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+See [`docs/architecture.md`](docs/architecture.md) for the full system breakdown.
 
 ---
 
 ## License
 
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
-
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.

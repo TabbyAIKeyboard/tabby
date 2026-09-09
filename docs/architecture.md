@@ -330,13 +330,4 @@ Audio playback + text display
 
 ---
 
-## Deployment
-
-| Component | Platform | Trigger |
-|---|---|---|
-| Desktop App | GitHub Releases | `pnpm run release` from `frontend/` |
-| Next.js Backend | Vercel | Auto-deploy on push to `main` |
-| Python Backend | Azure Container Apps | Push to `backend/` on `main` |
-| Supabase | Local Docker (dev) / Cloud (prod) | `npx supabase start` |
-
-See the [README](../README.md) for detailed setup and deployment instructions.
+See the [README](../README.md) for setup instructions.
